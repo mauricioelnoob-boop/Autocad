@@ -24,13 +24,25 @@ Piezas a recortar         : 217
   -> sin optimizar         = 217 baldosas (una entera por cada recorte)
   -> reusando recortes     = 165 baldosas
 AHORRO                    : 52 baldosas
-TOTAL BALDOSAS A COMPRAR  : 354  (189 completas + 165 para recortes)
+TOTAL PIEZAS A COMPRAR    : 354  (189 completas + 165 para recortes)
 Merma (desperdicio)       : ~6 %
 ```
 
+### Cantidades a comprar (piezas / cajas / m²)
+
+| Material      | Piezas | Cajas | Pzas/caja | m²/caja | m² a comprar |
+|---------------|:------:|:-----:|:---------:|:-------:|:------------:|
+| Moret         | 179    | 90    | 2         | 1.42    | 127.80 m²    |
+| Royal Walnut  | 175    | 35    | 5         | 1.20    | 42.00 m²     |
+| **TOTAL**     | **354**| **125** |         |         | **169.80 m²**|
+
+> Material suministrado (dato informativo): Moret 166.52 m², Royal Walnut 49.2 m².
+> No se calcula si alcanza o no — falta sumar zoclo y piso en muro.
+
 Detalle por material en [`reporte_recortes.txt`](reporte_recortes.txt),
-el plan pieza-por-pieza en [`plan_corte.csv`](plan_corte.csv) y los dibujos de
-cada baldosa con sus cortes en [`diagramas_corte.pdf`](diagramas_corte.pdf).
+el plan pieza-por-pieza en [`plan_corte.csv`](plan_corte.csv) y el **PDF con el
+resumen de compra + diagramas** de cada baldosa en
+[`reporte_recortes.pdf`](reporte_recortes.pdf).
 
 ---
 
@@ -75,9 +87,10 @@ siguientes. Así varias piezas pequeñas salen de **una sola** baldosa.
 
 Genera:
 
-- `reporte_recortes.txt` — resumen: cuántas baldosas comprar y cuánto se ahorra
+- `reporte_recortes.txt` — resumen: piezas, cajas y m² a comprar, y cuánto se ahorra
 - `plan_corte.csv` — de qué baldosa sale cada pieza (con su ubicación en el plano)
-- `diagramas_corte.pdf` — dibujo de cada baldosa con sus cortes y el sobrante
+- `reporte_recortes.pdf` — PDF con la tabla de compra (piezas/cajas/m²) y el
+  dibujo de cada baldosa con sus cortes y el sobrante reutilizable
 
 En el plan, cada pieza viene con su ubicación `@(x,y)` (el centro de la pieza en
 coordenadas del plano), para que la encuentres en AutoCAD y sepas exactamente
