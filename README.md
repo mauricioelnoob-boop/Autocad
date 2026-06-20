@@ -213,6 +213,24 @@ el "Área a revestir" del generador (Cabernet):
 El despiece dibujado da menos área que el generador (revisa si falta despiece de
 algún cuarto o si el generador usó área bruta). Salida: `cruce_area.csv`.
 
+### 8. PDF por material (plano + desperdicios)  →  `pdf_material.py`
+
+```bash
+python3 pdf_material.py        # genera piso_moret.pdf y piso_royal_walnut.pdf
+```
+
+Dos PDF, uno por material, con el estilo del plano de la casa:
+
+- **Página 1**: el plano completo con ese material coloreado e identificado por
+  pieza; el otro piso se dibuja tenue como contexto. (Royal Walnut ya **no**
+  aparece en planta baja; sólo en las recámaras de planta alta.)
+- **Página 2**: resumen (piezas, cajas, m², sobrante reutilizable, desperdicio).
+- **Páginas 3+**: los desperdicios/recortes — cada baldosa que se corta, qué
+  piezas salen, a dónde van y qué sobra (amarillo = reutilizable, rojo = merma).
+
+Usa los datos corregidos (`datos_piezas.py`, sin charolas de baño). Salidas:
+`piso_moret.pdf` (179 pzas / 90 cajas) y `piso_royal_walnut.pdf` (168 pzas / 34 cajas).
+
 ## Requisitos
 
 - **Python 3** (sólo librería estándar para extraer y optimizar).

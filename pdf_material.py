@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+pdf_material.py
+===============
+
+Genera DOS PDF (uno por material): piso_moret.pdf y piso_royal_walnut.pdf.
+
+Cada PDF:
+  Página 1  -> el PLANO DE LA CASA (mismo estilo del plano general) pero
+               enfocado en ese material: sus piezas van coloreadas e
+               identificadas por ID; el otro material se dibuja tenue, sólo
+               como contexto. (Royal Walnut ya NO aparece en planta baja.)
+  Página 2  -> resumen de compra y desperdicio del material.
+  Págs. 3+  -> los DESPERDICIOS / recortes: cada baldosa que se corta, con las
+               piezas y a dónde van, y el sobrante coloreado
+               (amarillo = reutilizable, rojo = desperdicio).
+
+Usa los datos corregidos (sin las charolas de baño de planta baja).
+
+Uso:  python3 pdf_material.py
+"""
+
+import math
+from collections import defaultdict
+
+from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
+from datos_piezas import cargar_anotado, PREF_CORTE
+from plano_casa import ESTILO
+
+MIN_REUSABLE = 0.10
+POR_PAGINA = 9
+PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
+       "#f1948a", "#73c6b6", "#f8c471", "#aab7b8", "#a3e4d7", "#d7bde2"]
+
+
+def es_reutilizable(w, l):
+    return min(w, l) >= MIN_REUSABLE
+
+
+def empacar(piezas, material):
+    mapa = {p["id"]: p for p in piezas if p["material"] == material}
+    ancho, largo = PISOS[material]
+    recortes = [p for p in piezas if p["material"] == material and not p["completa"]]
+    entradas = [(*ajustar(p["ancho"], p["largo"], ancho, largo), p["id"]) for p in recortes]
+    return empaquetar(entradas, material, 0.0, False), mapa, (ancho, largo)
+
+
+def hacer_pdf(todas, material, path):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle, Patch
+    from matplotlib.backends.backend_pdf import PdfPages
+
+    focal = [p for p in todas if p["material"] == material]
+    otro = [p for p in todas if p["material"] != material]
+
+    baldosas, mapa, (ancho, largo) = empacar(todas, material)
+    area_reut = area_desp = 0.0
+    for b in baldosas:
+        for (fx, fy, fw, fl) in b.libres:
+            if fw <= 0.005 or fl <= 0.005:
+                continue
+            if es_reutilizable(fw, fl):
+                area_reut += fw * fl
+            else:
+                area_desp += fw * fl
+
+    completas = sum(1 for p in focal if p["completa"])
+    total_pzas = completas + len(baldosas)
+    cfg = CAJAS[material]
+    cajas = math.ceil(total_pzas / cfg["pzas_caja"])
+
+    with PdfPages(path) as pdf:
+        # ---------- Página 1: PLANO ----------
+        xs0 = [p["x0"] for p in todas]; ys0 = [p["y0"] for p in todas]
+        xs1 = [p["x0"] + p["wx"] for p in todas]; ys1 = [p["y0"] + p["hy"] for p in todas]
+        minx, maxx, miny, maxy = min(xs0), max(xs1), min(ys0), max(ys1)
+        W, H = maxx - minx, maxy - miny
+        fig, ax = plt.subplots(figsize=(min(24, W * 1.4), min(16, H * 1.4) + 1))
+        # contexto (otro material) tenue
+        for p in otro:
+            ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                   facecolor="#f4f6f6", edgecolor="#d5d8dc", lw=0.3))
+        # material enfocado
+        for p in focal:
+            est = ESTILO[(p["material"], p["completa"])]
+            ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                   facecolor=est["face"], edgecolor="#333",
+                                   lw=0.4 if p["completa"] else 0.7))
+            fs = min(max(1.8, min(p["wx"], p["hy"]) * 14), 4.5)
+            ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
+                    fontsize=fs, rotation=0 if p["wx"] >= p["hy"] else 90)
+        ax.set_xlim(minx - 0.3, maxx + 0.3); ax.set_ylim(miny - 0.3, maxy + 0.3)
+        ax.set_aspect("equal"); ax.axis("off")
+        col_rec = ESTILO[(material, False)]["face"]
+        col_com = ESTILO[(material, True)]["face"]
+        ax.set_title(f"PLANO DE LA CASA — PISO {material.upper()}\n"
+                     f"(coloreado = {material}; gris claro = el otro piso, sólo contexto)",
+                     fontsize=12)
+        ax.legend(handles=[
+            Patch(facecolor=col_com, edgecolor="#333", label=f"{material} completa"),
+            Patch(facecolor=col_rec, edgecolor="#333", label=f"{material} recorte"),
+            Patch(facecolor="#f4f6f6", edgecolor="#d5d8dc", label="otro piso (contexto)"),
+        ], loc="upper center", ncol=3, fontsize=9, bbox_to_anchor=(0.5, -0.02))
+        fig.tight_layout()
+        pdf.savefig(fig); plt.close(fig)
+
+        # ---------- Página 2: RESUMEN ----------
+        fig = plt.figure(figsize=(11.7, 8.3))
+        fig.suptitle(f"PISO {material} — Resumen", fontsize=16, weight="bold", y=0.9)
+        lineas = [
+            f"Piezas completas        : {completas}",
+            f"Baldosas para recortes  : {len(baldosas)}  (optimizado, reusando sobrantes)",
+            f"PIEZAS A COMPRAR        : {total_pzas}",
+            f"En cajas                : {cajas} cajas de {cfg['pzas_caja']} pzas "
+            f"= {cajas*cfg['pzas_caja']} piezas",
+            f"Equivale a              : {cajas*cfg['m2_caja']:.2f} m²  "
+            f"(caja = {cfg['m2_caja']:g} m²)",
+            "",
+            f"Sobrante reutilizable   : {area_reut:.2f} m²",
+            f"Desperdicio (merma)     : {area_desp:.2f} m²",
+        ]
+        fig.text(0.1, 0.66, "\n".join(lineas), fontsize=13, va="top", family="monospace",
+                 bbox=dict(boxstyle="round", facecolor="#fcf3cf", edgecolor="#b7950b"))
+        fig.text(0.1, 0.30,
+                 "En las páginas siguientes: cada baldosa que se corta, qué piezas\n"
+                 "salen, a dónde van y qué sobra (amarillo = reutilizable, rojo =\n"
+                 "desperdicio). Royal Walnut sólo en planta alta (recámaras).",
+                 fontsize=11, va="top")
+        pdf.savefig(fig); plt.close(fig)
+
+        # ---------- Págs 3+: DESPERDICIOS / RECORTES ----------
+        pc = PREF_CORTE[material]
+        npag = (len(baldosas) + POR_PAGINA - 1) // POR_PAGINA
+        for ini in range(0, len(baldosas), POR_PAGINA):
+            grupo = baldosas[ini:ini + POR_PAGINA]
+            fig, axes = plt.subplots(3, 3, figsize=(16, 11)); axes = axes.ravel()
+            for ax, b in zip(axes, grupo):
+                idx = baldosas.index(b) + 1
+                ax.add_patch(Rectangle((0, 0), ancho, largo, fill=False, edgecolor="black", lw=1.6))
+                for k, (x, y, w, l, pid, rot) in enumerate(b.piezas):
+                    ax.add_patch(Rectangle((x, y), w, l, facecolor=PAL[k % len(PAL)],
+                                           edgecolor="black", lw=0.8))
+                    dest = mapa.get(pid)
+                    loc = f"\n→ ({dest['x']:.1f}, {dest['y']:.1f})" if dest else ""
+                    ax.text(x + w / 2, y + l / 2, f"{pid}\n{w:.2f}x{l:.2f}{loc}",
+                            ha="center", va="center",
+                            fontsize=6 if w >= 0.25 else 4.6, rotation=0 if w >= l else 90)
+                for (fx, fy, fw, fl) in b.libres:
+                    if fw <= 0.005 or fl <= 0.005:
+                        continue
+                    if es_reutilizable(fw, fl):
+                        ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#f9e79f",
+                                               edgecolor="#b7950b", lw=0.8, hatch=".."))
+                        ax.text(fx + fw / 2, fy + fl / 2, f"SOBRA\n{fw:.2f}x{fl:.2f}",
+                                ha="center", va="center", fontsize=5.2, color="#7d6608")
+                    else:
+                        ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#f1948a",
+                                               edgecolor="#922b21", lw=0.8, hatch="xx"))
+                        ax.text(fx + fw / 2, fy + fl / 2, f"desperd.\n{fw:.2f}x{fl:.2f}",
+                                ha="center", va="center", fontsize=4.8, color="#641e16")
+                ax.set_xlim(-0.03, ancho + 0.03); ax.set_ylim(-0.03, largo + 0.03)
+                ax.set_aspect("equal"); ax.axis("off")
+                ax.set_title(f"Baldosa {pc}-{idx:02d} · {len(b.piezas)} pza(s)", fontsize=9, weight="bold")
+            for ax in axes[len(grupo):]:
+                ax.axis("off")
+            fig.suptitle(f"{material} — DESPERDICIOS / recortes: qué cortar, a dónde va y qué sobra\n"
+                         f"(amarillo = sobrante reutilizable · rojo = desperdicio)   "
+                         f"pág. {ini//POR_PAGINA + 1} de {npag}", fontsize=12)
+            fig.legend(handles=[
+                Patch(facecolor="#82e0aa", edgecolor="k", label="pieza que se corta (con destino)"),
+                Patch(facecolor="#f9e79f", edgecolor="#b7950b", label="sobrante reutilizable"),
+                Patch(facecolor="#f1948a", edgecolor="#922b21", label="desperdicio"),
+            ], loc="lower center", ncol=3, fontsize=9, frameon=False)
+            fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+            pdf.savefig(fig); plt.close(fig)
+
+    return total_pzas, cajas, area_reut, area_desp
+
+
+def main():
+    todas = cargar_anotado()
+    salidas = {"Moret": "piso_moret.pdf", "Royal Walnut": "piso_royal_walnut.pdf"}
+    for material, path in salidas.items():
+        pzas, cajas, reut, desp = hacer_pdf(todas, material, path)
+        print(f"{material}: {pzas} piezas / {cajas} cajas  ·  reutilizable {reut:.2f} m²  ·  "
+              f"desperdicio {desp:.2f} m²  ->  {path}")
+
+
+if __name__ == "__main__":
+    main()
