@@ -168,6 +168,51 @@ piso + escalera + zoclo vs lo suministrado. Demuestra el faltante:
 **Moret −30 cajas, Royal Walnut −11 cajas**. Salidas: `demostracion_faltante.pdf`
 y `demostracion_faltante.csv`.
 
+### 6. Plano por planta (versión corregida)  →  `plano_por_planta.py`
+
+```bash
+python3 plano_por_planta.py          # genera planta_baja.pdf y planta_alta.pdf
+```
+
+Separa el despiece por **nivel** (las dos plantas vienen dibujadas lado a lado
+en el plano, se parten por la coordenada X):
+
+- **Planta baja**: SOLO piso Moret.
+- **Planta alta**: Moret + Royal Walnut (las 3 recámaras).
+
+Aplica la regla real de la obra: **el Royal Walnut sólo va en las recámaras**;
+las piezas de 0.20 m que aparecían en baños de planta baja son las **charolas**
+(otro piso) y se **excluyen** (7 piezas). La lógica está en `datos_piezas.py`.
+
+Cada PDF (`planta_baja.pdf`, `planta_alta.pdf`) trae: (1) el plano de la planta
+con cada pieza identificada (`PB-M-001`, `PA-R-014`…), (2) un resumen de compra
+de esa planta, y (3) el detalle de recortes (qué cortar, a dónde va, qué sobra).
+
+Cantidades corregidas (sin charolas):
+
+| Planta | Material | Piezas | Cajas |
+|--------|----------|:------:|:-----:|
+| Baja   | Moret    | 133    | 67    |
+| Alta   | Moret    | 47     | 24    |
+| Alta   | Royal Walnut | 168 | 34   |
+
+### 7. Cruce de área real vs generador  →  `cruce_area_generador.py`
+
+```bash
+python3 cruce_area_generador.py Numeros_Generadores_....xlsx
+```
+
+Mide el área real del despiece (pieza por pieza, sin charolas) y la compara con
+el "Área a revestir" del generador (Cabernet):
+
+| Material | Real (plano) | Generador | Diferencia |
+|----------|:------------:|:---------:|:----------:|
+| Moret        | 119.68 m² | 134.78 m² | −15.10 m² |
+| Royal Walnut |  37.87 m² |  40.20 m² |  −2.33 m² |
+
+El despiece dibujado da menos área que el generador (revisa si falta despiece de
+algún cuarto o si el generador usó área bruta). Salida: `cruce_area.csv`.
+
 ## Requisitos
 
 - **Python 3** (sólo librería estándar para extraer y optimizar).
