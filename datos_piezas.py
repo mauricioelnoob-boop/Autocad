@@ -33,6 +33,14 @@ PREF_PLANTA = {"baja": "PB", "alta": "PA"}
 PREF_MAT = {"Moret": "M", "Royal Walnut": "R"}
 PREF_CORTE = {"Moret": "M", "Royal Walnut": "RW"}
 
+# Piezas que faltan en el despiece del DWG y se agregan a mano.
+# El arranque del piso Moret en planta baja (baldosa completa) no quedó dibujado.
+PIEZAS_EXTRA = [
+    {"material": "Moret", "ancho": 0.596, "largo": 1.194, "completa": True,
+     "tipo_corte": "completa", "x": 489.84, "y": -86.14,
+     "x0": 489.539, "y0": -86.738, "wx": 0.600, "hy": 1.194, "extra": True},
+]
+
 
 def planta_de(p):
     return "baja" if p["x"] < X_CORTE else "alta"
@@ -51,6 +59,12 @@ def cargar_anotado(path="piezas_piso.json"):
             continue
         p["planta"] = pl
         anotadas.append(p)
+
+    # Piezas faltantes agregadas a mano (p.ej. el arranque de Moret)
+    for extra in PIEZAS_EXTRA:
+        e = dict(extra)
+        e["planta"] = planta_de(e)
+        anotadas.append(e)
 
     # IDs y baldosa de corte, por (planta, material)
     grupos = defaultdict(list)

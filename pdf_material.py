@@ -177,6 +177,79 @@ def hacer_pdf(todas, material, path):
             fig.tight_layout(rect=[0, 0.03, 1, 0.95])
             pdf.savefig(fig); plt.close(fig)
 
+        # ---------- Página FINAL: todos los sobrantes sumados ----------
+        from collections import Counter
+        reut = Counter()      # (w,l) -> cantidad
+        desp = Counter()
+        for b in baldosas:
+            for (fx, fy, fw, fl) in b.libres:
+                if fw <= 0.005 or fl <= 0.005:
+                    continue
+                clave = (round(min(fw, fl), 2), round(max(fw, fl), 2))
+                if es_reutilizable(fw, fl):
+                    reut[clave] += 1
+                else:
+                    desp[clave] += 1
+
+        def filas_de(cont, limite=15):
+            items = sorted(cont.items(), key=lambda kv: -kv[0][0] * kv[0][1] * kv[1])
+            filas = []
+            for (a, b_), n in items[:limite]:
+                filas.append([f"{a:.2f} x {b_:.2f}", n, f"{a*b_*n:.3f}"])
+            if len(items) > limite:
+                resto = items[limite:]
+                nn = sum(n for _, n in resto)
+                mm = sum(a * b_ * n for (a, b_), n in resto)
+                filas.append([f"otros ({len(resto)} tamaños)", nn, f"{mm:.3f}"])
+            return filas
+
+        fig = plt.figure(figsize=(11.7, 8.3))
+        fig.suptitle(f"PISO {material} — Sobrantes y desperdicio (TODO sumado)",
+                     fontsize=15, weight="bold", y=0.965)
+
+        area_inst = sum(min(p["wx"], PISOS[material][0]) * min(p["hy"], PISOS[material][1])
+                        for p in focal)
+        area_comprada = cajas * cfg["m2_caja"]
+        total_sobra = area_reut + area_desp
+        cab = (f"Piezas a comprar: {total_pzas}  ·  {cajas} cajas  ·  {area_comprada:.2f} m²    |    "
+               f"Área neta instalada: {area_inst:.2f} m²\n"
+               f"Recortes optimizados en {len(baldosas)} baldosas (best-fit: cada sobrante se reusa "
+               f"para otra pieza).")
+        fig.text(0.06, 0.91, cab, fontsize=10.5, va="top", family="monospace")
+
+        resumen = (
+            f"SOBRANTE TOTAL: {total_sobra:.2f} m² de {area_comprada:.2f} m² ({100*total_sobra/area_comprada:.1f}%)   ·   "
+            f"reutilizable {area_reut:.2f} m² ({sum(reut.values())} pzs)   ·   "
+            f"desperdicio {area_desp:.2f} m² ({sum(desp.values())} pedacitos muy cortos)")
+        fig.text(0.5, 0.845, resumen, fontsize=8.6, va="top", ha="center", family="monospace",
+                 bbox=dict(boxstyle="round", facecolor="#eaf2f8", edgecolor="#5499c7"))
+
+        # Tabla de sobrantes reutilizables
+        ax1 = fig.add_axes([0.05, 0.05, 0.43, 0.70]); ax1.axis("off")
+        ax1.set_title(f"SOBRANTE REUTILIZABLE  (lado ≥ {MIN_REUSABLE*100:.0f} cm)\n"
+                      f"total: {area_reut:.2f} m²", fontsize=11, color="#7d6608", weight="bold")
+        f1 = filas_de(reut) or [["—", 0, "0.000"]]
+        t1 = ax1.table(cellText=f1, colLabels=["Tamaño (m)", "Cant.", "m²"],
+                       loc="upper center", cellLoc="center")
+        t1.auto_set_font_size(False); t1.set_fontsize(8.5); t1.scale(1, 1.25)
+        for (r, c), cell in t1.get_celld().items():
+            if r == 0:
+                cell.set_facecolor("#f9e79f"); cell.set_text_props(weight="bold")
+
+        # Tabla de desperdicio
+        ax2 = fig.add_axes([0.54, 0.05, 0.41, 0.70]); ax2.axis("off")
+        ax2.set_title(f"DESPERDICIO  (lado < {MIN_REUSABLE*100:.0f} cm, ya no sirve)\n"
+                      f"total: {area_desp:.2f} m²", fontsize=11, color="#922b21", weight="bold")
+        f2 = filas_de(desp) or [["—", 0, "0.000"]]
+        t2 = ax2.table(cellText=f2, colLabels=["Tamaño (m)", "Cant.", "m²"],
+                       loc="upper center", cellLoc="center")
+        t2.auto_set_font_size(False); t2.set_fontsize(8.5); t2.scale(1, 1.25)
+        for (r, c), cell in t2.get_celld().items():
+            if r == 0:
+                cell.set_facecolor("#f1948a"); cell.set_text_props(weight="bold")
+
+        pdf.savefig(fig); plt.close(fig)
+
     return total_pzas, cajas, area_reut, area_desp
 
 

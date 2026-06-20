@@ -99,6 +99,17 @@ class Baldosa:
             return None
         return mejor[1], mejor[2], mejor[3], mejor[4]
 
+    def evaluar(self, pw, pl, kerf, rotar):
+        """Calidad del mejor hueco (área sobrante); None si no cabe."""
+        mejor = None
+        for (fx, fy, fw, fl) in self.libres:
+            for (w, l, rot) in ((pw, pl, False), (pl, pw, True)) if rotar else ((pw, pl, False),):
+                if w <= fw + EPS and l <= fl + EPS:
+                    sobra = fw * fl - w * l
+                    if mejor is None or sobra < mejor:
+                        mejor = sobra
+        return mejor
+
     def colocar(self, pw, pl, etiqueta, kerf, rotar):
         r = self._buscar(pw, pl, kerf, rotar)
         if r is None:
@@ -148,21 +159,29 @@ class Baldosa:
 
 
 def empaquetar(recortes, material, kerf, rotar):
-    """recortes: lista de (ancho, largo, etiqueta). Devuelve lista de Baldosa."""
+    """recortes: lista de (ancho, largo, etiqueta). Devuelve lista de Baldosa.
+
+    Best-Fit-Decreasing: las piezas grandes primero y cada una se coloca en la
+    baldosa donde deja MENOS sobrante, para maximizar el reuso de recortes
+    (que el sobrante de una sirva para otra pieza) y reducir baldosas nuevas.
+    """
     ancho, largo = PISOS[material]
-    # First-Fit-Decreasing: piezas grandes primero
     piezas = sorted(recortes, key=lambda p: p[0] * p[1], reverse=True)
     baldosas = []
     for (pw, pl, etiqueta) in piezas:
-        colocada = False
+        # Buscar la baldosa abierta donde mejor encaja (menor sobrante)
+        mejor_b = None
+        mejor_score = None
         for b in baldosas:
-            if b.colocar(pw, pl, etiqueta, kerf, rotar):
-                colocada = True
-                break
-        if not colocada:
+            s = b.evaluar(pw, pl, kerf, rotar)
+            if s is not None and (mejor_score is None or s < mejor_score):
+                mejor_score = s
+                mejor_b = b
+        if mejor_b is not None:
+            mejor_b.colocar(pw, pl, etiqueta, kerf, rotar)
+        else:
             b = Baldosa(material, ancho, largo)
             if not b.colocar(pw, pl, etiqueta, kerf, rotar):
-                # La pieza no cabe ni en una baldosa nueva (no debería pasar)
                 b.piezas.append((0, 0, pw, pl, etiqueta + " (NO CABE)", False))
             baldosas.append(b)
     return baldosas

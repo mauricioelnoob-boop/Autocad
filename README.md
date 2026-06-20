@@ -228,8 +228,18 @@ Dos PDF, uno por material, con el estilo del plano de la casa:
 - **Páginas 3+**: los desperdicios/recortes — cada baldosa que se corta, qué
   piezas salen, a dónde van y qué sobra (amarillo = reutilizable, rojo = merma).
 
-Usa los datos corregidos (`datos_piezas.py`, sin charolas de baño). Salidas:
-`piso_moret.pdf` (179 pzas / 90 cajas) y `piso_royal_walnut.pdf` (168 pzas / 34 cajas).
+- **Página final**: TODOS los sobrantes sumados, separados en **reutilizable**
+  (lado ≥ 10 cm) y **desperdicio** (lado < 10 cm, pedacitos muy cortos), con el
+  m² de cada tamaño y el total. Así se ve el aprovechamiento real del material.
+
+Usa los datos corregidos (`datos_piezas.py`): sin charolas de baño y **con el
+arranque de Moret** que faltaba en el despiece (`PIEZAS_EXTRA`). El empaquetado
+es **Best-Fit-Decreasing**: cada recorte se coloca donde deja menos sobrante,
+para que el sobrante de una pieza sirva para otra y se corten menos baldosas.
+
+Salidas: `piso_moret.pdf` (180 pzas / 90 cajas; sobrante 5.05 m² reutilizable +
+2.60 m² desperdicio) y `piso_royal_walnut.pdf` (168 pzas / 34 cajas; sobrante
+1.77 m² reutilizable + 0.67 m² desperdicio).
 
 ## Requisitos
 
