@@ -142,6 +142,32 @@ Genera:
   (ID → medida a cortar → tipo → de qué baldosa sale → ubicación).
 - `lista_piezas.csv` — las 406 piezas con todo el detalle, para Excel.
 
+### 5. Plano de recortes por material (sobrante coloreado)  →  `plano_recortes_material.py`
+
+```bash
+python3 plano_recortes_material.py
+```
+
+Genera **un PDF por material** con cada baldosa que se corta, mostrando cada
+pieza con su ID y **a dónde va** (`→ va a (x,y)`), y el sobrante coloreado:
+
+- amarillo = **sobrante reutilizable** (lado ≥ 10 cm),
+- rojo = **desperdicio**.
+
+Salidas: `plano_recortes_moret.pdf` y `plano_recortes_royal_walnut.pdf`.
+
+### Demostración de faltante de material  →  `demostracion_faltante.py`
+
+```bash
+python3 demostracion_faltante.py Numeros_Generadores_....xlsx
+```
+
+Consolida las 6 hojas del Excel de generadores (Moret/Royal × Chardonnay/
+Cabernet/Merlot), aplica el factor de desperdicio del propio generador y suma
+piso + escalera + zoclo vs lo suministrado. Demuestra el faltante:
+**Moret −30 cajas, Royal Walnut −11 cajas**. Salidas: `demostracion_faltante.pdf`
+y `demostracion_faltante.csv`.
+
 ## Requisitos
 
 - **Python 3** (sólo librería estándar para extraer y optimizar).
