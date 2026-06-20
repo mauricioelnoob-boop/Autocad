@@ -98,6 +98,28 @@ qué recorte va en cada lugar.
 
 ---
 
+### 3. Plano general de corte  →  `generar_plano.py`
+
+```bash
+python3 generar_plano.py            # genera plano_corte.dxf y plano_corte.pdf
+```
+
+Dibuja **todas** las baldosas que se van a recortar (una por una, a escala real),
+y dentro de cada una marca por color:
+
+- **verde** = pieza que se corta y se usa en el piso (con su medida),
+- **amarillo** = sobrante reutilizable (lado ≥ 10 cm),
+- **rojo** = desperdicio / merma (tira demasiado chica).
+
+Incluye totales (piezas, cajas, m², desperdicio) y leyenda. Genera:
+
+- `plano_corte.dxf` — se abre directo en **AutoCAD** (capas: BALDOSA, PIEZA,
+  SOBRANTE, DESPERDICIO, TITULO), cada baldosa a escala real en metros.
+- `plano_corte.pdf` — el mismo plano como póster (un material por hoja).
+
+Resumen de este plano: desperdicio real **≈ 3.4 m²**; sobrante reutilizable
+**≈ 6.8 m²** (que podrías guardar para otra obra).
+
 ## Requisitos
 
 - **Python 3** (sólo librería estándar para extraer y optimizar).
