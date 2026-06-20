@@ -120,6 +120,28 @@ Incluye totales (piezas, cajas, m², desperdicio) y leyenda. Genera:
 Resumen de este plano: desperdicio real **≈ 3.4 m²**; sobrante reutilizable
 **≈ 6.8 m²** (que podrías guardar para otra obra).
 
+### 4. Plano de la casa con piezas identificadas  →  `plano_casa.py`
+
+```bash
+python3 plano_casa.py               # genera plano_casa.dxf, plano_casa.pdf, lista_piezas.csv
+```
+
+Dibuja el despiece **en su posición real** dentro de la casa y le pone a cada
+pieza un **ID** (`M-042` = Moret pieza 42, `R-118` = Royal Walnut pieza 118),
+para que sepas pieza por pieza cuál recortar, cómo y dónde va instalada. Cada
+recorte se **enlaza** con su baldosa del plano de corte (columna `corte_de`).
+
+- gris = baldosa completa · naranja = recorte Moret · turquesa = recorte Royal.
+
+Genera:
+
+- `plano_casa.dxf` — plano para **AutoCAD**, cada pieza con su ID; capas por
+  material y por completa/recorte (puedes apagar las completas y dejar sólo los
+  recortes).
+- `plano_casa.pdf` — el plano de la casa + una **tabla de recortes**
+  (ID → medida a cortar → tipo → de qué baldosa sale → ubicación).
+- `lista_piezas.csv` — las 406 piezas con todo el detalle, para Excel.
+
 ## Requisitos
 
 - **Python 3** (sólo librería estándar para extraer y optimizar).

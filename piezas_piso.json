@@ -6,7 +6,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 496.461,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 496.1607,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -15,7 +19,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.859,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 495.5587,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -24,7 +32,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.257,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 494.9567,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -33,7 +45,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.655,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 494.3547,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -42,7 +58,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.053,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 493.7527,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -51,7 +71,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 493.451,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 493.1507,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -60,7 +84,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.849,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 492.5487,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -69,7 +97,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.247,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 491.9467,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -78,7 +110,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.645,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 491.3447,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -87,7 +123,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.043,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 490.7427,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -96,7 +136,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 490.441,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 490.1407,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -105,7 +149,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 489.839,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 489.5387,
+    "y0": -87.9324,
+    "wx": 0.6,
+    "hy": 1.192
   },
   {
     "material": "Moret",
@@ -114,7 +162,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 496.461,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 496.1607,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -123,7 +175,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.859,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 495.5587,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -132,7 +188,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.257,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 494.9567,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -141,7 +201,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.655,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 494.3547,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -150,7 +214,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.053,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 493.7527,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -159,7 +227,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 493.451,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 493.1507,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -168,7 +240,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.849,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 492.5487,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -177,7 +253,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.247,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 491.9467,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -186,7 +266,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.645,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 491.3447,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -195,7 +279,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.043,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 490.7427,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -204,7 +292,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 490.441,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 490.1407,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -213,7 +305,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 489.841,
-    "y": -87.336
+    "y": -87.336,
+    "x0": 489.5407,
+    "y0": -87.9334,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Royal Walnut",
@@ -222,7 +318,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 502.263,
-    "y": -86.036
+    "y": -86.036,
+    "x0": 502.1632,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 1.0495
   },
   {
     "material": "Royal Walnut",
@@ -231,7 +331,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.263,
-    "y": -84.91
+    "y": -84.91,
+    "x0": 502.1632,
+    "y0": -85.5099,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -240,7 +344,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 502.062,
-    "y": -86.336
+    "y": -86.336,
+    "x0": 501.9622,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 0.449
   },
   {
     "material": "Royal Walnut",
@@ -249,7 +357,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.062,
-    "y": -85.51
+    "y": -85.51,
+    "x0": 501.9622,
+    "y0": -86.1104,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -258,7 +370,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.861,
-    "y": -86.036
+    "y": -86.036,
+    "x0": 501.7612,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 1.0495
   },
   {
     "material": "Royal Walnut",
@@ -267,7 +383,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.861,
-    "y": -84.91
+    "y": -84.91,
+    "x0": 501.7612,
+    "y0": -85.5099,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -276,7 +396,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.66,
-    "y": -86.336
+    "y": -86.336,
+    "x0": 501.5602,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 0.449
   },
   {
     "material": "Royal Walnut",
@@ -285,7 +409,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.66,
-    "y": -85.51
+    "y": -85.51,
+    "x0": 501.5602,
+    "y0": -86.1104,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -294,7 +422,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.459,
-    "y": -86.036
+    "y": -86.036,
+    "x0": 501.3592,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 1.0495
   },
   {
     "material": "Royal Walnut",
@@ -303,7 +435,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.459,
-    "y": -84.91
+    "y": -84.91,
+    "x0": 501.3592,
+    "y0": -85.5099,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -312,7 +448,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.258,
-    "y": -86.336
+    "y": -86.336,
+    "x0": 501.1582,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 0.449
   },
   {
     "material": "Royal Walnut",
@@ -321,7 +461,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.258,
-    "y": -85.51
+    "y": -85.51,
+    "x0": 501.1582,
+    "y0": -86.1104,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -330,7 +474,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.057,
-    "y": -86.036
+    "y": -86.036,
+    "x0": 500.9572,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 1.0495
   },
   {
     "material": "Royal Walnut",
@@ -339,7 +487,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.057,
-    "y": -84.91
+    "y": -84.91,
+    "x0": 500.9572,
+    "y0": -85.5099,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -348,7 +500,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.856,
-    "y": -86.336
+    "y": -86.336,
+    "x0": 500.7562,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 0.449
   },
   {
     "material": "Royal Walnut",
@@ -357,7 +513,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.856,
-    "y": -85.51
+    "y": -85.51,
+    "x0": 500.7562,
+    "y0": -86.1104,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -366,7 +526,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.655,
-    "y": -86.036
+    "y": -86.036,
+    "x0": 500.5552,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 1.0495
   },
   {
     "material": "Royal Walnut",
@@ -375,7 +539,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.655,
-    "y": -84.91
+    "y": -84.91,
+    "x0": 500.5552,
+    "y0": -85.5099,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -384,7 +552,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.454,
-    "y": -86.336
+    "y": -86.336,
+    "x0": 500.3542,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 0.449
   },
   {
     "material": "Royal Walnut",
@@ -393,7 +565,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.454,
-    "y": -85.51
+    "y": -85.51,
+    "x0": 500.3542,
+    "y0": -86.1104,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -402,7 +578,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.253,
-    "y": -86.036
+    "y": -86.036,
+    "x0": 500.1532,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 1.0495
   },
   {
     "material": "Royal Walnut",
@@ -411,7 +591,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.253,
-    "y": -84.91
+    "y": -84.91,
+    "x0": 500.1532,
+    "y0": -85.5099,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -420,7 +604,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.052,
-    "y": -86.336
+    "y": -86.336,
+    "x0": 499.9522,
+    "y0": -86.5604,
+    "wx": 0.2,
+    "hy": 0.449
   },
   {
     "material": "Royal Walnut",
@@ -429,7 +617,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.052,
-    "y": -85.51
+    "y": -85.51,
+    "x0": 499.9522,
+    "y0": -86.1104,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -438,7 +630,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 499.863,
-    "y": -86.036
+    "y": -86.036,
+    "x0": 499.7742,
+    "y0": -86.5604,
+    "wx": 0.177,
+    "hy": 1.0495
   },
   {
     "material": "Royal Walnut",
@@ -447,7 +643,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 499.863,
-    "y": -84.91
+    "y": -84.91,
+    "x0": 499.7742,
+    "y0": -85.5099,
+    "wx": 0.177,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -456,7 +656,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.263,
-    "y": -83.709
+    "y": -83.709,
+    "x0": 502.1632,
+    "y0": -84.3089,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -465,7 +669,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.062,
-    "y": -84.309
+    "y": -84.309,
+    "x0": 501.9622,
+    "y0": -84.9094,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -474,7 +682,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.861,
-    "y": -83.709
+    "y": -83.709,
+    "x0": 501.7612,
+    "y0": -84.3089,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -483,7 +695,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.66,
-    "y": -84.309
+    "y": -84.309,
+    "x0": 501.5602,
+    "y0": -84.9094,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -492,7 +708,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.459,
-    "y": -83.709
+    "y": -83.709,
+    "x0": 501.3592,
+    "y0": -84.3089,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -501,7 +721,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.258,
-    "y": -84.309
+    "y": -84.309,
+    "x0": 501.1582,
+    "y0": -84.9094,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -510,7 +734,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.057,
-    "y": -83.709
+    "y": -83.709,
+    "x0": 500.9572,
+    "y0": -84.3089,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -519,7 +747,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.856,
-    "y": -84.309
+    "y": -84.309,
+    "x0": 500.7562,
+    "y0": -84.9094,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -528,7 +760,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.655,
-    "y": -83.709
+    "y": -83.709,
+    "x0": 500.5552,
+    "y0": -84.3089,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -537,7 +773,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.454,
-    "y": -84.309
+    "y": -84.309,
+    "x0": 500.3542,
+    "y0": -84.9094,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -546,7 +786,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.253,
-    "y": -83.709
+    "y": -83.709,
+    "x0": 500.1532,
+    "y0": -84.3089,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -555,7 +799,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.052,
-    "y": -84.309
+    "y": -84.309,
+    "x0": 499.9522,
+    "y0": -84.9094,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -564,7 +812,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 499.863,
-    "y": -83.709
+    "y": -83.709,
+    "x0": 499.7742,
+    "y0": -84.3089,
+    "wx": 0.177,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -573,7 +825,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 502.263,
-    "y": -82.6
+    "y": -82.6,
+    "x0": 502.1632,
+    "y0": -83.1079,
+    "wx": 0.2,
+    "hy": 1.0157
   },
   {
     "material": "Royal Walnut",
@@ -582,7 +838,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.062,
-    "y": -83.108
+    "y": -83.108,
+    "x0": 501.9622,
+    "y0": -83.7084,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -591,7 +851,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.861,
-    "y": -82.6
+    "y": -82.6,
+    "x0": 501.7612,
+    "y0": -83.1079,
+    "wx": 0.2,
+    "hy": 1.016
   },
   {
     "material": "Royal Walnut",
@@ -600,7 +864,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.66,
-    "y": -83.108
+    "y": -83.108,
+    "x0": 501.5602,
+    "y0": -83.7084,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -609,7 +877,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.459,
-    "y": -82.6
+    "y": -82.6,
+    "x0": 501.3592,
+    "y0": -83.1079,
+    "wx": 0.2,
+    "hy": 1.0163
   },
   {
     "material": "Royal Walnut",
@@ -618,7 +890,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 501.258,
-    "y": -83.108
+    "y": -83.108,
+    "x0": 501.1582,
+    "y0": -83.7084,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -627,7 +903,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.057,
-    "y": -82.6
+    "y": -82.6,
+    "x0": 500.9572,
+    "y0": -83.1079,
+    "wx": 0.2,
+    "hy": 1.0166
   },
   {
     "material": "Royal Walnut",
@@ -636,7 +916,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.856,
-    "y": -83.108
+    "y": -83.108,
+    "x0": 500.7562,
+    "y0": -83.7084,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -645,7 +929,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.655,
-    "y": -82.599
+    "y": -82.599,
+    "x0": 500.5552,
+    "y0": -83.1079,
+    "wx": 0.2,
+    "hy": 1.0169
   },
   {
     "material": "Royal Walnut",
@@ -654,7 +942,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.454,
-    "y": -83.108
+    "y": -83.108,
+    "x0": 500.3542,
+    "y0": -83.7084,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -663,7 +955,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.253,
-    "y": -82.599
+    "y": -82.599,
+    "x0": 500.1532,
+    "y0": -83.1079,
+    "wx": 0.2,
+    "hy": 1.0172
   },
   {
     "material": "Royal Walnut",
@@ -672,7 +968,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 500.052,
-    "y": -83.108
+    "y": -83.108,
+    "x0": 499.9522,
+    "y0": -83.7084,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -681,7 +981,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 499.863,
-    "y": -82.599
+    "y": -82.599,
+    "x0": 499.7742,
+    "y0": -83.1079,
+    "wx": 0.177,
+    "hy": 1.0173
   },
   {
     "material": "Royal Walnut",
@@ -690,7 +994,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 502.062,
-    "y": -82.3
+    "y": -82.3,
+    "x0": 501.9622,
+    "y0": -82.5074,
+    "wx": 0.2,
+    "hy": 0.4153
   },
   {
     "material": "Royal Walnut",
@@ -699,7 +1007,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.66,
-    "y": -82.3
+    "y": -82.3,
+    "x0": 501.5602,
+    "y0": -82.5074,
+    "wx": 0.2,
+    "hy": 0.4156
   },
   {
     "material": "Royal Walnut",
@@ -708,7 +1020,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 501.258,
-    "y": -82.299
+    "y": -82.299,
+    "x0": 501.1582,
+    "y0": -82.5074,
+    "wx": 0.2,
+    "hy": 0.4159
   },
   {
     "material": "Royal Walnut",
@@ -717,7 +1033,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.856,
-    "y": -82.299
+    "y": -82.299,
+    "x0": 500.7562,
+    "y0": -82.5074,
+    "wx": 0.2,
+    "hy": 0.4162
   },
   {
     "material": "Royal Walnut",
@@ -726,7 +1046,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.454,
-    "y": -82.299
+    "y": -82.299,
+    "x0": 500.3542,
+    "y0": -82.5074,
+    "wx": 0.2,
+    "hy": 0.4165
   },
   {
     "material": "Royal Walnut",
@@ -735,7 +1059,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.052,
-    "y": -82.299
+    "y": -82.299,
+    "x0": 499.9522,
+    "y0": -82.5074,
+    "wx": 0.2,
+    "hy": 0.4168
   },
   {
     "material": "Moret",
@@ -744,7 +1072,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 507.792,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 507.7692,
+    "y0": -84.8804,
+    "wx": 0.045,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -753,7 +1085,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 507.792,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 507.7692,
+    "y0": -83.7694,
+    "wx": 0.045,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -762,7 +1098,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.668,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 507.5682,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -771,7 +1111,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.668,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 507.5682,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -780,7 +1124,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.668,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 507.5682,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -789,7 +1137,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.467,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 507.3672,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -798,7 +1150,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.467,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 507.3672,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -807,7 +1163,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.266,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 507.1662,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -816,7 +1176,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.266,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 507.1662,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -825,7 +1189,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.266,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 507.1662,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -834,7 +1202,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.065,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 506.9652,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -843,7 +1215,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.065,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 506.9652,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -852,7 +1228,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.864,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 506.7642,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -861,7 +1241,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.864,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 506.7642,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -870,7 +1254,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.864,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 506.7642,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -879,7 +1267,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.663,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 506.5632,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -888,7 +1280,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.663,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 506.5632,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -897,7 +1293,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.462,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 506.3622,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -906,7 +1306,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.462,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 506.3622,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -915,7 +1319,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.462,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 506.3622,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -924,7 +1332,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.261,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 506.1612,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -933,7 +1345,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.261,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 506.1612,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -942,7 +1358,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.06,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 505.9602,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -951,7 +1371,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.06,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 505.9602,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -960,7 +1384,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.06,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 505.9602,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -969,7 +1397,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.859,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 505.7592,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -978,7 +1410,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.859,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 505.7592,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -987,7 +1423,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.658,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 505.5582,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -996,7 +1436,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.658,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 505.5582,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -1005,7 +1449,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.658,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 505.5582,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -1014,7 +1462,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.457,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 505.3572,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -1023,7 +1475,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.457,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 505.3572,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1032,7 +1488,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.256,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 505.1562,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1041,7 +1501,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.256,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 505.1562,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -1050,7 +1514,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.256,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 505.1562,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -1059,7 +1527,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.055,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 504.9552,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -1068,7 +1540,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.055,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 504.9552,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1077,7 +1553,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.854,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 504.7542,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1086,7 +1566,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.854,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 504.7542,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -1095,7 +1579,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.854,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 504.7542,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -1104,7 +1592,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.653,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 504.5532,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -1113,7 +1605,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.653,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 504.5532,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1122,7 +1618,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.452,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 504.3522,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1131,7 +1631,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.452,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 504.3522,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -1140,7 +1644,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.452,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 504.3522,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -1149,7 +1657,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.251,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 504.1512,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -1158,7 +1670,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.251,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 504.1512,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1167,7 +1683,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.05,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 503.9502,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1176,7 +1696,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.05,
-    "y": -84.626
+    "y": -84.626,
+    "x0": 503.9502,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 0.5096
   },
   {
     "material": "Royal Walnut",
@@ -1185,7 +1709,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.05,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 503.9502,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -1194,7 +1722,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.849,
-    "y": -84.325
+    "y": -84.325,
+    "x0": 503.7492,
+    "y0": -84.8804,
+    "wx": 0.2,
+    "hy": 1.1101
   },
   {
     "material": "Royal Walnut",
@@ -1203,7 +1735,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.849,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 503.7492,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1212,7 +1748,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.648,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 503.5482,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1221,7 +1761,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.648,
-    "y": -84.671
+    "y": -84.671,
+    "x0": 503.5482,
+    "y0": -84.9704,
+    "wx": 0.2,
+    "hy": 0.5995
   },
   {
     "material": "Royal Walnut",
@@ -1230,7 +1774,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.648,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 503.5482,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -1239,7 +1787,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.447,
-    "y": -84.37
+    "y": -84.37,
+    "x0": 503.3472,
+    "y0": -84.9704,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1248,7 +1800,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.447,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 503.3472,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1257,7 +1813,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.246,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 503.1462,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1266,7 +1826,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.246,
-    "y": -84.671
+    "y": -84.671,
+    "x0": 503.1462,
+    "y0": -84.9704,
+    "wx": 0.2,
+    "hy": 0.5995
   },
   {
     "material": "Royal Walnut",
@@ -1275,7 +1839,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.246,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 503.1462,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -1284,7 +1852,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.045,
-    "y": -84.37
+    "y": -84.37,
+    "x0": 502.9452,
+    "y0": -84.9704,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1293,7 +1865,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.045,
-    "y": -83.169
+    "y": -83.169,
+    "x0": 502.9452,
+    "y0": -83.7694,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1302,7 +1878,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.844,
-    "y": -83.77
+    "y": -83.77,
+    "x0": 502.7442,
+    "y0": -84.3699,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1311,7 +1891,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 502.844,
-    "y": -84.671
+    "y": -84.671,
+    "x0": 502.7442,
+    "y0": -84.9704,
+    "wx": 0.2,
+    "hy": 0.5995
   },
   {
     "material": "Royal Walnut",
@@ -1320,7 +1904,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 502.844,
-    "y": -82.63
+    "y": -82.63,
+    "x0": 502.7442,
+    "y0": -83.1689,
+    "wx": 0.2,
+    "hy": 1.0784
   },
   {
     "material": "Royal Walnut",
@@ -1329,7 +1917,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.641,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 507.5412,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Royal Walnut",
@@ -1338,7 +1930,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.239,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 507.1392,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Royal Walnut",
@@ -1347,7 +1943,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.837,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 506.7372,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Royal Walnut",
@@ -1356,7 +1956,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.435,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 506.3352,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Royal Walnut",
@@ -1365,7 +1969,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.033,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 505.9332,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Royal Walnut",
@@ -1374,7 +1982,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.631,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 505.5312,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Royal Walnut",
@@ -1383,7 +1995,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.229,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 505.1292,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Royal Walnut",
@@ -1392,7 +2008,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.827,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 504.7272,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Royal Walnut",
@@ -1401,7 +2021,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.425,
-    "y": -93.077
+    "y": -93.077,
+    "x0": 504.3252,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 0.5065
   },
   {
     "material": "Moret",
@@ -1410,7 +2034,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 507.778,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 507.7422,
+    "y0": -93.3304,
+    "wx": 0.072,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1419,7 +2047,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.641,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 507.5412,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1428,7 +2060,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.44,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 507.3402,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1437,7 +2073,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.239,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 507.1392,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1446,7 +2086,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.038,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 506.9382,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1455,7 +2099,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.837,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 506.7372,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1464,7 +2112,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.636,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 506.5362,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1473,7 +2125,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.435,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 506.3352,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1482,7 +2138,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.234,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 506.1342,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1491,7 +2151,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.033,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 505.9332,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1500,7 +2164,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.832,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 505.7322,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1509,7 +2177,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.631,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 505.5312,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1518,7 +2190,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.43,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 505.3302,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1527,7 +2203,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.229,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 505.1292,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1536,7 +2216,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.028,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 504.9282,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1545,7 +2229,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.827,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 504.7272,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1554,7 +2242,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.626,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 504.5262,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1563,7 +2255,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.425,
-    "y": -92.223
+    "y": -92.223,
+    "x0": 504.3252,
+    "y0": -92.8229,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1572,7 +2268,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.224,
-    "y": -92.777
+    "y": -92.777,
+    "x0": 504.1242,
+    "y0": -93.3304,
+    "wx": 0.2,
+    "hy": 1.107
   },
   {
     "material": "Royal Walnut",
@@ -1581,7 +2281,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 507.778,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 507.7422,
+    "y0": -92.2224,
+    "wx": 0.072,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1590,7 +2294,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.641,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 507.5412,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1599,7 +2307,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.44,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 507.3402,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1608,7 +2320,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.239,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 507.1392,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1617,7 +2333,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 507.038,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 506.9382,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1626,7 +2346,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.837,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 506.7372,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1635,7 +2359,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.636,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 506.5362,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1644,7 +2372,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.435,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 506.3352,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1653,7 +2385,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.234,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 506.1342,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1662,7 +2398,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.033,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 505.9332,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1671,7 +2411,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.832,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 505.7322,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1680,7 +2424,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.631,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 505.5312,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1689,7 +2437,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.43,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 505.3302,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1698,7 +2450,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.229,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 505.1292,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1707,7 +2463,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.028,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 504.9282,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1716,7 +2476,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.827,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 504.7272,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1725,7 +2489,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.626,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 504.5262,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1734,7 +2502,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.425,
-    "y": -91.022
+    "y": -91.022,
+    "x0": 504.3252,
+    "y0": -91.6219,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1743,7 +2515,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.224,
-    "y": -91.622
+    "y": -91.622,
+    "x0": 504.1242,
+    "y0": -92.2224,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Moret",
@@ -1752,7 +2528,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 507.762,
-    "y": -90.466
+    "y": -90.466,
+    "x0": 507.7422,
+    "y0": -91.0214,
+    "wx": 0.0395,
+    "hy": 1.111
   },
   {
     "material": "Royal Walnut",
@@ -1761,7 +2541,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.641,
-    "y": -90.166
+    "y": -90.166,
+    "x0": 507.5412,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5105
   },
   {
     "material": "Royal Walnut",
@@ -1770,7 +2554,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.44,
-    "y": -90.466
+    "y": -90.466,
+    "x0": 507.3402,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.111
   },
   {
     "material": "Royal Walnut",
@@ -1779,7 +2567,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.239,
-    "y": -90.166
+    "y": -90.166,
+    "x0": 507.1392,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5105
   },
   {
     "material": "Royal Walnut",
@@ -1788,7 +2580,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.038,
-    "y": -90.466
+    "y": -90.466,
+    "x0": 506.9382,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.111
   },
   {
     "material": "Royal Walnut",
@@ -1797,7 +2593,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.837,
-    "y": -90.166
+    "y": -90.166,
+    "x0": 506.7372,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5105
   },
   {
     "material": "Royal Walnut",
@@ -1806,7 +2606,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.636,
-    "y": -90.466
+    "y": -90.466,
+    "x0": 506.5362,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.111
   },
   {
     "material": "Royal Walnut",
@@ -1815,7 +2619,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.435,
-    "y": -90.166
+    "y": -90.166,
+    "x0": 506.3352,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5105
   },
   {
     "material": "Royal Walnut",
@@ -1824,7 +2632,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.234,
-    "y": -90.466
+    "y": -90.466,
+    "x0": 506.1342,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.111
   },
   {
     "material": "Royal Walnut",
@@ -1833,7 +2645,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.033,
-    "y": -90.121
+    "y": -90.121,
+    "x0": 505.9332,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5995
   },
   {
     "material": "Royal Walnut",
@@ -1842,7 +2658,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.832,
-    "y": -90.421
+    "y": -90.421,
+    "x0": 505.7322,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1851,7 +2671,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.631,
-    "y": -90.121
+    "y": -90.121,
+    "x0": 505.5312,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5995
   },
   {
     "material": "Royal Walnut",
@@ -1860,7 +2684,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.43,
-    "y": -90.421
+    "y": -90.421,
+    "x0": 505.3302,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1869,7 +2697,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.229,
-    "y": -90.121
+    "y": -90.121,
+    "x0": 505.1292,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5995
   },
   {
     "material": "Royal Walnut",
@@ -1878,7 +2710,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.028,
-    "y": -90.466
+    "y": -90.466,
+    "x0": 504.9282,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.111
   },
   {
     "material": "Royal Walnut",
@@ -1887,7 +2723,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.827,
-    "y": -90.166
+    "y": -90.166,
+    "x0": 504.7272,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5105
   },
   {
     "material": "Royal Walnut",
@@ -1896,7 +2736,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.626,
-    "y": -90.466
+    "y": -90.466,
+    "x0": 504.5262,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.111
   },
   {
     "material": "Royal Walnut",
@@ -1905,7 +2749,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.425,
-    "y": -90.166
+    "y": -90.166,
+    "x0": 504.3252,
+    "y0": -90.4209,
+    "wx": 0.2,
+    "hy": 0.5105
   },
   {
     "material": "Royal Walnut",
@@ -1914,7 +2762,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 502.464,
-    "y": -86.336
+    "y": -86.336,
+    "x0": 502.3642,
+    "y0": -86.5607,
+    "wx": 0.2,
+    "hy": 0.449
   },
   {
     "material": "Royal Walnut",
@@ -1923,7 +2775,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.464,
-    "y": -85.511
+    "y": -85.511,
+    "x0": 502.3642,
+    "y0": -86.1107,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1932,7 +2788,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.464,
-    "y": -84.31
+    "y": -84.31,
+    "x0": 502.3642,
+    "y0": -84.9097,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Royal Walnut",
@@ -1941,7 +2801,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 502.464,
-    "y": -83.109
+    "y": -83.109,
+    "x0": 502.3642,
+    "y0": -83.7087,
+    "wx": 0.2,
+    "hy": 1.2
   },
   {
     "material": "Moret",
@@ -1950,7 +2814,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 502.61,
-    "y": -85.51
+    "y": -85.51,
+    "x0": 502.5652,
+    "y0": -85.9604,
+    "wx": 0.089,
+    "hy": 0.9
   },
   {
     "material": "Moret",
@@ -1959,7 +2827,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 504.079,
-    "y": -90.36
+    "y": -90.36,
+    "x0": 504.0342,
+    "y0": -90.8104,
+    "wx": 0.089,
+    "hy": 0.9
   },
   {
     "material": "Royal Walnut",
@@ -1968,7 +2840,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.224,
-    "y": -90.466
+    "y": -90.466,
+    "x0": 504.1242,
+    "y0": -91.0214,
+    "wx": 0.2,
+    "hy": 1.111
   },
   {
     "material": "Moret",
@@ -1977,7 +2853,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 497.063,
-    "y": -87.3
+    "y": -87.3,
+    "x0": 496.7627,
+    "y0": -87.8604,
+    "wx": 0.6,
+    "hy": 1.12
   },
   {
     "material": "Moret",
@@ -1986,7 +2866,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 497.063,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 496.7627,
+    "y0": -86.7384,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Royal Walnut",
@@ -1995,7 +2879,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 497.472,
-    "y": -87.3
+    "y": -87.3,
+    "x0": 497.3647,
+    "y0": -87.8604,
+    "wx": 0.214,
+    "hy": 1.12
   },
   {
     "material": "Royal Walnut",
@@ -2004,7 +2892,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 497.472,
-    "y": -86.141
+    "y": -86.141,
+    "x0": 497.3647,
+    "y0": -86.7384,
+    "wx": 0.214,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2013,7 +2905,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 496.461,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 496.1607,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2022,7 +2918,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.859,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 495.5587,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2031,7 +2931,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.257,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 494.9567,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2040,7 +2944,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.655,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 494.3547,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2049,7 +2957,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.053,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 493.7527,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2058,7 +2970,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 493.451,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 493.1507,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2067,7 +2983,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.849,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 492.5487,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2076,7 +2996,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.247,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 491.9467,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2085,7 +3009,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.645,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 491.3447,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2094,7 +3022,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.043,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 490.7427,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2103,7 +3035,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 490.441,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 490.1407,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2112,7 +3048,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 489.839,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 489.5387,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2121,7 +3061,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 497.063,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 496.7627,
+    "y0": -85.5424,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Royal Walnut",
@@ -2130,7 +3074,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 497.472,
-    "y": -84.945
+    "y": -84.945,
+    "x0": 497.3647,
+    "y0": -85.5424,
+    "wx": 0.214,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2139,7 +3087,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 496.461,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 496.1607,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2148,7 +3100,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 495.859,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 495.5587,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2157,7 +3113,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 495.257,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 494.9567,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2166,7 +3126,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 494.655,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 494.3547,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2175,7 +3139,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 494.053,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 493.7527,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2184,7 +3152,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 493.451,
-    "y": -83.803
+    "y": -83.803,
+    "x0": 493.1507,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.086
   },
   {
     "material": "Moret",
@@ -2193,7 +3165,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 492.849,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 492.5487,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2202,7 +3178,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 492.247,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 491.9467,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2211,7 +3191,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 491.645,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 491.3447,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2220,7 +3204,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 491.043,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 490.7427,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2229,7 +3217,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 490.441,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 490.1407,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2238,7 +3230,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 489.839,
-    "y": -83.773
+    "y": -83.773,
+    "x0": 489.5387,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.146
   },
   {
     "material": "Moret",
@@ -2247,7 +3243,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 497.063,
-    "y": -83.803
+    "y": -83.803,
+    "x0": 496.7627,
+    "y0": -84.3464,
+    "wx": 0.6,
+    "hy": 1.086
   },
   {
     "material": "Royal Walnut",
@@ -2256,7 +3256,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 497.472,
-    "y": -83.803
+    "y": -83.803,
+    "x0": 497.3647,
+    "y0": -84.3464,
+    "wx": 0.214,
+    "hy": 1.086
   },
   {
     "material": "Moret",
@@ -2265,7 +3269,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 495.634,
-    "y": -88.17
+    "y": -88.17,
+    "x0": 495.5587,
+    "y0": -88.4054,
+    "wx": 0.15,
+    "hy": 0.471
   },
   {
     "material": "Moret",
@@ -2274,7 +3282,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 495.257,
-    "y": -88.17
+    "y": -88.17,
+    "x0": 494.9567,
+    "y0": -88.4054,
+    "wx": 0.6,
+    "hy": 0.471
   },
   {
     "material": "Moret",
@@ -2283,7 +3295,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 494.497,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 494.3547,
+    "y0": -89.1284,
+    "wx": 0.284,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2292,7 +3308,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.053,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 493.7527,
+    "y0": -89.1284,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2301,7 +3321,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 493.451,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 493.1507,
+    "y0": -89.1284,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2310,7 +3334,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.849,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 492.5487,
+    "y0": -89.1284,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2319,7 +3347,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.247,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 491.9467,
+    "y0": -89.1284,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2328,7 +3360,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.645,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 491.3447,
+    "y0": -89.1284,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2337,7 +3373,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.043,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 490.7427,
+    "y0": -89.1284,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2346,7 +3386,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 490.441,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 490.1407,
+    "y0": -89.1284,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2355,7 +3399,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 489.839,
-    "y": -88.531
+    "y": -88.531,
+    "x0": 489.5387,
+    "y0": -89.1284,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2364,7 +3412,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 494.497,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 494.3547,
+    "y0": -90.3244,
+    "wx": 0.284,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2373,7 +3425,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.053,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 493.7527,
+    "y0": -90.3244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2382,7 +3438,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 493.451,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 493.1507,
+    "y0": -90.3244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2391,7 +3451,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.849,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 492.5487,
+    "y0": -90.3244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2400,7 +3464,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.247,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 491.9467,
+    "y0": -90.3244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2409,7 +3477,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.645,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 491.3447,
+    "y0": -90.3244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2418,7 +3490,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.043,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 490.7427,
+    "y0": -90.3244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2427,7 +3503,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 490.441,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 490.1407,
+    "y0": -90.3244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2436,7 +3516,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 489.839,
-    "y": -89.727
+    "y": -89.727,
+    "x0": 489.5387,
+    "y0": -90.3244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Royal Walnut",
@@ -2445,7 +3529,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 496.67,
-    "y": -90.9
+    "y": -90.9,
+    "x0": 496.5787,
+    "y0": -91.4604,
+    "wx": 0.182,
+    "hy": 1.12
   },
   {
     "material": "Moret",
@@ -2454,7 +3542,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 495.859,
-    "y": -90.9
+    "y": -90.9,
+    "x0": 495.5587,
+    "y0": -91.4604,
+    "wx": 0.6,
+    "hy": 1.12
   },
   {
     "material": "Moret",
@@ -2463,7 +3555,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 495.257,
-    "y": -90.93
+    "y": -90.93,
+    "x0": 494.9567,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.18
   },
   {
     "material": "Moret",
@@ -2472,7 +3568,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.655,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 494.3547,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2481,7 +3581,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.053,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 493.7527,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2490,7 +3594,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 493.451,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 493.1507,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2499,7 +3607,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.849,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 492.5487,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2508,7 +3620,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.247,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 491.9467,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2517,7 +3633,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.645,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 491.3447,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2526,7 +3646,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.043,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 490.7427,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2535,7 +3659,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 490.441,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 490.1407,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2544,7 +3672,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 489.839,
-    "y": -90.923
+    "y": -90.923,
+    "x0": 489.5387,
+    "y0": -91.5204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2553,7 +3685,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 497.063,
-    "y": -90.9
+    "y": -90.9,
+    "x0": 496.7627,
+    "y0": -91.4604,
+    "wx": 0.6,
+    "hy": 1.12
   },
   {
     "material": "Royal Walnut",
@@ -2562,7 +3698,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 497.472,
-    "y": -90.9
+    "y": -90.9,
+    "x0": 497.3647,
+    "y0": -91.4604,
+    "wx": 0.214,
+    "hy": 1.12
   },
   {
     "material": "Moret",
@@ -2571,7 +3711,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 496.461,
-    "y": -92.017
+    "y": -92.017,
+    "x0": 496.1607,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.11
   },
   {
     "material": "Moret",
@@ -2580,7 +3724,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 495.859,
-    "y": -92.017
+    "y": -92.017,
+    "x0": 495.5587,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.11
   },
   {
     "material": "Moret",
@@ -2589,7 +3737,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 495.083,
-    "y": -92.116
+    "y": -92.116,
+    "x0": 494.9567,
+    "y0": -92.7104,
+    "wx": 0.252,
+    "hy": 1.188
   },
   {
     "material": "Moret",
@@ -2598,7 +3750,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.655,
-    "y": -92.116
+    "y": -92.116,
+    "x0": 494.3547,
+    "y0": -92.7104,
+    "wx": 0.6,
+    "hy": 1.188
   },
   {
     "material": "Moret",
@@ -2607,7 +3763,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.053,
-    "y": -92.116
+    "y": -92.116,
+    "x0": 493.7527,
+    "y0": -92.7104,
+    "wx": 0.6,
+    "hy": 1.188
   },
   {
     "material": "Moret",
@@ -2616,7 +3776,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 493.451,
-    "y": -92.047
+    "y": -92.047,
+    "x0": 493.1507,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.05
   },
   {
     "material": "Moret",
@@ -2625,7 +3789,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 492.849,
-    "y": -92.047
+    "y": -92.047,
+    "x0": 492.5487,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.05
   },
   {
     "material": "Moret",
@@ -2634,7 +3802,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 492.247,
-    "y": -92.047
+    "y": -92.047,
+    "x0": 491.9467,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.05
   },
   {
     "material": "Moret",
@@ -2643,7 +3815,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 491.645,
-    "y": -92.047
+    "y": -92.047,
+    "x0": 491.3447,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.05
   },
   {
     "material": "Moret",
@@ -2652,7 +3828,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 491.043,
-    "y": -92.047
+    "y": -92.047,
+    "x0": 490.7427,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.05
   },
   {
     "material": "Moret",
@@ -2661,7 +3841,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 490.441,
-    "y": -92.047
+    "y": -92.047,
+    "x0": 490.1407,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.05
   },
   {
     "material": "Moret",
@@ -2670,7 +3854,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 489.839,
-    "y": -92.047
+    "y": -92.047,
+    "x0": 489.5387,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.05
   },
   {
     "material": "Moret",
@@ -2679,7 +3867,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 497.063,
-    "y": -92.017
+    "y": -92.017,
+    "x0": 496.7627,
+    "y0": -92.5724,
+    "wx": 0.6,
+    "hy": 1.11
   },
   {
     "material": "Royal Walnut",
@@ -2688,7 +3880,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 497.472,
-    "y": -92.017
+    "y": -92.017,
+    "x0": 497.3647,
+    "y0": -92.5724,
+    "wx": 0.214,
+    "hy": 1.11
   },
   {
     "material": "Moret",
@@ -2697,7 +3893,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 495.473,
-    "y": -92.017
+    "y": -92.017,
+    "x0": 495.3887,
+    "y0": -92.5724,
+    "wx": 0.168,
+    "hy": 1.11
   },
   {
     "material": "Moret",
@@ -2706,7 +3906,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 494.887,
-    "y": -88.17
+    "y": -88.17,
+    "x0": 494.8187,
+    "y0": -88.4054,
+    "wx": 0.136,
+    "hy": 0.471
   },
   {
     "material": "Moret",
@@ -2715,7 +3919,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 496.28,
-    "y": -90.9
+    "y": -90.9,
+    "x0": 496.1607,
+    "y0": -91.4604,
+    "wx": 0.238,
+    "hy": 1.12
   },
   {
     "material": "Moret",
@@ -2724,7 +3932,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 496.461,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 496.1607,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2733,7 +3945,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.859,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 495.5587,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2742,7 +3958,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.257,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 494.9567,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2751,7 +3971,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.655,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 494.3547,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2760,7 +3984,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 494.053,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 493.7527,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2769,7 +3997,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 493.451,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 493.1507,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2778,7 +4010,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.849,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 492.5487,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2787,7 +4023,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 492.247,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 491.9467,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2796,7 +4036,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.645,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 491.3447,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2805,7 +4049,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 491.043,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 490.7427,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2814,7 +4062,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 490.441,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 490.1407,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2823,7 +4075,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 489.839,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 489.5387,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2832,7 +4088,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 497.063,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 496.7627,
+    "y0": -82.0044,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2841,7 +4101,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 497.562,
-    "y": -81.407
+    "y": -81.407,
+    "x0": 497.3647,
+    "y0": -82.0044,
+    "wx": 0.394,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -2850,7 +4114,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 496.461,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 496.1607,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2859,7 +4127,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 495.859,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 495.5587,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2868,7 +4140,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 495.257,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 494.9567,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2877,7 +4153,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 494.655,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 494.3547,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2886,7 +4166,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 494.053,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 493.7527,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2895,7 +4179,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 493.451,
-    "y": -82.543
+    "y": -82.543,
+    "x0": 493.1507,
+    "y0": -83.0804,
+    "wx": 0.6,
+    "hy": 1.074
   },
   {
     "material": "Moret",
@@ -2904,7 +4192,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 492.849,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 492.5487,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2913,7 +4205,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 492.247,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 491.9467,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2922,7 +4218,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 491.645,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 491.3447,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2931,7 +4231,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 491.043,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 490.7427,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2940,7 +4244,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 490.441,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 490.1407,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2949,7 +4257,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 489.839,
-    "y": -82.563
+    "y": -82.563,
+    "x0": 489.5387,
+    "y0": -83.1204,
+    "wx": 0.6,
+    "hy": 1.114
   },
   {
     "material": "Moret",
@@ -2958,7 +4270,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 497.063,
-    "y": -82.543
+    "y": -82.543,
+    "x0": 496.7627,
+    "y0": -83.0804,
+    "wx": 0.6,
+    "hy": 1.074
   },
   {
     "material": "Moret",
@@ -2967,7 +4283,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 497.562,
-    "y": -82.543
+    "y": -82.543,
+    "x0": 497.3647,
+    "y0": -83.0804,
+    "wx": 0.394,
+    "hy": 1.074
   },
   {
     "material": "Moret",
@@ -2976,7 +4296,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 502.619,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 502.4942,
+    "y0": -87.8904,
+    "wx": 0.25,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -2985,7 +4309,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 502.359,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 502.2242,
+    "y0": -87.8904,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -2994,7 +4322,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 502.089,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 501.9542,
+    "y0": -87.8904,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3003,7 +4335,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 501.819,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 501.6842,
+    "y0": -87.8904,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3012,7 +4348,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 501.549,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 501.4142,
+    "y0": -87.8904,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3021,7 +4361,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 501.279,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 501.1442,
+    "y0": -87.8904,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3030,7 +4374,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 501.009,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 500.8742,
+    "y0": -87.8904,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3039,7 +4387,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 501.009,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 500.8742,
+    "y0": -89.0404,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3048,7 +4400,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 501.279,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 501.1442,
+    "y0": -89.0404,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3057,7 +4413,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 501.549,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 501.4142,
+    "y0": -89.0404,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3066,7 +4426,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 501.819,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 501.6842,
+    "y0": -89.0404,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3075,7 +4439,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 502.089,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 501.9542,
+    "y0": -89.0404,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3084,7 +4452,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 502.359,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 502.2242,
+    "y0": -89.0404,
+    "wx": 0.27,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3093,7 +4465,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 502.619,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 502.4942,
+    "y0": -89.0404,
+    "wx": 0.25,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3102,7 +4478,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.574,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 500.2742,
+    "y0": -87.8904,
+    "wx": 0.6,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3111,7 +4491,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 500.023,
-    "y": -87.315
+    "y": -87.315,
+    "x0": 499.7742,
+    "y0": -87.8904,
+    "wx": 0.498,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3120,7 +4504,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.646,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 503.3462,
+    "y0": -89.0404,
+    "wx": 0.6,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3129,7 +4517,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.044,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 502.7442,
+    "y0": -89.0404,
+    "wx": 0.6,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3138,7 +4530,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.645,
-    "y": -89.639
+    "y": -89.639,
+    "x0": 503.3462,
+    "y0": -90.2364,
+    "wx": 0.598,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3147,7 +4543,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.044,
-    "y": -89.639
+    "y": -89.639,
+    "x0": 502.7442,
+    "y0": -90.2364,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3156,7 +4556,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.645,
-    "y": -90.835
+    "y": -90.835,
+    "x0": 503.3462,
+    "y0": -91.4324,
+    "wx": 0.598,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3165,7 +4569,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.044,
-    "y": -90.835
+    "y": -90.835,
+    "x0": 502.7442,
+    "y0": -91.4324,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3174,7 +4582,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.645,
-    "y": -91.982
+    "y": -91.982,
+    "x0": 503.3462,
+    "y0": -92.5304,
+    "wx": 0.598,
+    "hy": 1.096
   },
   {
     "material": "Moret",
@@ -3183,7 +4595,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 503.044,
-    "y": -91.982
+    "y": -91.982,
+    "x0": 502.7442,
+    "y0": -92.5304,
+    "wx": 0.6,
+    "hy": 1.096
   },
   {
     "material": "Moret",
@@ -3192,7 +4608,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.912,
-    "y": -89.178
+    "y": -89.178,
+    "x0": 506.6122,
+    "y0": -89.7304,
+    "wx": 0.6,
+    "hy": 1.104
   },
   {
     "material": "Moret",
@@ -3201,7 +4621,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.31,
-    "y": -89.223
+    "y": -89.223,
+    "x0": 506.0102,
+    "y0": -89.8204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3210,7 +4634,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.708,
-    "y": -89.223
+    "y": -89.223,
+    "x0": 505.4082,
+    "y0": -89.8204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3219,7 +4647,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.106,
-    "y": -89.223
+    "y": -89.223,
+    "x0": 504.8062,
+    "y0": -89.8204,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3228,7 +4660,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.504,
-    "y": -89.178
+    "y": -89.178,
+    "x0": 504.2042,
+    "y0": -89.7304,
+    "wx": 0.6,
+    "hy": 1.104
   },
   {
     "material": "Moret",
@@ -3237,7 +4673,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.514,
-    "y": -89.178
+    "y": -89.178,
+    "x0": 507.2142,
+    "y0": -89.7304,
+    "wx": 0.6,
+    "hy": 1.104
   },
   {
     "material": "Moret",
@@ -3246,7 +4686,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 504.163,
-    "y": -89.178
+    "y": -89.178,
+    "x0": 504.1242,
+    "y0": -89.7304,
+    "wx": 0.078,
+    "hy": 1.104
   },
   {
     "material": "Moret",
@@ -3255,7 +4699,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.708,
-    "y": -88.027
+    "y": -88.027,
+    "x0": 505.4082,
+    "y0": -88.6244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3264,7 +4712,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.106,
-    "y": -88.027
+    "y": -88.027,
+    "x0": 504.8062,
+    "y0": -88.6244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3273,7 +4725,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.504,
-    "y": -88.027
+    "y": -88.027,
+    "x0": 504.2042,
+    "y0": -88.6244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3282,7 +4738,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 506.31,
-    "y": -88.027
+    "y": -88.027,
+    "x0": 506.0102,
+    "y0": -88.6244,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3291,7 +4751,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 506.912,
-    "y": -88.282
+    "y": -88.282,
+    "x0": 506.6122,
+    "y0": -88.6244,
+    "wx": 0.6,
+    "hy": 0.684
   },
   {
     "material": "Moret",
@@ -3300,7 +4764,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 507.514,
-    "y": -88.282
+    "y": -88.282,
+    "x0": 507.2142,
+    "y0": -88.6244,
+    "wx": 0.6,
+    "hy": 0.684
   },
   {
     "material": "Moret",
@@ -3309,7 +4777,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 504.504,
-    "y": -87.084
+    "y": -87.084,
+    "x0": 504.2042,
+    "y0": -87.4284,
+    "wx": 0.6,
+    "hy": 0.688
   },
   {
     "material": "Moret",
@@ -3318,7 +4790,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.106,
-    "y": -87.084
+    "y": -87.084,
+    "x0": 504.8062,
+    "y0": -87.4284,
+    "wx": 0.6,
+    "hy": 0.688
   },
   {
     "material": "Moret",
@@ -3327,7 +4803,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 505.708,
-    "y": -87.084
+    "y": -87.084,
+    "x0": 505.4082,
+    "y0": -87.4284,
+    "wx": 0.6,
+    "hy": 0.688
   },
   {
     "material": "Royal Walnut",
@@ -3336,7 +4816,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 506.117,
-    "y": -87.084
+    "y": -87.084,
+    "x0": 506.0102,
+    "y0": -87.4284,
+    "wx": 0.214,
+    "hy": 0.688
   },
   {
     "material": "Moret",
@@ -3345,7 +4829,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 504.163,
-    "y": -88.027
+    "y": -88.027,
+    "x0": 504.1242,
+    "y0": -88.6244,
+    "wx": 0.078,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3354,7 +4842,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 504.163,
-    "y": -87.084
+    "y": -87.084,
+    "x0": 504.1242,
+    "y0": -87.4284,
+    "wx": 0.078,
+    "hy": 0.688
   },
   {
     "material": "Moret",
@@ -3363,7 +4855,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.645,
-    "y": -87.291
+    "y": -87.291,
+    "x0": 503.3462,
+    "y0": -87.8884,
+    "wx": 0.598,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3372,7 +4868,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.044,
-    "y": -87.291
+    "y": -87.291,
+    "x0": 502.7442,
+    "y0": -87.8884,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3381,7 +4881,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.645,
-    "y": -86.095
+    "y": -86.095,
+    "x0": 503.3462,
+    "y0": -86.6924,
+    "wx": 0.598,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3390,7 +4894,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.044,
-    "y": -86.095
+    "y": -86.095,
+    "x0": 502.7442,
+    "y0": -86.6924,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3399,7 +4907,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 503.645,
-    "y": -85.233
+    "y": -85.233,
+    "x0": 503.3462,
+    "y0": -85.4964,
+    "wx": 0.598,
+    "hy": 0.5272
   },
   {
     "material": "Moret",
@@ -3408,7 +4920,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 503.044,
-    "y": -84.899
+    "y": -84.899,
+    "x0": 502.7442,
+    "y0": -85.4964,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3417,7 +4933,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 504.205,
-    "y": -85.278
+    "y": -85.278,
+    "x0": 503.9462,
+    "y0": -85.4964,
+    "wx": 0.518,
+    "hy": 0.436
   },
   {
     "material": "Moret",
@@ -3426,7 +4946,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 504.205,
-    "y": -86.029
+    "y": -86.029,
+    "x0": 503.9462,
+    "y0": -86.5604,
+    "wx": 0.518,
+    "hy": 1.062
   },
   {
     "material": "Moret",
@@ -3435,7 +4959,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 504.765,
-    "y": -85.657
+    "y": -85.657,
+    "x0": 504.4662,
+    "y0": -86.2544,
+    "wx": 0.598,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3444,7 +4972,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.365,
-    "y": -85.657
+    "y": -85.657,
+    "x0": 505.0662,
+    "y0": -86.2544,
+    "wx": 0.598,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3453,7 +4985,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 505.965,
-    "y": -85.657
+    "y": -85.657,
+    "x0": 505.6662,
+    "y0": -86.2544,
+    "wx": 0.598,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3462,7 +4998,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 506.44,
-    "y": -85.657
+    "y": -85.657,
+    "x0": 506.2662,
+    "y0": -86.2544,
+    "wx": 0.348,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3471,7 +5011,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 505.365,
-    "y": -86.408
+    "y": -86.408,
+    "x0": 505.0662,
+    "y0": -86.5604,
+    "wx": 0.598,
+    "hy": 0.304
   },
   {
     "material": "Moret",
@@ -3480,7 +5024,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 504.794,
-    "y": -86.408
+    "y": -86.408,
+    "x0": 504.5242,
+    "y0": -86.5604,
+    "wx": 0.54,
+    "hy": 0.304
   },
   {
     "material": "Moret",
@@ -3489,7 +5037,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 505.965,
-    "y": -86.408
+    "y": -86.408,
+    "x0": 505.6662,
+    "y0": -86.5604,
+    "wx": 0.598,
+    "hy": 0.304
   },
   {
     "material": "Moret",
@@ -3498,7 +5050,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 506.44,
-    "y": -86.408
+    "y": -86.408,
+    "x0": 506.2662,
+    "y0": -86.5604,
+    "wx": 0.348,
+    "hy": 0.304
   },
   {
     "material": "Moret",
@@ -3507,7 +5063,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 496.46,
-    "y": -88.229
+    "y": -88.229,
+    "x0": 496.1607,
+    "y0": -88.5234,
+    "wx": 0.598,
+    "hy": 0.589
   },
   {
     "material": "Moret",
@@ -3516,7 +5076,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 495.994,
-    "y": -88.229
+    "y": -88.229,
+    "x0": 495.8287,
+    "y0": -88.5234,
+    "wx": 0.33,
+    "hy": 0.589
   },
   {
     "material": "Moret",
@@ -3525,7 +5089,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 495.634,
-    "y": -88.17
+    "y": -88.17,
+    "x0": 495.5587,
+    "y0": -88.4054,
+    "wx": 0.15,
+    "hy": 0.471
   },
   {
     "material": "Moret",
@@ -3534,7 +5102,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 497.562,
-    "y": -89.165
+    "y": -89.165,
+    "x0": 497.3647,
+    "y0": -89.7194,
+    "wx": 0.394,
+    "hy": 1.109
   },
   {
     "material": "Moret",
@@ -3543,7 +5115,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 497.063,
-    "y": -89.165
+    "y": -89.165,
+    "x0": 496.7627,
+    "y0": -89.7194,
+    "wx": 0.6,
+    "hy": 1.109
   },
   {
     "material": "Moret",
@@ -3552,7 +5128,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 496.461,
-    "y": -89.122
+    "y": -89.122,
+    "x0": 496.1607,
+    "y0": -89.7194,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3561,7 +5141,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.859,
-    "y": -89.122
+    "y": -89.122,
+    "x0": 495.5587,
+    "y0": -89.7194,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3570,7 +5154,11 @@
     "completa": true,
     "tipo_corte": "completa",
     "x": 495.257,
-    "y": -89.122
+    "y": -89.122,
+    "x0": 494.9567,
+    "y0": -89.7194,
+    "wx": 0.6,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3579,7 +5167,11 @@
     "completa": false,
     "tipo_corte": "corte_ancho",
     "x": 494.887,
-    "y": -89.122
+    "y": -89.122,
+    "x0": 494.8187,
+    "y0": -89.7194,
+    "wx": 0.136,
+    "hy": 1.194
   },
   {
     "material": "Moret",
@@ -3588,7 +5180,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 497.063,
-    "y": -89.941
+    "y": -89.941,
+    "x0": 496.7627,
+    "y0": -90.1604,
+    "wx": 0.6,
+    "hy": 0.439
   },
   {
     "material": "Moret",
@@ -3597,7 +5193,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 496.461,
-    "y": -89.941
+    "y": -89.941,
+    "x0": 496.1607,
+    "y0": -90.1604,
+    "wx": 0.6,
+    "hy": 0.439
   },
   {
     "material": "Moret",
@@ -3606,7 +5206,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 495.859,
-    "y": -89.941
+    "y": -89.941,
+    "x0": 495.5587,
+    "y0": -90.1604,
+    "wx": 0.6,
+    "hy": 0.439
   },
   {
     "material": "Moret",
@@ -3615,7 +5219,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 495.257,
-    "y": -89.941
+    "y": -89.941,
+    "x0": 494.9567,
+    "y0": -90.1604,
+    "wx": 0.6,
+    "hy": 0.439
   },
   {
     "material": "Moret",
@@ -3624,7 +5232,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 494.887,
-    "y": -89.941
+    "y": -89.941,
+    "x0": 494.8187,
+    "y0": -90.1604,
+    "wx": 0.136,
+    "hy": 0.439
   },
   {
     "material": "Moret",
@@ -3633,7 +5245,11 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 497.502,
-    "y": -89.941
+    "y": -89.941,
+    "x0": 497.3647,
+    "y0": -90.1604,
+    "wx": 0.274,
+    "hy": 0.439
   },
   {
     "material": "Moret",
@@ -3642,7 +5258,11 @@
     "completa": false,
     "tipo_corte": "corte_largo",
     "x": 500.574,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 500.2742,
+    "y0": -89.0404,
+    "wx": 0.6,
+    "hy": 1.15
   },
   {
     "material": "Moret",
@@ -3651,6 +5271,10 @@
     "completa": false,
     "tipo_corte": "corte_esquina",
     "x": 500.023,
-    "y": -88.465
+    "y": -88.465,
+    "x0": 499.7742,
+    "y0": -89.0404,
+    "wx": 0.498,
+    "hy": 1.15
   }
 ]

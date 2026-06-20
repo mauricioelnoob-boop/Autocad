@@ -69,12 +69,13 @@ def nombre_capa(o, capas):
 
 
 def bbox(puntos):
-    """Ancho, alto y centroide del rectángulo que envuelve a la polilínea."""
+    """Rectángulo que envuelve a la polilínea en coordenadas reales del plano.
+    Devuelve (x0, y0, wx, hy, cx, cy): esquina mínima, anchos en X/Y y centro."""
     xs = [p[0] for p in puntos]
     ys = [p[1] for p in puntos]
-    cx = (max(xs) + min(xs)) / 2.0
-    cy = (max(ys) + min(ys)) / 2.0
-    return max(xs) - min(xs), max(ys) - min(ys), cx, cy
+    x0, x1 = min(xs), max(xs)
+    y0, y1 = min(ys), max(ys)
+    return x0, y0, x1 - x0, y1 - y0, (x0 + x1) / 2.0, (y0 + y1) / 2.0
 
 
 def clasificar(corto, largo):
@@ -141,7 +142,7 @@ def extraer(json_path, capa_objetivo):
         pts = o.get("points", [])
         if len(pts) < 3:
             continue
-        w, h, cx, cy = bbox(pts)
+        x0, y0, w, h, cx, cy = bbox(pts)
         if w <= 0.001 or h <= 0.001:
             continue
         corto, largo = (w, h) if w <= h else (h, w)
@@ -149,8 +150,12 @@ def extraer(json_path, capa_objetivo):
         if info is None:
             descartadas += 1
             continue
-        info["x"] = round(cx, 3)   # ubicación en el plano (centro de la pieza)
+        info["x"] = round(cx, 3)    # ubicación en el plano (centro de la pieza)
         info["y"] = round(cy, 3)
+        info["x0"] = round(x0, 4)   # esquina mínima (para dibujar el rectángulo real)
+        info["y0"] = round(y0, 4)
+        info["wx"] = round(w, 4)    # ancho real en X
+        info["hy"] = round(h, 4)    # alto real en Y
         info["handle"] = o.get("handle")
         piezas.append(info)
 
