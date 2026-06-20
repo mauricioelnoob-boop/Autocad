@@ -1,0 +1,9 @@
+﻿material,modelo,cajas_suministradas,req_piso,req_escalera,req_zoclo,req_total,diferencia,resultado
+Moret,Chardonnay,127,117,13,11,141,-14,FALTA
+Moret,Cabernet,117,105,11,10,126,-9,FALTA
+Moret,Merlot,98,87,11,7,105,-7,FALTA
+Moret,TOTAL,342,,,,372,-30,FALTA
+Royal Walnut,Chardonnay,32,31,0,6,37,-5,FALTA
+Royal Walnut,Cabernet,41,36,0,4,40,1,SUFICIENTE
+Royal Walnut,Merlot,37,36,0,8,44,-7,FALTA
+Royal Walnut,TOTAL,110,,,,121,-11,FALTA
