@@ -1,0 +1,443 @@
+﻿material,ancho_m,largo_m,completa,tipo_corte,x_plano,y_plano
+Moret,0.132,0.434,no,corte_esquina,280.947,-70.475
+Moret,0.434,0.6,no,corte_esquina,280.579,-70.475
+Moret,0.434,0.6,no,corte_esquina,279.977,-70.475
+Moret,0.434,0.6,no,corte_esquina,279.375,-70.475
+Moret,0.434,0.6,no,corte_esquina,278.773,-70.475
+Moret,0.434,0.6,no,corte_esquina,278.171,-70.475
+Moret,0.434,0.6,no,corte_esquina,277.569,-70.475
+Moret,0.434,0.6,no,corte_esquina,276.967,-70.475
+Moret,0.408,0.666,no,corte_esquina,276.269,-70.539
+Moret,0.012,0.434,no,corte_esquina,276.659,-70.475
+Moret,0.6,0.666,no,corte_largo,275.763,-70.539
+Moret,0.6,0.666,no,corte_largo,275.161,-70.539
+Moret,0.6,0.666,no,corte_largo,274.559,-70.539
+Moret,0.6,0.666,no,corte_largo,273.957,-70.539
+Moret,0.486,0.6,no,corte_esquina,273.355,-70.449
+Moret,0.486,0.6,no,corte_esquina,272.753,-70.449
+Royal Walnut,0.132,1.2,no,corte_ancho,280.947,-69.656
+Moret,0.6,1.2,si,completa,280.579,-69.656
+Moret,0.6,1.2,si,completa,279.977,-69.656
+Moret,0.6,1.2,si,completa,279.375,-69.656
+Moret,0.6,1.2,si,completa,278.773,-69.656
+Moret,0.6,1.2,si,completa,278.171,-69.656
+Moret,0.6,1.2,si,completa,277.569,-69.656
+Moret,0.6,1.2,si,completa,276.967,-69.656
+Royal Walnut,0.012,1.2,no,corte_ancho,276.659,-69.656
+Moret,0.408,1.2,no,corte_ancho,276.269,-69.604
+Moret,0.6,1.2,si,completa,275.763,-69.604
+Moret,0.6,1.2,si,completa,275.161,-69.604
+Moret,0.6,1.2,si,completa,274.559,-69.604
+Moret,0.6,1.2,si,completa,273.957,-69.604
+Moret,0.6,1.2,si,completa,273.355,-69.604
+Moret,0.6,1.2,si,completa,272.753,-69.604
+Royal Walnut,0.132,1.202,no,corte_ancho,280.947,-68.453
+Moret,0.6,1.202,si,completa,280.579,-68.453
+Moret,0.6,1.202,si,completa,279.977,-68.453
+Moret,0.6,1.202,si,completa,279.375,-68.453
+Moret,0.6,1.202,si,completa,278.773,-68.453
+Moret,0.6,1.202,si,completa,278.171,-68.453
+Royal Walnut,0.012,1.2,no,corte_ancho,276.659,-68.454
+Moret,0.408,1.15,no,corte_esquina,276.269,-68.427
+Moret,0.6,1.15,no,corte_largo,275.763,-68.427
+Moret,0.6,1.15,no,corte_largo,275.161,-68.427
+Moret,0.6,1.15,no,corte_largo,274.559,-68.427
+Moret,0.6,1.15,no,corte_largo,273.957,-68.427
+Moret,0.6,1.15,no,corte_largo,273.355,-68.427
+Moret,0.6,1.15,no,corte_largo,272.753,-68.427
+Moret,0.166,1.02,no,corte_esquina,279.76,-67.162
+Moret,0.6,1.02,no,corte_largo,279.375,-67.162
+Moret,0.6,1.02,no,corte_largo,278.773,-67.162
+Moret,0.6,1.02,no,corte_largo,278.171,-67.162
+Royal Walnut,0.186,1.02,no,corte_esquina,277.776,-67.162
+Royal Walnut,0.012,1.2,no,corte_ancho,276.659,-67.252
+Moret,0.408,1.198,no,corte_ancho,276.269,-67.251
+Moret,0.6,1.198,si,completa,275.763,-67.251
+Moret,0.6,1.198,si,completa,275.161,-67.251
+Moret,0.6,1.198,si,completa,274.559,-67.251
+Moret,0.6,1.198,si,completa,273.957,-67.251
+Moret,0.6,1.198,si,completa,273.355,-67.251
+Moret,0.6,1.198,si,completa,272.753,-67.251
+Moret,0.328,0.6,no,corte_esquina,279.375,-66.486
+Moret,0.328,0.6,no,corte_esquina,278.773,-66.486
+Moret,0.328,0.6,no,corte_esquina,278.171,-66.486
+Royal Walnut,0.186,0.328,no,corte_esquina,277.776,-66.486
+Moret,0.234,1.2,no,corte_ancho,277.386,-66.05
+Moret,0.6,1.2,si,completa,276.967,-66.05
+Moret,0.6,1.2,si,completa,276.365,-66.05
+Moret,0.6,1.2,si,completa,275.763,-66.05
+Moret,0.6,1.2,si,completa,275.161,-66.05
+Moret,0.6,1.2,si,completa,274.559,-66.05
+Moret,0.6,1.2,si,completa,273.957,-66.05
+Moret,0.6,1.2,si,completa,273.355,-66.05
+Moret,0.6,1.2,si,completa,272.753,-66.05
+Moret,0.132,0.194,no,corte_esquina,280.947,-64.345
+Royal Walnut,0.194,0.6,no,corte_largo,280.579,-64.345
+Royal Walnut,0.194,0.6,no,corte_largo,279.977,-64.345
+Moret,0.246,0.6,no,corte_esquina,279.375,-64.319
+Royal Walnut,0.194,0.414,no,corte_largo,277.476,-64.345
+Royal Walnut,0.186,0.374,no,corte_esquina,277.776,-64.435
+Moret,0.234,0.826,no,corte_esquina,277.386,-65.035
+Royal Walnut,0.194,0.6,no,corte_largo,276.967,-64.345
+Moret,0.6,0.826,no,corte_largo,276.967,-65.035
+Moret,0.6,1.2,si,completa,276.365,-64.848
+Moret,0.6,1.2,si,completa,275.763,-64.848
+Moret,0.6,1.2,si,completa,275.161,-64.848
+Moret,0.6,1.2,si,completa,274.559,-64.848
+Moret,0.6,1.2,si,completa,273.957,-64.848
+Moret,0.6,1.2,si,completa,273.355,-64.848
+Moret,0.6,1.2,si,completa,272.753,-64.848
+Royal Walnut,0.132,1.2,no,corte_ancho,280.947,-63.646
+Moret,0.6,1.2,si,completa,280.579,-63.646
+Moret,0.6,1.2,si,completa,279.977,-63.646
+Moret,0.6,1.2,si,completa,279.375,-63.646
+Moret,0.6,1.2,si,completa,278.773,-63.646
+Moret,0.6,1.2,si,completa,278.171,-63.646
+Moret,0.6,1.2,si,completa,277.569,-63.646
+Moret,0.6,1.2,si,completa,276.967,-63.646
+Moret,0.6,1.2,si,completa,276.365,-63.646
+Moret,0.6,1.2,si,completa,275.763,-63.646
+Moret,0.6,1.2,si,completa,275.161,-63.646
+Moret,0.6,1.2,si,completa,274.559,-63.646
+Moret,0.6,1.2,si,completa,273.957,-63.646
+Moret,0.6,1.2,si,completa,273.355,-63.646
+Moret,0.6,1.2,si,completa,272.753,-63.646
+Royal Walnut,0.132,1.2,no,corte_ancho,280.947,-62.444
+Moret,0.6,1.2,si,completa,280.579,-62.444
+Moret,0.6,1.2,si,completa,279.977,-62.444
+Moret,0.6,1.2,si,completa,279.375,-62.444
+Moret,0.6,1.2,si,completa,278.773,-62.444
+Moret,0.6,1.2,si,completa,278.171,-62.444
+Moret,0.6,1.2,si,completa,277.569,-62.444
+Moret,0.6,1.2,si,completa,276.967,-62.444
+Moret,0.6,1.2,si,completa,276.365,-62.444
+Moret,0.6,1.2,si,completa,275.763,-62.444
+Moret,0.6,1.2,si,completa,275.161,-62.444
+Moret,0.6,1.2,si,completa,274.559,-62.444
+Moret,0.6,1.2,si,completa,273.957,-62.444
+Moret,0.6,1.2,si,completa,273.355,-62.444
+Moret,0.6,1.2,si,completa,272.753,-62.444
+Moret,0.132,1.0914,no,corte_esquina,280.947,-61.297
+Moret,0.6,1.11,no,corte_largo,280.579,-61.287
+Moret,0.6,1.17,no,corte_largo,279.977,-61.257
+Moret,0.6,1.17,no,corte_largo,279.375,-61.257
+Moret,0.6,1.17,no,corte_largo,278.773,-61.257
+Moret,0.6,1.21,no,corte_largo,278.171,-61.237
+Moret,0.6,1.21,no,corte_largo,277.569,-61.237
+Moret,0.6,1.11,no,corte_largo,276.365,-61.287
+Moret,0.6,1.17,no,corte_largo,275.763,-61.257
+Moret,0.6,1.17,no,corte_largo,275.161,-61.257
+Moret,0.6,1.17,no,corte_largo,274.559,-61.257
+Moret,0.6,1.17,no,corte_largo,273.957,-61.257
+Moret,0.6,1.11,no,corte_largo,272.753,-61.287
+Moret,0.6,1.17,no,corte_largo,273.355,-61.257
+Royal Walnut,0.2,1.2,si,completa,287.581,-63.469
+Royal Walnut,0.2,1.2,si,completa,287.581,-62.268
+Royal Walnut,0.2,1.2,si,completa,287.38,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,287.581,-61.2
+Royal Walnut,0.2,1.2,si,completa,287.38,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,287.38,-60.899
+Royal Walnut,0.2,1.2,si,completa,287.179,-63.469
+Royal Walnut,0.2,1.2,si,completa,287.179,-62.268
+Royal Walnut,0.2,1.2,si,completa,286.978,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,287.179,-61.2
+Royal Walnut,0.2,1.2,si,completa,286.978,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,286.978,-60.899
+Royal Walnut,0.2,1.2,si,completa,286.777,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,286.576,-63.956
+Royal Walnut,0.2,1.2,si,completa,286.777,-62.268
+Royal Walnut,0.2,1.2,si,completa,286.576,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,286.777,-61.2
+Royal Walnut,0.2,1.2,si,completa,286.576,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,286.576,-60.899
+Royal Walnut,0.2,1.2,si,completa,286.375,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,286.174,-63.956
+Royal Walnut,0.2,1.2,si,completa,286.375,-62.268
+Royal Walnut,0.2,1.2,si,completa,286.174,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,286.375,-61.2
+Royal Walnut,0.2,1.2,si,completa,286.174,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,286.174,-60.899
+Royal Walnut,0.2,1.2,si,completa,285.973,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,285.772,-63.956
+Royal Walnut,0.2,1.2,si,completa,285.973,-62.268
+Royal Walnut,0.2,1.2,si,completa,285.772,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,285.973,-61.2
+Royal Walnut,0.2,1.2,si,completa,285.772,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,285.772,-60.899
+Royal Walnut,0.2,1.2,si,completa,285.571,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,285.37,-63.956
+Royal Walnut,0.2,1.2,si,completa,285.571,-62.268
+Royal Walnut,0.2,1.2,si,completa,285.37,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,285.571,-61.2
+Royal Walnut,0.2,1.2,si,completa,285.37,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,285.37,-60.899
+Royal Walnut,0.2,1.2,si,completa,285.169,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,284.968,-63.956
+Royal Walnut,0.2,1.2,si,completa,285.169,-62.268
+Royal Walnut,0.2,1.2,si,completa,284.968,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,285.169,-61.2
+Royal Walnut,0.2,1.2,si,completa,284.968,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,284.968,-60.899
+Royal Walnut,0.2,1.2,si,completa,284.767,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,284.566,-63.956
+Royal Walnut,0.2,1.2,si,completa,284.767,-62.268
+Royal Walnut,0.2,1.2,si,completa,284.566,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,284.767,-61.2
+Royal Walnut,0.2,1.2,si,completa,284.566,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,284.566,-60.899
+Royal Walnut,0.2,1.2,si,completa,284.365,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,284.164,-63.956
+Royal Walnut,0.2,1.2,si,completa,284.365,-62.268
+Royal Walnut,0.2,1.2,si,completa,284.164,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,284.365,-61.2
+Royal Walnut,0.2,1.2,si,completa,284.164,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,284.164,-60.899
+Royal Walnut,0.2,1.2,si,completa,283.963,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,283.762,-63.956
+Royal Walnut,0.2,1.2,si,completa,283.963,-62.268
+Royal Walnut,0.2,1.2,si,completa,283.762,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,283.963,-61.2
+Royal Walnut,0.2,1.2,si,completa,283.762,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,283.762,-60.899
+Royal Walnut,0.2,1.2,si,completa,283.561,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,283.36,-63.956
+Royal Walnut,0.2,1.2,si,completa,283.561,-62.268
+Royal Walnut,0.2,1.2,si,completa,283.36,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,283.561,-61.2
+Royal Walnut,0.2,1.2,si,completa,283.36,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,283.36,-60.899
+Royal Walnut,0.2,1.2,si,completa,283.159,-63.469
+Royal Walnut,0.2,0.973,no,corte_largo,282.958,-63.956
+Royal Walnut,0.2,1.2,si,completa,283.159,-62.268
+Royal Walnut,0.2,1.2,si,completa,282.958,-62.868
+Royal Walnut,0.2,0.9345,no,corte_largo,283.159,-61.2
+Royal Walnut,0.2,1.2,si,completa,282.958,-61.667
+Royal Walnut,0.2,0.334,no,corte_largo,282.958,-60.899
+Royal Walnut,0.025,1.2,no,corte_ancho,282.844,-63.469
+Royal Walnut,0.025,1.2,no,corte_ancho,282.844,-62.268
+Moret,0.025,0.9345,no,corte_esquina,282.844,-61.2
+Royal Walnut,0.2,0.334,no,corte_largo,287.782,-60.899
+Moret,0.6,1.15,no,corte_largo,287.23,-70.117
+Moret,0.6,1.2,si,completa,287.23,-68.94
+Moret,0.3497,1.2,no,corte_ancho,286.753,-68.94
+Moret,0.6,1.2,si,completa,287.23,-67.738
+Moret,0.3497,1.2,no,corte_ancho,287.707,-66.536
+Moret,0.6,1.2,si,completa,287.23,-66.536
+Moret,0.3497,1.2,no,corte_ancho,287.707,-65.334
+Moret,0.6,1.2,si,completa,287.23,-65.334
+Royal Walnut,0.2,0.3497,no,corte_largo,287.707,-64.632
+Royal Walnut,0.2,0.6,no,corte_largo,287.23,-64.632
+Moret,0.3497,1.2,no,corte_ancho,287.707,-68.94
+Moret,0.3497,1.15,no,corte_esquina,287.707,-70.117
+Moret,0.3497,1.2,no,corte_ancho,286.753,-67.738
+Moret,0.3497,1.2,no,corte_ancho,286.753,-66.536
+Moret,0.3497,1.2,no,corte_ancho,286.753,-65.334
+Moret,0.11,0.3497,no,corte_esquina,286.753,-64.677
+Moret,0.4142,0.821,no,corte_esquina,289.985,-64.032
+Moret,0.6,0.821,no,corte_largo,289.476,-64.032
+Moret,0.6,0.821,no,corte_largo,288.874,-64.032
+Moret,0.51,0.821,no,corte_esquina,288.317,-64.032
+Moret,0.41,0.528,no,corte_esquina,291.187,-62.683
+Moret,0.528,0.6,no,corte_esquina,290.68,-62.683
+Moret,0.6,1.2,si,completa,290.078,-63.019
+Moret,0.6,1.2,si,completa,289.476,-63.019
+Moret,0.6,1.2,si,completa,288.874,-63.019
+Moret,0.51,1.2,no,corte_ancho,288.317,-63.019
+Moret,0.41,0.57,no,corte_esquina,291.187,-62.132
+Moret,0.57,0.6,no,corte_esquina,290.68,-62.132
+Moret,0.6,1.2,si,completa,290.078,-61.817
+Moret,0.6,1.2,si,completa,289.476,-61.817
+Moret,0.6,1.2,si,completa,288.874,-61.817
+Moret,0.51,1.2,no,corte_ancho,288.317,-61.817
+Moret,0.41,0.483,no,corte_esquina,291.187,-60.974
+Moret,0.483,0.6,no,corte_esquina,290.68,-60.974
+Moret,0.483,0.6,no,corte_esquina,290.078,-60.974
+Moret,0.483,0.6,no,corte_esquina,289.476,-60.974
+Moret,0.483,0.6,no,corte_esquina,288.874,-60.974
+Moret,0.483,0.51,no,corte_esquina,288.317,-60.974
+Royal Walnut,0.2,1.2,si,completa,287.782,-61.667
+Royal Walnut,0.2,1.063,no,corte_largo,286.978,-64.001
+Royal Walnut,0.2,1.063,no,corte_largo,287.38,-64.001
+Royal Walnut,0.2,1.2,si,completa,287.782,-62.868
+Royal Walnut,0.2,1.063,no,corte_largo,287.782,-64.001
+Royal Walnut,0.2,0.4625,no,corte_largo,287.581,-64.301
+Royal Walnut,0.2,0.4625,no,corte_largo,287.179,-64.301
+Royal Walnut,0.2,0.3725,no,corte_largo,286.777,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,286.375,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,285.973,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,285.571,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,285.169,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,284.767,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,284.365,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,283.963,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,283.561,-64.256
+Royal Walnut,0.2,0.3725,no,corte_largo,283.159,-64.256
+Moret,0.025,0.3725,no,corte_esquina,282.844,-64.256
+Royal Walnut,0.114,1.2,no,corte_ancho,291.335,-70.092
+Royal Walnut,0.114,1.2,no,corte_ancho,291.335,-68.891
+Royal Walnut,0.2,1.2,si,completa,291.177,-69.492
+Royal Walnut,0.2,0.5995,no,corte_largo,291.177,-70.393
+Royal Walnut,0.2,1.2,si,completa,291.177,-68.291
+Royal Walnut,0.2,1.2,si,completa,290.976,-70.092
+Royal Walnut,0.2,1.2,si,completa,290.976,-68.891
+Royal Walnut,0.2,1.2,si,completa,290.775,-69.492
+Royal Walnut,0.2,0.5995,no,corte_largo,290.775,-70.393
+Royal Walnut,0.2,1.2,si,completa,290.775,-68.291
+Royal Walnut,0.2,1.2,si,completa,290.574,-70.092
+Royal Walnut,0.2,1.2,si,completa,290.574,-68.891
+Royal Walnut,0.2,1.2,si,completa,290.373,-69.492
+Royal Walnut,0.2,0.5995,no,corte_largo,290.373,-70.393
+Royal Walnut,0.2,1.2,si,completa,290.373,-68.291
+Royal Walnut,0.2,1.2,si,completa,290.172,-70.092
+Royal Walnut,0.2,1.2,si,completa,290.172,-68.891
+Royal Walnut,0.2,1.2,si,completa,289.971,-69.492
+Royal Walnut,0.2,0.5995,no,corte_largo,289.971,-70.393
+Royal Walnut,0.2,1.2,si,completa,289.971,-68.291
+Royal Walnut,0.2,1.2,si,completa,289.77,-70.092
+Royal Walnut,0.2,1.2,si,completa,289.77,-68.891
+Royal Walnut,0.2,1.2,si,completa,289.569,-69.492
+Royal Walnut,0.2,0.5995,no,corte_largo,289.569,-70.393
+Royal Walnut,0.2,1.2,si,completa,289.569,-68.291
+Royal Walnut,0.2,1.2,si,completa,289.368,-70.092
+Royal Walnut,0.2,1.2,si,completa,289.368,-68.891
+Royal Walnut,0.2,1.2,si,completa,289.167,-69.492
+Royal Walnut,0.2,0.5995,no,corte_largo,289.167,-70.393
+Royal Walnut,0.2,1.2,si,completa,289.167,-68.291
+Royal Walnut,0.2,1.2,si,completa,288.966,-70.092
+Royal Walnut,0.2,1.2,si,completa,288.966,-68.891
+Royal Walnut,0.2,1.2,si,completa,288.765,-69.492
+Royal Walnut,0.2,0.5995,no,corte_largo,288.765,-70.393
+Royal Walnut,0.2,1.2,si,completa,288.765,-68.291
+Royal Walnut,0.2,1.2,si,completa,288.564,-70.092
+Royal Walnut,0.2,1.2,si,completa,288.564,-68.891
+Royal Walnut,0.2,1.2,si,completa,288.363,-69.492
+Royal Walnut,0.2,0.5995,no,corte_largo,288.363,-70.393
+Royal Walnut,0.2,1.2,si,completa,288.363,-68.291
+Royal Walnut,0.2,1.2,si,completa,288.162,-70.092
+Royal Walnut,0.2,1.2,si,completa,288.162,-68.891
+Royal Walnut,0.114,1.2,no,corte_ancho,291.335,-67.69
+Royal Walnut,0.2,1.2,si,completa,291.177,-67.09
+Royal Walnut,0.2,1.2,si,completa,290.976,-67.69
+Royal Walnut,0.2,1.2,si,completa,290.775,-67.09
+Royal Walnut,0.2,1.2,si,completa,290.574,-67.69
+Royal Walnut,0.2,1.2,si,completa,290.373,-67.09
+Royal Walnut,0.2,1.2,si,completa,290.172,-67.69
+Royal Walnut,0.2,1.2,si,completa,289.971,-67.09
+Royal Walnut,0.2,1.2,si,completa,289.77,-67.69
+Royal Walnut,0.2,1.2,si,completa,289.569,-67.09
+Royal Walnut,0.2,1.2,si,completa,289.368,-67.69
+Royal Walnut,0.2,1.2,si,completa,289.167,-67.09
+Royal Walnut,0.2,1.2,si,completa,288.966,-67.69
+Royal Walnut,0.2,0.8491,no,corte_largo,288.765,-67.265
+Royal Walnut,0.2,1.2,si,completa,288.564,-67.69
+Royal Walnut,0.2,0.8491,no,corte_largo,288.363,-67.265
+Royal Walnut,0.2,1.2,si,completa,288.162,-67.69
+Moret,0.114,0.767,no,corte_esquina,291.335,-66.706
+Moret,0.1665,0.2,no,corte_esquina,291.177,-66.406
+Royal Walnut,0.2,0.767,no,corte_largo,290.976,-66.706
+Moret,0.1665,0.2,no,corte_esquina,290.775,-66.406
+Royal Walnut,0.2,0.767,no,corte_largo,290.574,-66.706
+Moret,0.1665,0.2,no,corte_esquina,290.373,-66.406
+Royal Walnut,0.2,0.767,no,corte_largo,290.172,-66.706
+Moret,0.1665,0.2,no,corte_esquina,289.971,-66.406
+Royal Walnut,0.2,0.767,no,corte_largo,289.77,-66.706
+Moret,0.1665,0.2,no,corte_esquina,289.569,-66.406
+Royal Walnut,0.2,0.767,no,corte_largo,289.368,-66.706
+Moret,0.125,0.1665,no,corte_esquina,289.204,-66.406
+Royal Walnut,0.2,0.2486,no,corte_largo,288.966,-66.965
+Royal Walnut,0.2,0.2486,no,corte_largo,288.564,-66.965
+Royal Walnut,0.2,0.2486,no,corte_largo,288.162,-66.965
+Moret,0.079,0.9,no,corte_esquina,288.021,-70.242
+Moret,0.6,1.194,si,completa,275.763,-59.995
+Moret,0.6,1.192,si,completa,275.763,-58.8
+Moret,0.6,1.154,no,corte_largo,276.365,-59.975
+Moret,0.6,1.192,si,completa,276.365,-58.8
+Moret,0.6,1.194,si,completa,275.161,-59.995
+Moret,0.6,1.192,si,completa,275.161,-58.8
+Moret,0.6,1.194,si,completa,273.957,-59.995
+Moret,0.6,1.192,si,completa,273.957,-58.8
+Moret,0.6,1.194,si,completa,273.355,-59.995
+Moret,0.6,1.192,si,completa,273.355,-58.8
+Moret,0.6,1.154,no,corte_largo,272.753,-59.975
+Moret,0.6,1.192,si,completa,272.753,-58.8
+Moret,0.6,1.194,si,completa,274.559,-59.995
+Moret,0.6,1.192,si,completa,274.559,-58.8
+Moret,0.6,1.17,no,corte_largo,276.967,-61.257
+Moret,0.6,1.2,si,completa,278.171,-65.224
+Moret,0.374,0.6,no,corte_esquina,278.171,-64.435
+Moret,0.374,0.6,no,corte_esquina,278.773,-64.435
+Royal Walnut,0.186,1.2,no,corte_ancho,277.776,-65.224
+Moret,0.6,1.2,si,completa,278.773,-65.224
+Moret,0.6,1.2,si,completa,279.375,-65.224
+Moret,0.6,1.2,si,completa,279.977,-65.224
+Moret,0.316,0.6,no,corte_esquina,278.171,-65.984
+Royal Walnut,0.186,0.316,no,corte_esquina,277.776,-65.984
+Moret,0.316,0.6,no,corte_esquina,278.773,-65.984
+Moret,0.316,0.6,no,corte_esquina,279.375,-65.984
+Moret,0.316,0.6,no,corte_esquina,279.977,-65.984
+Moret,0.3015,0.316,no,corte_esquina,280.43,-65.984
+Moret,0.41,0.51,no,corte_esquina,291.187,-61.472
+Moret,0.51,0.6,no,corte_esquina,290.68,-61.472
+Moret,0.3497,1.2,no,corte_ancho,287.707,-67.738
+Moret,0.6,1.192,si,completa,276.967,-58.8
+Moret,0.6,1.194,si,completa,277.569,-59.995
+Moret,0.6,1.192,si,completa,277.569,-58.8
+Moret,0.6,1.192,si,completa,273.957,-57.606
+Moret,0.6,1.192,si,completa,273.355,-57.606
+Moret,0.6,1.192,si,completa,272.753,-57.606
+Moret,0.6,1.2,si,completa,280.579,-65.224
+Moret,0.016,0.132,no,corte_esquina,274.927,-72.084
+Moret,0.016,0.6,no,corte_esquina,274.559,-72.084
+Royal Walnut,0.132,1.2,no,corte_ancho,274.927,-71.474
+Moret,0.6,1.2,si,completa,274.559,-71.474
+Moret,0.016,0.6,no,corte_esquina,273.957,-72.084
+Moret,0.6,1.2,si,completa,273.957,-71.474
+Moret,0.016,0.6,no,corte_esquina,273.355,-72.084
+Moret,0.6,1.2,si,completa,273.355,-71.474
+Moret,0.016,0.6,no,corte_esquina,272.753,-72.084
+Moret,0.6,1.2,si,completa,272.753,-71.474
+Moret,0.6,1.2,si,completa,276.967,-67.252
+Moret,0.6,1.2,si,completa,276.967,-68.454
+Moret,0.6,1.2,si,completa,277.569,-68.454
+Moret,0.6,1.2,si,completa,277.569,-67.252
+Moret,0.55,1.15,no,corte_esquina,283.657,-70.117
+Moret,0.548,1.15,no,corte_esquina,283.106,-70.117
+Moret,0.27,1.15,no,corte_esquina,284.067,-70.117
+Moret,0.27,1.15,no,corte_esquina,284.337,-70.117
+Moret,0.27,1.15,no,corte_esquina,284.607,-70.117
+Moret,0.27,1.15,no,corte_esquina,284.877,-70.117
+Moret,0.27,1.15,no,corte_esquina,285.147,-70.117
+Moret,0.27,1.15,no,corte_esquina,285.417,-70.117
+Moret,0.6,1.15,no,corte_largo,286.628,-70.117
+Moret,0.6,1.15,no,corte_largo,286.026,-70.117
+Royal Walnut,0.1723,1.15,no,corte_esquina,285.638,-70.117
+Moret,0.27,1.1,no,corte_esquina,283.382,-69.137
+Moret,0.27,1.1,no,corte_esquina,283.382,-69.407
+Moret,0.55,1.15,no,corte_esquina,283.657,-68.427
+Moret,0.548,1.15,no,corte_esquina,283.106,-68.427
+Moret,0.27,1.15,no,corte_esquina,284.067,-68.427
+Moret,0.27,1.15,no,corte_esquina,284.337,-68.427
+Moret,0.27,1.15,no,corte_esquina,284.607,-68.427
+Moret,0.27,1.15,no,corte_esquina,284.877,-68.427
+Moret,0.27,1.15,no,corte_esquina,285.147,-68.427
+Moret,0.27,1.15,no,corte_esquina,285.417,-68.427
+Moret,0.166,0.328,no,corte_esquina,279.76,-66.486
+Moret,0.136,0.6,no,corte_esquina,273.957,-56.94
+Moret,0.136,0.6,no,corte_esquina,273.355,-56.94
+Moret,0.136,0.6,no,corte_esquina,272.753,-56.94
+Moret,0.6,1.194,si,completa,276.967,-59.995
+Moret,0.04,0.6,no,corte_esquina,278.171,-60.572
+Moret,0.04,0.36,no,corte_esquina,278.653,-60.572
+Moret,0.6,0.6964,no,corte_largo,288.512,-66.492
+Moret,0.6,1.2,si,completa,288.512,-65.542
+Moret,0.318,0.6,no,corte_esquina,288.512,-64.781
+Moret,0.6,1.2,si,completa,289.114,-65.542
+Moret,0.318,0.6,no,corte_esquina,289.114,-64.781
+Moret,0.148,0.6964,no,corte_esquina,288.888,-66.492
+Moret,0.6,1.2,si,completa,289.716,-65.542
+Moret,0.318,0.6,no,corte_esquina,289.716,-64.781
+Royal Walnut,0.1742,1.2,no,corte_ancho,290.105,-65.542
+Royal Walnut,0.1742,0.318,no,corte_esquina,290.105,-64.781
+Royal Walnut,0.148,1.2,no,corte_ancho,288.136,-65.542
+Moret,0.148,0.318,no,corte_esquina,288.136,-64.781
+Moret,0.148,0.6964,no,corte_esquina,288.136,-66.492

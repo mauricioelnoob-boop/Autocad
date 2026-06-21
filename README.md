@@ -11,8 +11,32 @@ Pisos considerados:
 | Moret         | 0.596 m × 1.194 m       |
 | Royal Walnut  | 0.200 m × 1.200 m       |
 
-El despiece está dibujado en la capa **`A-PISO`** del plano `plano_pisos.dwg`
-(cada baldosa/recorte es una polilínea rectangular).
+El despiece está dibujado en la capa **`A-PISO`** del plano (cada pieza/recorte es
+una polilínea rectangular).
+
+## Multi-modelo (Cabernet, Merlot, Chardonnay)
+
+El pipeline procesa varios prototipos de casa. Toda la configuración por modelo
+(corte entre plantas, regiones de las recámaras con Royal Walnut, piezas
+faltantes, etc.) vive en **`modelos.py`**. Para generar los 2 PDF de un modelo:
+
+```bash
+python3 generar_modelo.py Cabernet        # un modelo
+python3 generar_modelo.py --todos         # los 3
+```
+
+Genera `Moret_<Modelo>_Despiece.pdf` y `RoyalWalnut_<Modelo>_Despiece.pdf`.
+
+Reglas de material (iguales en los 3 modelos):
+- **Royal Walnut** sólo en las recámaras (tablones de 0.20 m dentro de las
+  regiones de `modelos.py`); el baño/vestidor/pasillo va **Moret**.
+- Planta baja: puro Moret; los tablones de 0.20 m en planta baja son charolas de
+  baño (otro piso) y se excluyen.
+- Una pieza de 0.60 m nunca es Royal aunque caiga en la caja de la recámara
+  (protege el baño). La escalera va Moret.
+
+Para un modelo nuevo: agregar su entrada a `modelos.py` (el corte de plantas y
+las cajas de recámara se obtienen agrupando los tablones de 0.20 m del plano).
 
 ---
 

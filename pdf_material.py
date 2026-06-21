@@ -46,7 +46,7 @@ def empacar(piezas, material):
     return empaquetar(entradas, material, 0.0, False), mapa, (ancho, largo)
 
 
-def hacer_pdf(todas, material, path):
+def hacer_pdf(todas, material, path, modelo=""):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -76,7 +76,8 @@ def hacer_pdf(todas, material, path):
     fecha = datetime.date.today().strftime("%d/%m/%Y")
 
     def guardar(fig):
-        fig.text(0.5, 0.012, f"Elaboró: Ing. Mauricio Gastelum Mora        Piso {material}        {fecha}",
+        fig.text(0.5, 0.012,
+                 f"Elaboró: Ing. Mauricio Gastelum Mora        Piso {material} — {modelo}        {fecha}",
                  ha="center", fontsize=8, color="#555")
         pdf.savefig(fig)
         plt.close(fig)
@@ -105,7 +106,7 @@ def hacer_pdf(todas, material, path):
         ax.set_aspect("equal"); ax.axis("off")
         col_rec = ESTILO[(material, False)]["face"]
         col_com = ESTILO[(material, True)]["face"]
-        ax.set_title(f"PLANO DE LA CASA — PISO {material.upper()}\n"
+        ax.set_title(f"PLANO {modelo.upper()} — PISO {material.upper()}\n"
                      f"(coloreado = {material}; gris claro = el otro piso, sólo contexto)",
                      fontsize=12)
         ax.legend(handles=[
@@ -257,15 +258,16 @@ def hacer_pdf(todas, material, path):
     return total_pzas, cajas, area_reut, area_desp
 
 
-def main():
-    todas = cargar_anotado()
-    salidas = {"Moret": "Moret_Cabernet_Despiece.pdf",
-               "Royal Walnut": "RoyalWalnut_Cabernet_Despiece.pdf"}
+def main(modelo="Cabernet"):
+    todas = cargar_anotado(modelo)
+    salidas = {"Moret": f"Moret_{modelo}_Despiece.pdf",
+               "Royal Walnut": f"RoyalWalnut_{modelo}_Despiece.pdf"}
     for material, path in salidas.items():
-        pzas, cajas, reut, desp = hacer_pdf(todas, material, path)
-        print(f"{material}: {pzas} piezas / {cajas} cajas  ·  reutilizable {reut:.2f} m²  ·  "
-              f"desperdicio {desp:.2f} m²  ->  {path}")
+        pzas, cajas, reut, desp = hacer_pdf(todas, material, path, modelo)
+        print(f"{modelo} · {material}: {pzas} piezas / {cajas} cajas  ·  reutilizable "
+              f"{reut:.2f} m²  ·  desperdicio {desp:.2f} m²  ->  {path}")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(sys.argv[1] if len(sys.argv) > 1 else "Cabernet")
