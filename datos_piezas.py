@@ -46,11 +46,24 @@ PIEZAS_EXTRA = [
 # Cada entrada reasigna la pieza más cercana a (x,y): material correcto y, si se
 # indica, si es completa o recorte. Editar aquí para cada modelo de casa.
 RECLASIFICAR = [
-    # Pieza aislada en zona de pasillo que es Moret, no Royal Walnut
-    {"x": 506.12, "y": -87.08, "material": "Moret", "completa": False},
     # Pieza de transición dibujada completa que en realidad es recorte de Moret
     {"x": 503.04, "y": -84.90, "material": "Moret", "completa": False},
 ]
+
+# Regiones de las recámaras (única zona con Royal Walnut). Todo lo demás de
+# planta alta (baño, vestidor, pasillo, escalera) es Moret. (X0,X1,Y0,Y1)
+REGIONES_ROYAL = [
+    (499.5, 502.75, -86.7, -81.8),   # Recámara 1
+    (503.6, 508.1, -85.3, -81.8),    # Recámara principal
+    (503.8, 508.1, -93.5, -89.6),    # Recámara 2
+]
+
+# Zona de escalera: se ignora (no se marca despiece ahí; va Moret pero no se cuenta).
+REGION_ESCALERA = None   # (X0,X1,Y0,Y1) si se necesita excluir
+
+
+def en_region(p, reg):
+    return reg[0] <= p["x"] <= reg[1] and reg[2] <= p["y"] <= reg[3]
 
 
 def planta_de(p):
@@ -131,13 +144,17 @@ def cargar_anotado(path="piezas_piso.json", obstaculos="obstaculos_cabernet.json
         e["planta"] = planta_de(e)
         anotadas.append(e)
 
-    # Tiras muy angostas a lo largo en planta alta = orilla de tablón Royal Walnut
+    # Material por REGIÓN en planta alta: Royal sólo en las recámaras, el resto
+    # (baño, vestidor, pasillo) es Moret. Más confiable que el ancho en la frontera.
+    if REGION_ESCALERA:
+        anotadas = [p for p in anotadas if not (p["planta"] == "alta" and en_region(p, REGION_ESCALERA))]
     for p in anotadas:
-        if (p["planta"] == "alta" and p["material"] == "Moret"
-                and min(p["wx"], p["hy"]) < 0.10 and max(p["wx"], p["hy"]) >= 0.85):
-            p["material"] = "Royal Walnut"
-            p["completa"] = False
-            p["tipo_corte"] = "corte_ancho"
+        if p["planta"] != "alta":
+            continue
+        debe = "Royal Walnut" if any(en_region(p, r) for r in REGIONES_ROYAL) else "Moret"
+        if debe != p["material"]:
+            p["material"] = debe
+            _retipo(p)
 
     # Correcciones de material en la frontera
     TOL = 0.012
@@ -162,10 +179,6 @@ def cargar_anotado(path="piezas_piso.json", obstaculos="obstaculos_cabernet.json
             cerca["tipo_corte"] = "corte_ancho"
         else:
             cerca["tipo_corte"] = "corte_esquina"
-
-    # Recortar piezas que caen bajo muros / closets / muebles fijos:
-    # el despiece a veces dibuja la pieza completa metida en el muro.
-    cargar_anotado.recortadas = recortar_por_obstaculos(anotadas, obstaculos)
 
     # IDs y baldosa de corte, por (planta, material)
     grupos = defaultdict(list)
