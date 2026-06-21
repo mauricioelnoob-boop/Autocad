@@ -41,6 +41,19 @@ PIEZAS_EXTRA = [
      "x0": 489.539, "y0": -86.738, "wx": 0.600, "hy": 1.194, "extra": True},
 ]
 
+# Correcciones de material en la frontera entre pisos (la detección por ancho
+# se equivoca en algunas piezas pegadas al límite recámara/pasillo).
+# Cada entrada reasigna la pieza más cercana a (x,y): material correcto y, si se
+# indica, si es completa o recorte. Editar aquí para cada modelo de casa.
+RECLASIFICAR = [
+    # Pieza aislada en zona de pasillo que es Moret, no Royal Walnut
+    {"x": 506.12, "y": -87.08, "material": "Moret", "completa": False},
+    # Tiras/piezas pegadas a la recámara que son Royal Walnut, no Moret
+    {"x": 502.61, "y": -85.51, "material": "Royal Walnut", "completa": False},
+    {"x": 507.79, "y": -84.33, "material": "Royal Walnut", "completa": False},
+    {"x": 503.04, "y": -84.90, "material": "Moret", "completa": False},
+]
+
 
 def planta_de(p):
     return "baja" if p["x"] < X_CORTE else "alta"
@@ -65,6 +78,30 @@ def cargar_anotado(path="piezas_piso.json"):
         e = dict(extra)
         e["planta"] = planta_de(e)
         anotadas.append(e)
+
+    # Correcciones de material en la frontera
+    TOL = 0.012
+    for r in RECLASIFICAR:
+        cerca = min(anotadas, key=lambda p: (p["x"] - r["x"])**2 + (p["y"] - r["y"])**2)
+        if (cerca["x"] - r["x"])**2 + (cerca["y"] - r["y"])**2 > 0.25:   # > 0.5 m, no match
+            continue
+        cerca["material"] = r["material"]
+        aw, al = PISOS[r["material"]]
+        corto, largo = min(cerca["wx"], cerca["hy"]), max(cerca["wx"], cerca["hy"])
+        ancho_ok = abs(corto - aw) <= TOL
+        largo_ok = abs(largo - al) <= TOL
+        if "completa" in r:
+            cerca["completa"] = r["completa"]
+        else:
+            cerca["completa"] = ancho_ok and largo_ok
+        if cerca["completa"]:
+            cerca["tipo_corte"] = "completa"
+        elif ancho_ok:
+            cerca["tipo_corte"] = "corte_largo"
+        elif largo_ok:
+            cerca["tipo_corte"] = "corte_ancho"
+        else:
+            cerca["tipo_corte"] = "corte_esquina"
 
     # IDs y baldosa de corte, por (planta, material)
     grupos = defaultdict(list)

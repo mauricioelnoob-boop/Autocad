@@ -72,6 +72,15 @@ def hacer_pdf(todas, material, path):
     cfg = CAJAS[material]
     cajas = math.ceil(total_pzas / cfg["pzas_caja"])
 
+    import datetime
+    fecha = datetime.date.today().strftime("%d/%m/%Y")
+
+    def guardar(fig):
+        fig.text(0.5, 0.012, f"Elaboró: Ing. Mauricio Gastelum Mora        Piso {material}        {fecha}",
+                 ha="center", fontsize=8, color="#555")
+        pdf.savefig(fig)
+        plt.close(fig)
+
     with PdfPages(path) as pdf:
         # ---------- Página 1: PLANO ----------
         xs0 = [p["x0"] for p in todas]; ys0 = [p["y0"] for p in todas]
@@ -105,15 +114,15 @@ def hacer_pdf(todas, material, path):
             Patch(facecolor="#f4f6f6", edgecolor="#d5d8dc", label="otro piso (contexto)"),
         ], loc="upper center", ncol=3, fontsize=9, bbox_to_anchor=(0.5, -0.02))
         fig.tight_layout()
-        pdf.savefig(fig); plt.close(fig)
+        guardar(fig)
 
         # ---------- Página 2: RESUMEN ----------
         fig = plt.figure(figsize=(11.7, 8.3))
         fig.suptitle(f"PISO {material} — Resumen", fontsize=16, weight="bold", y=0.9)
         lineas = [
             f"Piezas completas        : {completas}",
-            f"Baldosas para recortes  : {len(baldosas)}  (optimizado, reusando sobrantes)",
-            f"PIEZAS A COMPRAR        : {total_pzas}",
+            f"Baldosas para recortes  : {len(baldosas)}  (reusando sobrantes)",
+            f"Total de piezas         : {total_pzas}",
             f"En cajas                : {cajas} cajas de {cfg['pzas_caja']} pzas "
             f"= {cajas*cfg['pzas_caja']} piezas",
             f"Equivale a              : {cajas*cfg['m2_caja']:.2f} m²  "
@@ -129,7 +138,7 @@ def hacer_pdf(todas, material, path):
                  "salen, a dónde van y qué sobra (amarillo = reutilizable, rojo =\n"
                  "desperdicio). Royal Walnut sólo en planta alta (recámaras).",
                  fontsize=11, va="top")
-        pdf.savefig(fig); plt.close(fig)
+        guardar(fig)
 
         # ---------- Págs 3+: DESPERDICIOS / RECORTES ----------
         pc = PREF_CORTE[material]
@@ -175,7 +184,7 @@ def hacer_pdf(todas, material, path):
                 Patch(facecolor="#f1948a", edgecolor="#922b21", label="desperdicio"),
             ], loc="lower center", ncol=3, fontsize=9, frameon=False)
             fig.tight_layout(rect=[0, 0.03, 1, 0.95])
-            pdf.savefig(fig); plt.close(fig)
+            guardar(fig)
 
         # ---------- Página FINAL: todos los sobrantes sumados ----------
         from collections import Counter
@@ -211,10 +220,10 @@ def hacer_pdf(todas, material, path):
                         for p in focal)
         area_comprada = cajas * cfg["m2_caja"]
         total_sobra = area_reut + area_desp
-        cab = (f"Piezas a comprar: {total_pzas}  ·  {cajas} cajas  ·  {area_comprada:.2f} m²    |    "
+        cab = (f"Total de piezas: {total_pzas}  ·  {cajas} cajas  ·  {area_comprada:.2f} m²    |    "
                f"Área neta instalada: {area_inst:.2f} m²\n"
-               f"Recortes optimizados en {len(baldosas)} baldosas (best-fit: cada sobrante se reusa "
-               f"para otra pieza).")
+               f"Recortes acomodados en {len(baldosas)} baldosas, reusando al máximo cada sobrante "
+               f"para otra pieza.")
         fig.text(0.06, 0.91, cab, fontsize=10.5, va="top", family="monospace")
 
         resumen = (
@@ -248,7 +257,7 @@ def hacer_pdf(todas, material, path):
             if r == 0:
                 cell.set_facecolor("#f1948a"); cell.set_text_props(weight="bold")
 
-        pdf.savefig(fig); plt.close(fig)
+        guardar(fig)
 
     return total_pzas, cajas, area_reut, area_desp
 

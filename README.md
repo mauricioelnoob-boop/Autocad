@@ -241,6 +241,25 @@ Salidas: `piso_moret.pdf` (180 pzas / 90 cajas; sobrante 5.05 m² reutilizable +
 2.60 m² desperdicio) y `piso_royal_walnut.pdf` (168 pzas / 34 cajas; sobrante
 1.77 m² reutilizable + 0.67 m² desperdicio).
 
+### 9. Archivos DWG por material  →  `generar_dwg_material.py`
+
+```bash
+python3 generar_dwg_material.py        # genera piso_moret.dxf y piso_royal_walnut.dxf
+# convertir a DWG con LibreDWG:
+dxf2dwg -y -o piso_moret.dwg piso_moret.dxf
+dxf2dwg -y -o piso_royal_walnut.dwg piso_royal_walnut.dxf
+```
+
+Un DWG por material con TODO en un dibujo de AutoCAD (capas separadas): el plano
+con el piso identificado por pieza, abajo el despiece de recortes (pieza →
+destino, sobrante reutilizable en amarillo, desperdicio en rojo) y un cuadro de
+resumen con la firma del responsable.
+
+> **Correcciones de material en la frontera**: la lista `RECLASIFICAR` en
+> `datos_piezas.py` reasigna por ubicación las piezas mal detectadas en el
+> límite recámara/pasillo (Royal Walnut ↔ Moret). Para cada modelo nuevo se
+> ajusta ahí.
+
 ## Requisitos
 
 - **Python 3** (sólo librería estándar para extraer y optimizar).
