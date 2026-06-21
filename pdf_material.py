@@ -121,7 +121,7 @@ def hacer_pdf(todas, material, path):
         fig.suptitle(f"PISO {material} — Resumen", fontsize=16, weight="bold", y=0.9)
         lineas = [
             f"Piezas completas        : {completas}",
-            f"Baldosas para recortes  : {len(baldosas)}  (reusando sobrantes)",
+            f"Piezas con recorte      : {len(baldosas)}  (reusando sobrantes)",
             f"Total de piezas         : {total_pzas}",
             f"En cajas                : {cajas} cajas de {cfg['pzas_caja']} pzas "
             f"= {cajas*cfg['pzas_caja']} piezas",
@@ -134,7 +134,7 @@ def hacer_pdf(todas, material, path):
         fig.text(0.1, 0.66, "\n".join(lineas), fontsize=13, va="top", family="monospace",
                  bbox=dict(boxstyle="round", facecolor="#fcf3cf", edgecolor="#b7950b"))
         fig.text(0.1, 0.30,
-                 "En las páginas siguientes: cada baldosa que se corta, qué piezas\n"
+                 "En las páginas siguientes: cada pieza que se corta, qué recortes\n"
                  "salen, a dónde van y qué sobra (amarillo = reutilizable, rojo =\n"
                  "desperdicio). Royal Walnut sólo en planta alta (recámaras).",
                  fontsize=11, va="top")
@@ -172,18 +172,13 @@ def hacer_pdf(todas, material, path):
                                 ha="center", va="center", fontsize=4.8, color="#641e16")
                 ax.set_xlim(-0.03, ancho + 0.03); ax.set_ylim(-0.03, largo + 0.03)
                 ax.set_aspect("equal"); ax.axis("off")
-                ax.set_title(f"Baldosa {pc}-{idx:02d} · {len(b.piezas)} pza(s)", fontsize=9, weight="bold")
+                ax.set_title(f"Pieza {pc}-{idx:02d} · {len(b.piezas)} recorte(s)", fontsize=9, weight="bold")
             for ax in axes[len(grupo):]:
                 ax.axis("off")
-            fig.suptitle(f"{material} — DESPERDICIOS / recortes: qué cortar, a dónde va y qué sobra\n"
-                         f"(amarillo = sobrante reutilizable · rojo = desperdicio)   "
-                         f"pág. {ini//POR_PAGINA + 1} de {npag}", fontsize=12)
-            fig.legend(handles=[
-                Patch(facecolor="#82e0aa", edgecolor="k", label="pieza que se corta (con destino)"),
-                Patch(facecolor="#f9e79f", edgecolor="#b7950b", label="sobrante reutilizable"),
-                Patch(facecolor="#f1948a", edgecolor="#922b21", label="desperdicio"),
-            ], loc="lower center", ncol=3, fontsize=9, frameon=False)
-            fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+            fig.suptitle(f"{material} — recortes: qué cortar, a dónde va y qué sobra\n"
+                         f"(verde = recorte que se usa · amarillo = sobrante reutilizable · "
+                         f"rojo = desperdicio)   pág. {ini//POR_PAGINA + 1} de {npag}", fontsize=11)
+            fig.tight_layout(rect=[0, 0.04, 1, 0.95])
             guardar(fig)
 
         # ---------- Página FINAL: todos los sobrantes sumados ----------
@@ -222,8 +217,8 @@ def hacer_pdf(todas, material, path):
         total_sobra = area_reut + area_desp
         cab = (f"Total de piezas: {total_pzas}  ·  {cajas} cajas  ·  {area_comprada:.2f} m²    |    "
                f"Área neta instalada: {area_inst:.2f} m²\n"
-               f"Recortes acomodados en {len(baldosas)} baldosas, reusando al máximo cada sobrante "
-               f"para otra pieza.")
+               f"Recortes acomodados en {len(baldosas)} piezas, reusando al máximo cada sobrante "
+               f"para otro recorte.")
         fig.text(0.06, 0.91, cab, fontsize=10.5, va="top", family="monospace")
 
         resumen = (
@@ -264,7 +259,8 @@ def hacer_pdf(todas, material, path):
 
 def main():
     todas = cargar_anotado()
-    salidas = {"Moret": "piso_moret.pdf", "Royal Walnut": "piso_royal_walnut.pdf"}
+    salidas = {"Moret": "Moret_Cabernet_Despiece.pdf",
+               "Royal Walnut": "RoyalWalnut_Cabernet_Despiece.pdf"}
     for material, path in salidas.items():
         pzas, cajas, reut, desp = hacer_pdf(todas, material, path)
         print(f"{material}: {pzas} piezas / {cajas} cajas  ·  reutilizable {reut:.2f} m²  ·  "

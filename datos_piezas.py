@@ -48,9 +48,7 @@ PIEZAS_EXTRA = [
 RECLASIFICAR = [
     # Pieza aislada en zona de pasillo que es Moret, no Royal Walnut
     {"x": 506.12, "y": -87.08, "material": "Moret", "completa": False},
-    # Tiras/piezas pegadas a la recámara que son Royal Walnut, no Moret
-    {"x": 502.61, "y": -85.51, "material": "Royal Walnut", "completa": False},
-    {"x": 507.79, "y": -84.33, "material": "Royal Walnut", "completa": False},
+    # Pieza de transición dibujada completa que en realidad es recorte de Moret
     {"x": 503.04, "y": -84.90, "material": "Moret", "completa": False},
 ]
 
@@ -59,7 +57,61 @@ def planta_de(p):
     return "baja" if p["x"] < X_CORTE else "alta"
 
 
-def cargar_anotado(path="piezas_piso.json"):
+def _retipo(p):
+    """Recalcula completa/tipo_corte de una pieza según su material y medida."""
+    aw, al = PISOS[p["material"]]
+    corto, largo = min(p["wx"], p["hy"]), max(p["wx"], p["hy"])
+    p["ancho"], p["largo"] = round(corto, 4), round(largo, 4)
+    ancho_ok = abs(corto - aw) <= 0.012
+    largo_ok = abs(largo - al) <= 0.012
+    p["completa"] = ancho_ok and largo_ok
+    p["tipo_corte"] = ("completa" if p["completa"] else
+                       "corte_largo" if ancho_ok else
+                       "corte_ancho" if largo_ok else "corte_esquina")
+
+
+def recortar_por_obstaculos(piezas, path):
+    """Recorta al tamaño real las piezas que el despiece dibujó metidas en
+    muros, closets o muebles fijos. Devuelve cuántas se corrigieron.
+    Si no hay shapely o el archivo de obstáculos, no hace nada."""
+    try:
+        import json as _json
+        from shapely.geometry import box, Polygon
+        from shapely.ops import unary_union
+        raw = _json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return 0
+    polys = [Polygon(m).buffer(0) for m in raw if len(m) >= 3]
+    U = unary_union([p for p in polys if not p.is_empty and p.area > 0])
+    n = 0
+    for p in piezas:
+        if p.get("planta") != "alta":      # sólo planta alta (baños/closets)
+            continue
+        r = box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+        if r.area <= 0:
+            continue
+        inter = r.intersection(U).area
+        if inter <= 0.06 * r.area:
+            continue
+        rem = r.difference(U)
+        if rem.is_empty or rem.area < 0.02 * r.area:
+            p["completa"] = False
+            if p["tipo_corte"] == "completa":
+                p["tipo_corte"] = "corte_esquina"
+            n += 1
+            continue
+        geoms = list(rem.geoms) if rem.geom_type == "MultiPolygon" else [rem]
+        g = max(geoms, key=lambda q: q.area)
+        x0, y0, x1, y1 = g.bounds
+        p["x0"], p["y0"] = round(x0, 4), round(y0, 4)
+        p["wx"], p["hy"] = round(x1 - x0, 4), round(y1 - y0, 4)
+        p["x"], p["y"] = round((x0 + x1) / 2, 3), round((y0 + y1) / 2, 3)
+        _retipo(p)
+        n += 1
+    return n
+
+
+def cargar_anotado(path="piezas_piso.json", obstaculos="obstaculos_cabernet.json"):
     piezas = json.load(open(path, encoding="utf-8"))
 
     anotadas = []
@@ -78,6 +130,14 @@ def cargar_anotado(path="piezas_piso.json"):
         e = dict(extra)
         e["planta"] = planta_de(e)
         anotadas.append(e)
+
+    # Tiras muy angostas a lo largo en planta alta = orilla de tablón Royal Walnut
+    for p in anotadas:
+        if (p["planta"] == "alta" and p["material"] == "Moret"
+                and min(p["wx"], p["hy"]) < 0.10 and max(p["wx"], p["hy"]) >= 0.85):
+            p["material"] = "Royal Walnut"
+            p["completa"] = False
+            p["tipo_corte"] = "corte_ancho"
 
     # Correcciones de material en la frontera
     TOL = 0.012
@@ -102,6 +162,10 @@ def cargar_anotado(path="piezas_piso.json"):
             cerca["tipo_corte"] = "corte_ancho"
         else:
             cerca["tipo_corte"] = "corte_esquina"
+
+    # Recortar piezas que caen bajo muros / closets / muebles fijos:
+    # el despiece a veces dibuja la pieza completa metida en el muro.
+    cargar_anotado.recortadas = recortar_por_obstaculos(anotadas, obstaculos)
 
     # IDs y baldosa de corte, por (planta, material)
     grupos = defaultdict(list)
