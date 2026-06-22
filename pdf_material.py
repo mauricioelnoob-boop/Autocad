@@ -28,6 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
+VERSION = "v2.0"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
@@ -260,8 +261,8 @@ def hacer_pdf(todas, material, path, modelo=""):
 
 def main(modelo="Cabernet"):
     todas = cargar_anotado(modelo)
-    salidas = {"Moret": f"{modelo}_Despiece-Piso_Moret-Arena.pdf",
-               "Royal Walnut": f"{modelo}_Despiece-Piso_Royal-Walnut.pdf"}
+    salidas = {"Moret": f"{modelo}_Despiece-Piso_Moret-Arena_{VERSION}.pdf",
+               "Royal Walnut": f"{modelo}_Despiece-Piso_Royal-Walnut_{VERSION}.pdf"}
     for material, path in salidas.items():
         pzas, cajas, reut, desp = hacer_pdf(todas, material, path, modelo)
         print(f"{modelo} · {material}: {pzas} piezas / {cajas} cajas  ·  reutilizable "

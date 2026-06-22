@@ -57,13 +57,18 @@ MODELOS = {
             _recorte("Moret", 502.654, -85.960, 0.090, 0.900),   # der. de PA-M-005 (junto al Royal)
             _recorte("Moret", 506.010, -89.730, 0.214, 0.600),   # debajo de PA-M-050 (izq. del muro/jamba)
             _recorte("Moret", 506.344, -89.730, 0.268, 0.600),   # debajo de PA-M-050 (der. del muro/jamba)
+            _recorte("Moret", 495.205, -91.240, 0.184, 0.900),   # continuidad PB-M-136 <-> PB-M-122 (puerta)
         ],
         # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna,
-        # y PB-M-150 que debe llegar hasta la esquina inferior del baño:
+        # PB-M-150 hasta la esquina, y unir PA-M-003+009 (la línea no es muro) hasta PA-M-005:
         "redimensionar": [
             {"x": 490.12, "y": -83.77, "x0": 489.539, "y0": -84.346, "wx": 0.600, "hy": 1.146},  # arriba de PB-M-054
             {"x": 490.12, "y": -92.05, "x0": 489.539, "y0": -92.572, "wx": 0.600, "hy": 1.050},  # izq. de PB-M-159
             {"x": 497.47, "y": -91.94, "x0": 497.365, "y0": -92.530, "wx": 0.214, "hy": 1.068},  # PB-M-150 a la esquina
+            {"x": 504.20, "y": -85.68, "x0": 503.946, "y0": -85.860, "wx": 0.580, "hy": 0.800},  # unir PA-M-009+003 y dar continuidad a PA-M-005
+        ],
+        "eliminar": [
+            (504.20, -85.28),    # PA-M-003: se absorbe en la pieza unida (009)
         ],
         # Recámaras: alinear el tope de cada columna de Royal con el muro de arriba.
         "tope_royal_regiones": [
@@ -106,11 +111,39 @@ MODELOS = {
         ],
         "excluir_royal_baja": True,
         "piezas_extra": [],
-        "reclasificar": [],
-        # La tira vertical del pasillo (x≈329) se coló a la recámara como Royal;
-        # es pasillo, va en Moret.
+        "reclasificar": [
+            # Tiras de orilla de recámaras que salieron Moret -> son Royal Walnut.
+            {"x": 326.05, "y": -125.05, "material": "Royal Walnut"},
+            {"x": 326.05, "y": -124.23, "material": "Royal Walnut"},
+            {"x": 326.05, "y": -123.03, "material": "Royal Walnut"},
+            {"x": 326.05, "y": -121.83, "material": "Royal Walnut"},
+            {"x": 326.05, "y": -121.05, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -125.05, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -124.23, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -123.03, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -121.83, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -121.05, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -131.62, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -130.56, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -129.35, "material": "Royal Walnut"},
+            {"x": 333.56, "y": -128.71, "material": "Royal Walnut"},
+        ],
+        # Pasillo (x≈329) = Moret, no Royal. Incluye su parte de arriba.
         "forzar_material": [
-            {"box": (328.85, 329.30, -130.60, -124.70), "material": "Moret"},
+            {"box": (328.85, 329.30, -130.60, -121.00), "material": "Moret"},
+        ],
+        # Fantasmas (polilínea mal cerrada): se eliminan.
+        "eliminar": [
+            (330.04, -123.82),   # tira de 3.7 cm
+            (326.05, -125.36),   # fragmento suelto en orilla
+        ],
+        # PA-M-043 salió como tira de 3 cm porque una LINTERNILLA (tragaluz) se
+        # tomó como muro; en realidad es casi pieza completa.
+        "redimensionar": [
+            {"x": 331.09, "y": -126.79, "x0": 331.079, "y0": -127.385, "wx": 0.598, "hy": 1.194},
+        ],
+        "muros_ignorar": [
+            (331.05, 331.70, -127.70, -126.20),   # linternilla junto a PA-M-043
         ],
         # Baño de planta baja (claves 5/5 = Urbania): el despiece dejó el Moret
         # continuo; ese piso es otro material, se excluye. (Por confirmar.)
@@ -132,8 +165,34 @@ MODELOS = {
             (287.9, 291.45, -70.85, -66.15),
         ],
         "excluir_royal_baja": True,
-        "piezas_extra": [],
-        "reclasificar": [],
+        "piezas_extra": [
+            _recorte("Moret", 277.503, -67.672, 0.180, 0.750),   # continuidad PB-M-120 <-> PB-M-106 (puerta)
+        ],
+        "reclasificar": [
+            # Tiras de orilla de recámaras que salieron Moret -> Royal Walnut.
+            {"x": 282.84, "y": -64.26, "material": "Royal Walnut"},
+            {"x": 282.84, "y": -63.47, "material": "Royal Walnut"},
+            {"x": 282.84, "y": -62.27, "material": "Royal Walnut"},
+            {"x": 282.84, "y": -61.20, "material": "Royal Walnut"},
+            {"x": 289.20, "y": -66.41, "material": "Royal Walnut"},
+            {"x": 288.02, "y": -70.24, "material": "Royal Walnut"},
+            {"x": 291.33, "y": -70.09, "material": "Royal Walnut"},
+            {"x": 291.33, "y": -68.89, "material": "Royal Walnut"},
+            {"x": 291.33, "y": -67.69, "material": "Royal Walnut"},
+            {"x": 291.33, "y": -66.71, "material": "Royal Walnut"},
+            # Piezas que salieron Royal pero son de pasillo/transición -> Moret.
+            {"x": 287.23, "y": -64.63, "material": "Moret"},
+            {"x": 288.14, "y": -64.78, "material": "Moret"},
+            {"x": 288.14, "y": -65.54, "material": "Moret"},
+            {"x": 288.14, "y": -66.49, "material": "Moret"},
+            {"x": 288.89, "y": -66.49, "material": "Moret"},
+        ],
+        # Fantasmas / donde va muro: se eliminan.
+        "eliminar": [
+            (272.75, -70.78),   # PB: va muro
+            (273.36, -70.78),   # PB: va muro
+            (272.75, -60.64),   # PB: no debe existir
+        ],
         # Baño de planta baja (claves 5/5/2/4 = Urbania/Malla/concreto): el
         # despiece dejó el Moret continuo cruzando el muro; ese piso es otro
         # material, se excluye.

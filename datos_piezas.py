@@ -53,12 +53,15 @@ def _retipo(p):
                        "corte_ancho" if largo_ok else "corte_esquina")
 
 
-def recortar(anotadas, muros_path):
+def recortar(anotadas, muros_path, ignorar=None):
     """Recorta las piezas según los MUROS y la frontera de material:
       * En la recámara manda Royal: las piezas Moret que pisan Royal se recortan
         a la parte que NO pisa Royal (corte de pared/transición que faltaba).
       * Todas las piezas se recortan por los muros estructurales.
+    `ignorar` = lista de cajas (x0,x1,y0,y1) que NO son muros reales (linternillas
+    / tragaluces): los muros dentro de esas cajas no recortan.
     Devuelve (lista_filtrada, n_recortadas). Si no hay shapely, no hace nada."""
+    ignorar = ignorar or []
     try:
         from shapely.geometry import box, Polygon
         from shapely.ops import unary_union
@@ -75,10 +78,16 @@ def recortar(anotadas, muros_path):
         mindim = min(max(xs) - min(xs), max(ys) - min(ys))
         return not (Polygon(poly).buffer(0).area > 2.0 and mindim > 0.5)
 
+    def es_linternilla(poly):
+        # Centro del muro dentro de una caja de linternilla/tragaluz -> no es muro.
+        xs = [a[0] for a in poly]; ys = [a[1] for a in poly]
+        cx = (min(xs) + max(xs)) / 2; cy = (min(ys) + max(ys)) / 2
+        return any(x0 <= cx <= x1 and y0 <= cy <= y1 for (x0, x1, y0, y1) in ignorar)
+
     try:
         raw = json.load(open(muros_path, encoding="utf-8"))
         muros = unary_union([Polygon(m).buffer(0) for m in raw
-                             if len(m) >= 3 and es_muro_delgado(m)])
+                             if len(m) >= 3 and es_muro_delgado(m) and not es_linternilla(m)])
     except Exception:
         from shapely.geometry import GeometryCollection
         muros = GeometryCollection()
@@ -389,7 +398,8 @@ def cargar_anotado(modelo="Cabernet"):
     anotadas.extend(topes)
 
     # Recorte por muros y frontera de material (Royal manda en la recámara)
-    anotadas, cargar_anotado.recortadas = recortar(anotadas, cfg.get("muros", ""))
+    anotadas, cargar_anotado.recortadas = recortar(
+        anotadas, cfg.get("muros", ""), cfg.get("muros_ignorar", []))
 
     # Zonas que NO se despiezan (escalera, boiler, hueco de cancelería): se
     # quitan al final para que tampoco sobrevivan piezas rellenadas en ese hueco.
@@ -400,6 +410,16 @@ def cargar_anotado(modelo="Cabernet"):
         antes = len(anotadas)
         anotadas = [p for p in anotadas if not _excluida(p)]
         excluidas += antes - len(anotadas)
+
+    # Eliminar piezas fantasma puntuales (polilínea mal cerrada / donde va muro):
+    # quita la pieza más cercana a cada punto. Es filtro final (no se rellena).
+    for (ex, ey) in cfg.get("eliminar", []):
+        if not anotadas:
+            break
+        cerca = min(anotadas, key=lambda p: (p["x"] - ex)**2 + (p["y"] - ey)**2)
+        if (cerca["x"] - ex)**2 + (cerca["y"] - ey)**2 <= 0.09:   # dentro de 0.30 m
+            anotadas.remove(cerca)
+            excluidas += 1
 
     # IDs y pieza de corte, por (planta, material)
     asignar_ids_corte(anotadas)
