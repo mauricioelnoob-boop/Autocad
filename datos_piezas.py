@@ -144,28 +144,118 @@ def recortar(anotadas, muros_path):
     return salida, recortadas
 
 
+def rellenar_huecos(anotadas):
+    """Genera las piezas que el DWG olvidó dibujar: huecos DENTRO de una columna
+    (hay pieza arriba y abajo) de hasta ~1 tablón de alto y con vecino lateral
+    (=dentro del piso, no un vacío entre cuartos). No genera fantasmas."""
+    from collections import defaultdict
+    cols = defaultdict(list)
+    for p in anotadas:
+        cols[(p["planta"], p["material"], round(p["x0"], 2))].append(p)
+
+    def vecino_lateral(mat, cx_izq, cx_der, cy):
+        for q in anotadas:
+            if q["material"] != mat:
+                continue
+            if q["y0"] - 0.05 <= cy <= q["y0"] + q["hy"] + 0.05:
+                if abs((q["x0"] + q["wx"]) - cx_izq) < 0.25 or abs(q["x0"] - cx_der) < 0.25:
+                    return True
+        return False
+
+    nuevos = []
+    for (pl, mat, _), lst in cols.items():
+        if len(lst) < 2:
+            continue
+        lst.sort(key=lambda p: p["y0"])
+        w = sorted(p["wx"] for p in lst)[len(lst) // 2]
+        for a, b in zip(lst, lst[1:]):
+            top = a["y0"] + a["hy"]
+            gap = b["y0"] - top
+            if not (0.06 < gap <= 1.25):
+                continue
+            x0 = a["x0"]; cy = top + gap / 2
+            if not vecino_lateral(mat, x0, x0 + w, cy):
+                continue
+            p = {"material": mat, "x0": round(x0, 4), "y0": round(top, 4),
+                 "wx": round(w, 4), "hy": round(gap, 4),
+                 "x": round(x0 + w / 2, 3), "y": round(top + gap / 2, 3),
+                 "planta": pl, "relleno": True}
+            _retipo(p)
+            nuevos.append(p)
+    return nuevos
+
+
 def cargar_anotado(modelo="Cabernet"):
     cfg = MODELOS[modelo]
     piezas = json.load(open(cfg["piezas"], encoding="utf-8"))
     x_corte = cfg["x_corte"]
-    regiones = cfg["regiones_royal"]
     bbox = cfg.get("bbox_valido")
 
     def planta_de(p):
         return "baja" if p["x"] < x_corte else "alta"
+
+    # Claves de acabado del propio plano (capa A-ACABADOS PISOS):
+    #   1 = Moret Arena   3 = Royal Walnut   2/4/5 = otro piso (concreto/baños)
+    claves = json.load(open(cfg["claves"], encoding="utf-8"))
+
+    def clusters_royal_y_otro(piezas):
+        """Agrupa los tablones de 0.20 m en cuartos (componentes conexas) y
+        etiqueta cada cuarto con la clave que cae dentro de su recuadro:
+        '3' -> Royal Walnut, '4'/'5' -> otro piso (baño) a excluir."""
+        planks = [p for p in piezas if abs(min(p["wx"], p["hy"]) - ANCHO_ROYAL) < 0.06]
+        n = len(planks)
+        par = list(range(n))
+
+        def find(a):
+            while par[a] != a:
+                par[a] = par[par[a]]; a = par[a]
+            return a
+
+        def cerca(a, b):                    # rects casi tocándose
+            return not (a["x0"] + a["wx"] + 0.10 < b["x0"] or b["x0"] + b["wx"] + 0.10 < a["x0"]
+                        or a["y0"] + a["hy"] + 0.10 < b["y0"] or b["y0"] + b["hy"] + 0.10 < a["y0"])
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                if cerca(planks[i], planks[j]):
+                    par[find(i)] = find(j)
+        grupos = defaultdict(list)
+        for i, p in enumerate(planks):
+            grupos[find(i)].append(p)
+
+        royal_ids, otro_ids = set(), set()
+        for g in grupos.values():
+            x0 = min(q["x0"] for q in g) - 0.3; x1 = max(q["x0"] + q["wx"] for q in g) + 0.3
+            y0 = min(q["y0"] for q in g) - 0.3; y1 = max(q["y0"] + q["hy"] for q in g) + 0.3
+            dentro = [k[0] for k in claves if x0 <= k[1] <= x1 and y0 <= k[2] <= y1]
+            if "3" in dentro:
+                royal_ids |= {id(q) for q in g}
+            elif any(c in dentro for c in ("4", "5")):
+                otro_ids |= {id(q) for q in g}
+        return royal_ids, otro_ids
+
+    royal_ids, otro_ids = clusters_royal_y_otro(piezas)
+
+    def material_de(p):
+        if id(p) in otro_ids:
+            return None                      # baño / otro piso -> excluir
+        if id(p) in royal_ids:
+            return "Royal Walnut"
+        return "Moret"
 
     anotadas = []
     excluidas = 0
     for p in piezas:
         if not en_bbox(p, bbox):                 # descarta bloques sueltos / detalles
             continue
-        pl = planta_de(p)
-        # Charolas de baño en planta baja (tablón 0.20 m) = otro piso -> excluir
-        if cfg.get("excluir_royal_baja") and pl == "baja" \
-                and abs(min(p["wx"], p["hy"]) - ANCHO_ROYAL) < 0.06:
+        mat = material_de(p)
+        if mat is None:                          # otro piso (concreto, baño) -> excluir
             excluidas += 1
             continue
-        p["planta"] = pl
+        p["planta"] = planta_de(p)
+        if mat != p["material"]:
+            p["material"] = mat
+            _retipo(p)
         anotadas.append(p)
 
     # Piezas faltantes agregadas a mano (p.ej. el arranque de Moret)
@@ -173,18 +263,6 @@ def cargar_anotado(modelo="Cabernet"):
         e = dict(extra)
         e["planta"] = planta_de(e)
         anotadas.append(e)
-
-    # Material por REGIÓN: Royal sólo si es tablón de 0.20 dentro de una recámara.
-    for p in anotadas:
-        corto = min(p["wx"], p["hy"])
-        if p["planta"] == "alta" and corto <= LIMITE_MORET \
-                and any(en_region(p, r) for r in regiones):
-            debe = "Royal Walnut"
-        else:
-            debe = "Moret"
-        if debe != p["material"]:
-            p["material"] = debe
-            _retipo(p)
 
     # Correcciones puntuales en la frontera (por ubicación)
     for r in cfg.get("reclasificar", []):
@@ -197,6 +275,11 @@ def cargar_anotado(modelo="Cabernet"):
             cerca["completa"] = r["completa"]
             if not r["completa"] and cerca["tipo_corte"] == "completa":
                 cerca["tipo_corte"] = "corte_largo"
+
+    # Generar las piezas que el DWG olvidó dibujar (huecos internos de columna)
+    rellenos = rellenar_huecos(anotadas)
+    anotadas.extend(rellenos)
+    cargar_anotado.rellenadas = len(rellenos)
 
     # Recorte por muros y frontera de material (Royal manda en la recámara)
     anotadas, cargar_anotado.recortadas = recortar(anotadas, cfg.get("muros", ""))
