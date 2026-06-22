@@ -284,6 +284,29 @@ resumen con la firma del responsable.
 > límite recámara/pasillo (Royal Walnut ↔ Moret). Para cada modelo nuevo se
 > ajusta ahí.
 
+## Editar el despiece a mano (AutoCAD)  →  `exportar_dwg.py` / `importar_dwg.py`
+
+Para corregir/agregar/ajustar piezas tú mismo:
+
+```bash
+python3 exportar_dwg.py Cabernet      # crea Cabernet_editable.dxf (+ .dwg)
+```
+
+Ábrelo en AutoCAD. Cada pieza es una polilínea en su capa de material:
+- **PISO-MORET** (naranja) · **PISO-ROYAL-WALNUT** (turquesa) · **ETIQUETAS** (IDs).
+
+Edita lo que quieras: dibuja un rectángulo en la capa correcta para **agregar**
+una pieza que falte, muévelo/estíralo para **ajustar**, o bórralo para **quitar**.
+**Guarda como DXF** (AutoCAD: *Guardar como → DXF*). Luego:
+
+```bash
+python3 importar_dwg.py Cabernet_editable.dxf    # regenera el despiece con tus cambios
+```
+
+Genera `Moret_Cabernet_Despiece_EDITADO.pdf` y `RoyalWalnut_Cabernet_Despiece_EDITADO.pdf`.
+El material lo toma de la capa; el tamaño y posición, del rectángulo. (Recomendado
+DXF para el ida y vuelta; el DWG también sirve pero conviene guardar como DXF.)
+
 ## Requisitos
 
 - **Python 3** (sólo librería estándar para extraer y optimizar).

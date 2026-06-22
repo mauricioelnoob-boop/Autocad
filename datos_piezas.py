@@ -285,6 +285,15 @@ def cargar_anotado(modelo="Cabernet"):
     anotadas, cargar_anotado.recortadas = recortar(anotadas, cfg.get("muros", ""))
 
     # IDs y pieza de corte, por (planta, material)
+    asignar_ids_corte(anotadas)
+
+    cargar_anotado.excluidas = excluidas
+    return anotadas
+
+
+def asignar_ids_corte(anotadas):
+    """Asigna ID por (planta, material) en orden de lectura y calcula de qué
+    pieza de corte sale cada recorte (optimización por planta+material)."""
     grupos = defaultdict(list)
     for p in anotadas:
         grupos[(p["planta"], p["material"])].append(p)
@@ -307,8 +316,6 @@ def cargar_anotado(modelo="Cabernet"):
         for p in ps:
             p["corte_de"] = mapa.get(p["id"], "")
 
-    cargar_anotado.excluidas = excluidas
-    return anotadas
 
 
 cargar_anotado.excluidas = 0
