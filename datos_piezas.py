@@ -198,6 +198,30 @@ def rellenar_huecos(anotadas):
     return buenos
 
 
+def completar_tope_royal(anotadas, regiones):
+    """En cada recámara (región dada), alinea el tope de cada columna de Royal
+    Walnut con el muro de arriba: si la columna no llega, agrega el recorte que
+    falta encima. Así no quedan huecos contra el muro superior."""
+    nuevos = []
+    for (x0, x1, y0, y1) in regiones:
+        g = [p for p in anotadas if p["material"] == "Royal Walnut"
+             and x0 <= p["x"] <= x1 and y0 <= p["y"] <= y1]
+        if not g:
+            continue
+        ytop = max(p["y0"] + p["hy"] for p in g)
+        cols = defaultdict(list)
+        for p in g:
+            cols[round(p["x0"], 2)].append(p)
+        for lst in cols.values():
+            top = max(p["y0"] + p["hy"] for p in lst)
+            gap = ytop - top
+            if 0.12 < gap < 0.70:                       # hueco real contra el muro
+                xx = min(p["x0"] for p in lst)
+                wx = max(p["wx"] for p in lst)
+                nuevos.append(_nueva("Royal Walnut", lst[0]["planta"], xx, top, wx, gap))
+    return nuevos
+
+
 def _nueva(mat, pl, x0, y0, wx, hy):
     p = {"material": mat, "x0": round(x0, 4), "y0": round(y0, 4),
          "wx": round(wx, 4), "hy": round(hy, 4),
@@ -280,9 +304,12 @@ def cargar_anotado(modelo="Cabernet"):
             _retipo(p)
         anotadas.append(p)
 
-    # Piezas faltantes agregadas a mano (p.ej. el arranque de Moret)
+    # Piezas faltantes agregadas a mano (p.ej. el arranque de Moret, recortes que
+    # el DWG no cerró). Si no traen 'completa', se calcula con _retipo.
     for extra in cfg.get("piezas_extra", []):
         e = dict(extra)
+        if "completa" not in e:
+            _retipo(e)
         e["planta"] = planta_de(e)
         anotadas.append(e)
 
@@ -298,10 +325,29 @@ def cargar_anotado(modelo="Cabernet"):
             if not r["completa"] and cerca["tipo_corte"] == "completa":
                 cerca["tipo_corte"] = "corte_largo"
 
+    # Redimensionar una pieza mal dibujada (tirita de 3 cm que en realidad es casi
+    # entera): sobreescribe la geometría de la pieza más cercana al punto dado.
+    for r in cfg.get("redimensionar", []):
+        cerca = min(anotadas, key=lambda p: (p["x"] - r["x"])**2 + (p["y"] - r["y"])**2)
+        if (cerca["x"] - r["x"])**2 + (cerca["y"] - r["y"])**2 > 0.25:
+            continue
+        cerca["x0"], cerca["y0"] = round(r["x0"], 4), round(r["y0"], 4)
+        cerca["wx"], cerca["hy"] = round(r["wx"], 4), round(r["hy"], 4)
+        cerca["x"] = round(r["x0"] + r["wx"] / 2, 3)
+        cerca["y"] = round(r["y0"] + r["hy"] / 2, 3)
+        if "material" in r:
+            cerca["material"] = r["material"]
+        _retipo(cerca)
+
     # Generar las piezas que el DWG olvidó dibujar (huecos internos de columna)
     rellenos = rellenar_huecos(anotadas)
     anotadas.extend(rellenos)
     cargar_anotado.rellenadas = len(rellenos)
+
+    # Terminar cada tablón de recámara HASTA el muro de arriba: rellena el recorte
+    # que falta encima de cada columna de Royal Walnut que no llega al muro.
+    topes = completar_tope_royal(anotadas, cfg.get("tope_royal_regiones", []))
+    anotadas.extend(topes)
 
     # Recorte por muros y frontera de material (Royal manda en la recámara)
     anotadas, cargar_anotado.recortadas = recortar(anotadas, cfg.get("muros", ""))

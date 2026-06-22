@@ -23,6 +23,13 @@ _ARRANQUE_CABERNET = {
     "x0": 489.539, "y0": -86.738, "wx": 0.600, "hy": 1.194, "extra": True,
 }
 
+
+def _recorte(material, x0, y0, wx, hy):
+    """Recorte faltante (el DWG no cerró la polilínea); _retipo lo completa."""
+    return {"material": material, "x0": round(x0, 3), "y0": round(y0, 3),
+            "wx": round(wx, 3), "hy": round(hy, 3),
+            "x": round(x0 + wx / 2, 3), "y": round(y0 + hy / 2, 3), "extra": True}
+
 MODELOS = {
     "Cabernet": {
         "dwg": "planos/cabernet.dwg",
@@ -38,7 +45,26 @@ MODELOS = {
             (504.0, 508.2, -93.50, -89.60),   # Recámara 2
         ],
         "excluir_royal_baja": True,  # charolas de baño en planta baja = otro piso
-        "piezas_extra": [_ARRANQUE_CABERNET],
+        "piezas_extra": [
+            _ARRANQUE_CABERNET,
+            # Recortes de Moret que el DWG dejó vacíos (terminar hasta el muro):
+            _recorte("Moret", 504.526, -86.254, 0.540, 1.194),   # izq. de PA-M-006 (≈ idéntico)
+            _recorte("Moret", 502.744, -85.498, 0.600, 0.520),   # arriba de PA-M-010
+            _recorte("Moret", 506.008, -88.624, 0.210, 1.194),   # der. de PA-M-035 (corte de muro)
+            _recorte("Moret", 494.955, -91.520, 0.250, 1.194),   # der. de PB-M-147 hacia el baño
+            _recorte("Moret", 495.389, -91.460, 0.170, 1.120),   # izq. de PB-M-135
+            _recorte("Moret", 495.389, -92.530, 0.170, 1.068),   # izq. de PB-M-151
+        ],
+        # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna:
+        "redimensionar": [
+            {"x": 490.12, "y": -83.77, "x0": 489.539, "y0": -84.346, "wx": 0.600, "hy": 1.146},  # arriba de PB-M-054
+            {"x": 490.12, "y": -92.05, "x0": 489.539, "y0": -92.572, "wx": 0.600, "hy": 1.050},  # izq. de PB-M-159
+        ],
+        # Recámaras: alinear el tope de cada columna de Royal con el muro de arriba.
+        "tope_royal_regiones": [
+            (499.70, 502.75, -87.0, -82.0),   # recámara 1 (izquierda)
+            (502.80, 508.00, -85.0, -82.0),   # recámara principal (derecha)
+        ],
         "reclasificar": [
             {"x": 503.04, "y": -84.90, "material": "Moret", "completa": False},
             # Tiras delgadas en la orilla de las recámaras: son Royal Walnut, no Moret.
