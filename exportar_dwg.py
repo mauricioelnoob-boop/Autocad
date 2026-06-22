@@ -4,18 +4,25 @@
 exportar_dwg.py
 ===============
 
-Exporta el despiece de un modelo a un DWG EDITABLE para AutoCAD, donde puedes:
-  * agregar piezas que falten   (dibuja un rectángulo en la capa del material)
-  * ajustar piezas              (mueve / estira los rectángulos)
-  * borrar piezas fantasma      (borra el rectángulo)
+Exporta el despiece de un modelo a un DXF (+DWG) EDITABLE para AutoCAD.
 
-Capas:
-  PISO-MORET           -> piezas de Moret   (cada pieza = polilínea cerrada)
-  PISO-ROYAL-WALNUT    -> piezas de Royal Walnut
-  ETIQUETAS            -> el ID de cada pieza (texto)
-  AGREGAR-AQUI         -> capa vacía, opcional, para tus notas
+Capas (todas prendibles/apagables por separado):
+  PISO-MORET            -> piezas de Moret en el plano (polilínea cerrada)
+  PISO-ROYAL-WALNUT     -> piezas de Royal Walnut en el plano
+  ETIQUETAS             -> ID de cada pieza del plano (texto)
 
-Después de editar, corre:  python3 importar_dwg.py  <archivo_editado.dwg>
+  CORTE-TILE            -> contorno de cada baldosa entera que se abre para cortar
+  CORTE-RECORTE         -> el recorte ya ACOMODADO dentro de su baldosa
+  CORTE-SOBRANTE        -> sobrante reutilizable de esa baldosa
+  CORTE-DESPERDICIO     -> desperdicio (muy corto)
+  CORTE-TEXTO           -> etiquetas del plan de corte (texto)
+
+El "plan de corte" se dibuja DEBAJO del plano: cada baldosa que hay que abrir,
+con el/los recorte(s) que salen de ella ya puestos en su lugar. Así ves, pieza
+por pieza, qué se corta y de dónde sale — todo en su propio layer.
+
+Edita en AutoCAD (agrega/mueve/borra en la capa correcta), guarda como DXF y:
+    python3 importar_dwg.py  Cabernet_editable.dxf
 
 Uso:  python3 exportar_dwg.py  [Cabernet]
 """
@@ -25,12 +32,62 @@ import sys
 import subprocess
 
 import ezdxf
-from datos_piezas import cargar_anotado
+from datos_piezas import cargar_anotado, PREF_CORTE
+from optimizador_recortes import PISOS
+from pdf_material import empacar, es_reutilizable
 
 DXF2DWG = os.environ.get("DXF2DWG", "/tmp/libredwg-0.13.3/programs/dxf2dwg")
 
 CAPA = {"Moret": "PISO-MORET", "Royal Walnut": "PISO-ROYAL-WALNUT"}
-ACI = {"PISO-MORET": 30, "PISO-ROYAL-WALNUT": 4, "ETIQUETAS": 7, "AGREGAR-AQUI": 1}
+LAYERS = {
+    "PISO-MORET": 30, "PISO-ROYAL-WALNUT": 4, "ETIQUETAS": 7,
+    "CORTE-TILE": 7, "CORTE-RECORTE": 3, "CORTE-SOBRANTE": 2,
+    "CORTE-DESPERDICIO": 1, "CORTE-TEXTO": 5,
+}
+
+
+def _rect(msp, x, y, w, h, layer):
+    msp.add_lwpolyline([(x, y), (x + w, y), (x + w, y + h), (x, y + h)],
+                       close=True, dxfattribs={"layer": layer})
+
+
+def _txt(msp, s, x, y, h, layer):
+    t = msp.add_text(s, dxfattribs={"layer": layer, "height": h})
+    t.set_placement((x, y), align=ezdxf.enums.TextEntityAlignment.MIDDLE_CENTER)
+
+
+def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
+    """Dibuja, debajo del plano, cada baldosa que se abre con sus recortes puestos."""
+    y_top = y0_plan - 2.0
+    for material in ("Moret", "Royal Walnut"):
+        baldosas, mapa, (anchoB, largoB) = empacar(piezas, material)
+        if not baldosas:
+            continue
+        pc = PREF_CORTE[material]
+        cols = 26
+        cellw = anchoB + 0.18
+        cellh = largoB + 0.45
+        _txt(msp, f"PLAN DE CORTE - {material.upper()}  ({len(baldosas)} baldosas a abrir)",
+             x0_plan + 3, y_top + 0.5, 0.25, "CORTE-TEXTO")
+        for i, b in enumerate(baldosas):
+            col = i % cols
+            row = i // cols
+            ox = x0_plan + col * cellw
+            oy = y_top - (row + 1) * cellh
+            _rect(msp, ox, oy, anchoB, largoB, "CORTE-TILE")
+            _txt(msp, f"{pc}-{i+1:02d}", ox + anchoB / 2, oy + largoB + 0.10, 0.07, "CORTE-TEXTO")
+            for (x, y, w, l, pid, rot) in b.piezas:
+                _rect(msp, ox + x, oy + y, w, l, "CORTE-RECORTE")
+                dest = mapa.get(pid)
+                etq = pid + (f"->({dest['x']:.1f},{dest['y']:.1f})" if dest else "")
+                _txt(msp, etq, ox + x + w / 2, oy + y + l / 2, min(0.05, w / 3.5), "CORTE-TEXTO")
+            for (fx, fy, fw, fl) in b.libres:
+                if fw <= 0.005 or fl <= 0.005:
+                    continue
+                capa = "CORTE-SOBRANTE" if es_reutilizable(fw, fl) else "CORTE-DESPERDICIO"
+                _rect(msp, ox + fx, oy + fy, fw, fl, capa)
+        filas = (len(baldosas) + cols - 1) // cols
+        y_top = y_top - filas * cellh - 2.0
 
 
 def exportar(modelo):
@@ -38,17 +95,20 @@ def exportar(modelo):
     doc = ezdxf.new("R2010", setup=True)
     doc.units = ezdxf.units.M
     msp = doc.modelspace()
-    for nombre, color in ACI.items():
+    for nombre, color in LAYERS.items():
         doc.layers.add(nombre).color = color
 
+    # --- Plano: piezas + IDs ---
     for p in piezas:
-        capa = CAPA[p["material"]]
         x0, y0, w, h = p["x0"], p["y0"], p["wx"], p["hy"]
-        msp.add_lwpolyline([(x0, y0), (x0 + w, y0), (x0 + w, y0 + h), (x0, y0 + h)],
-                           close=True, dxfattribs={"layer": capa})
+        _rect(msp, x0, y0, w, h, CAPA[p["material"]])
         th = min(max(0.03, min(w, h) * 0.30), 0.09)
-        t = msp.add_text(p["id"], dxfattribs={"layer": "ETIQUETAS", "height": th})
-        t.set_placement((p["x"], p["y"]), align=ezdxf.enums.TextEntityAlignment.MIDDLE_CENTER)
+        _txt(msp, p["id"], p["x"], p["y"], th, "ETIQUETAS")
+
+    # --- Plan de corte (debajo del plano) ---
+    minx = min(p["x0"] for p in piezas)
+    miny = min(p["y0"] for p in piezas)
+    dibujar_plan_corte(msp, piezas, minx, miny)
 
     dxf = f"{modelo}_editable.dxf"
     dwg = f"{modelo}_editable.dwg"
@@ -58,10 +118,11 @@ def exportar(modelo):
         print(f"DWG editable: {dwg}")
     else:
         print(f"(no se encontró dxf2dwg; queda el DXF: {dxf})")
-    print(f"Piezas exportadas: {len(piezas)}  "
-          f"(Moret {sum(1 for p in piezas if p['material']=='Moret')}, "
-          f"Royal {sum(1 for p in piezas if p['material']=='Royal Walnut')})")
-    print("Edita en AutoCAD y luego: python3 importar_dwg.py " + dwg)
+    nrec = sum(1 for p in piezas if not p["completa"])
+    print(f"DXF editable: {dxf}")
+    print(f"Piezas en el plano: {len(piezas)}  (recortes: {nrec})")
+    print("Capas: PISO-MORET, PISO-ROYAL-WALNUT, ETIQUETAS, "
+          "CORTE-TILE/RECORTE/SOBRANTE/DESPERDICIO/TEXTO")
 
 
 if __name__ == "__main__":
