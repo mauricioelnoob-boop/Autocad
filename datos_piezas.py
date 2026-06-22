@@ -150,6 +150,9 @@ def recortar(anotadas, muros_path, ignorar=None, trim_muros=False):
             corto = min(p["wx"], p["hy"])
             if corto < 0.20 and p["material"] == "Royal Walnut":
                 pass                                   # tablón de recámara: respetar
+            elif p.get("relleno") and frac > 0.06:     # relleno fantasma que pisa un muro
+                recortadas += 1
+                continue
             elif corto < 0.10:                         # demasiado fina = junta/zoclo
                 recortadas += 1
                 continue
