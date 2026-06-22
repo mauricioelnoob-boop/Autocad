@@ -54,11 +54,16 @@ MODELOS = {
             _recorte("Moret", 494.955, -91.520, 0.250, 1.194),   # der. de PB-M-147 hacia el baño
             _recorte("Moret", 495.389, -91.460, 0.170, 1.120),   # izq. de PB-M-135
             _recorte("Moret", 495.389, -92.530, 0.170, 1.068),   # izq. de PB-M-151
+            _recorte("Moret", 502.654, -85.960, 0.090, 0.900),   # der. de PA-M-005 (junto al Royal)
+            _recorte("Moret", 506.010, -89.730, 0.214, 0.600),   # debajo de PA-M-050 (izq. del muro/jamba)
+            _recorte("Moret", 506.344, -89.730, 0.268, 0.600),   # debajo de PA-M-050 (der. del muro/jamba)
         ],
-        # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna:
+        # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna,
+        # y PB-M-150 que debe llegar hasta la esquina inferior del baño:
         "redimensionar": [
             {"x": 490.12, "y": -83.77, "x0": 489.539, "y0": -84.346, "wx": 0.600, "hy": 1.146},  # arriba de PB-M-054
             {"x": 490.12, "y": -92.05, "x0": 489.539, "y0": -92.572, "wx": 0.600, "hy": 1.050},  # izq. de PB-M-159
+            {"x": 497.47, "y": -91.94, "x0": 497.365, "y0": -92.530, "wx": 0.214, "hy": 1.068},  # PB-M-150 a la esquina
         ],
         # Recámaras: alinear el tope de cada columna de Royal con el muro de arriba.
         "tope_royal_regiones": [
@@ -82,6 +87,7 @@ MODELOS = {
             (499.70, 502.80, -89.10, -86.70),   # escalera
             (496.70, 497.60, -88.65, -88.00),   # boiler
             (489.00, 497.00, -83.21, -83.11),   # hueco de cancelería (tira de 8 cm)
+            (496.10, 496.60, -91.47, -91.40),   # tiritas de 4 cm (polilínea no cerrada) der. de PB-M-135
         ],
     },
     "Merlot": {
