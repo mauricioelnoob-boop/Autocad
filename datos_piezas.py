@@ -53,6 +53,97 @@ def _retipo(p):
                        "corte_ancho" if largo_ok else "corte_esquina")
 
 
+def recortar(anotadas, muros_path):
+    """Recorta las piezas según los MUROS y la frontera de material:
+      * En la recámara manda Royal: las piezas Moret que pisan Royal se recortan
+        a la parte que NO pisa Royal (corte de pared/transición que faltaba).
+      * Todas las piezas se recortan por los muros estructurales.
+    Devuelve (lista_filtrada, n_recortadas). Si no hay shapely, no hace nada."""
+    try:
+        from shapely.geometry import box, Polygon
+        from shapely.ops import unary_union
+    except Exception:
+        return anotadas, 0
+
+    def rect(p):
+        return box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+
+    def es_muro_delgado(poly):
+        # Muros reales = bandas delgadas. Descarta contornos de cuarto rellenados
+        # (área grande Y ancho mínimo grande), que recortarían de más.
+        xs = [a[0] for a in poly]; ys = [a[1] for a in poly]
+        mindim = min(max(xs) - min(xs), max(ys) - min(ys))
+        return not (Polygon(poly).buffer(0).area > 2.0 and mindim > 0.5)
+
+    try:
+        raw = json.load(open(muros_path, encoding="utf-8"))
+        muros = unary_union([Polygon(m).buffer(0) for m in raw
+                             if len(m) >= 3 and es_muro_delgado(m)])
+    except Exception:
+        from shapely.geometry import GeometryCollection
+        muros = GeometryCollection()
+
+    royal = unary_union([rect(p) for p in anotadas if p["material"] == "Royal Walnut"])
+
+    def trim(p, obst):
+        """Hace UN corte recto (guillotina) para quitar el traslape con obst,
+        dejando el rectángulo más grande sin traslape. Devuelve True si cortó,
+        False si no lo toca, None si no se puede limpiar con un corte (quitar)."""
+        r = rect(p)
+        inter = r.intersection(obst)
+        if inter.area < 0.02 * r.area:
+            return False
+        ix0, iy0, ix1, iy1 = inter.bounds
+        rx0, ry0, rx1, ry1 = p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"]
+        cands = []
+        if iy0 > ry0 + 0.02: cands.append((rx0, ry0, rx1, iy0))   # conservar abajo
+        if iy1 < ry1 - 0.02: cands.append((rx0, iy1, rx1, ry1))   # conservar arriba
+        if ix0 > rx0 + 0.02: cands.append((rx0, ry0, ix0, ry1))   # conservar izquierda
+        if ix1 < rx1 - 0.02: cands.append((ix1, ry0, rx1, ry1))   # conservar derecha
+        best = None
+        for (a, b, c, d) in cands:
+            cand = box(a, b, c, d)
+            if cand.intersection(obst).area < 0.02 * cand.area:
+                if best is None or cand.area > best[0]:
+                    best = (cand.area, a, b, c, d)
+        if best is None:
+            return None
+        _, a, b, c, d = best
+        p["x0"], p["y0"] = round(a, 4), round(b, 4)
+        p["wx"], p["hy"] = round(c - a, 4), round(d - b, 4)
+        p["x"], p["y"] = round((a + c) / 2, 3), round((b + d) / 2, 3)
+        _retipo(p)
+        return True
+
+    salida, recortadas = [], 0
+    for p in anotadas:
+        if rect(p).area <= 0:
+            salida.append(p); continue
+        # 1) En la recámara manda Royal: una pieza Moret mayoritariamente dentro
+        #    de Royal es un error del despiece -> se quita; si sólo asoma, se recorta.
+        if p["material"] == "Moret":
+            r = rect(p)
+            frac = r.intersection(royal).area / r.area
+            if frac > 0.50:
+                recortadas += 1
+                continue
+            if frac > 0.03:
+                if trim(p, royal) is None:    # no se limpia con un corte -> quitar
+                    recortadas += 1
+                    continue
+                recortadas += 1
+        # 2) Corte por muros estructurales (delgados)
+        if not muros.is_empty:
+            res = trim(p, muros)
+            if res is None:
+                recortadas += 1
+                continue
+            if res:
+                recortadas += 1
+        salida.append(p)
+    return salida, recortadas
+
+
 def cargar_anotado(modelo="Cabernet"):
     cfg = MODELOS[modelo]
     piezas = json.load(open(cfg["piezas"], encoding="utf-8"))
@@ -107,6 +198,9 @@ def cargar_anotado(modelo="Cabernet"):
             if not r["completa"] and cerca["tipo_corte"] == "completa":
                 cerca["tipo_corte"] = "corte_largo"
 
+    # Recorte por muros y frontera de material (Royal manda en la recámara)
+    anotadas, cargar_anotado.recortadas = recortar(anotadas, cfg.get("muros", ""))
+
     # IDs y pieza de corte, por (planta, material)
     grupos = defaultdict(list)
     for p in anotadas:
@@ -135,13 +229,15 @@ def cargar_anotado(modelo="Cabernet"):
 
 
 cargar_anotado.excluidas = 0
+cargar_anotado.recortadas = 0
 
 
 if __name__ == "__main__":
     import sys
     modelo = sys.argv[1] if len(sys.argv) > 1 else "Cabernet"
     ps = cargar_anotado(modelo)
-    print(f"{modelo}: {len(ps)} piezas   (charolas excluidas: {cargar_anotado.excluidas})")
+    print(f"{modelo}: {len(ps)} piezas   (charolas excluidas: {cargar_anotado.excluidas}, "
+          f"recortadas por muro/frontera: {cargar_anotado.recortadas})")
     agg = defaultdict(lambda: [0, 0])
     for p in ps:
         k = (p["planta"], p["material"])

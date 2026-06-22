@@ -28,6 +28,7 @@ MODELOS = {
         "dwg": "planos/cabernet.dwg",
         "json": "/tmp/cabernet.json",
         "piezas": "piezas_cabernet.json",
+        "muros": "muros_cabernet.json",
         "capa": "A-PISO",
         "x_corte": 498.7,            # planta baja: x < x_corte
         "bbox_valido": None,         # sin bloques sueltos
@@ -45,6 +46,7 @@ MODELOS = {
         "dwg": "planos/merlot.dwg",
         "json": "/tmp/merlot.json",
         "piezas": "piezas_merlot.json",
+        "muros": "muros_merlot.json",
         "capa": "A-PISO",
         "x_corte": 325.0,
         "bbox_valido": (300.0, 400.0, -200.0, 100.0),   # descarta bloque suelto en (145,58)
@@ -61,6 +63,7 @@ MODELOS = {
         "dwg": "planos/chardonnay.dwg",
         "json": "/tmp/chardonnay.json",
         "piezas": "piezas_chardonnay.json",
+        "muros": "muros_chardonnay.json",
         "capa": "A-PISO",
         "x_corte": 281.9,
         "bbox_valido": None,
