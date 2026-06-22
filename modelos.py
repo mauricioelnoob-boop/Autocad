@@ -167,6 +167,10 @@ MODELOS = {
         "excluir_royal_baja": True,
         "piezas_extra": [
             _recorte("Moret", 277.503, -67.672, 0.180, 0.750),   # continuidad PB-M-120 <-> PB-M-106 (puerta)
+            _recorte("Royal Walnut", 287.70, -61.215, 0.180, 0.483),  # mitad Royal junto a PA-M-001
+        ],
+        "redimensionar": [
+            {"x": 288.32, "y": -60.97, "x0": 287.88, "y0": -61.215, "wx": 0.692, "hy": 0.483},  # PA-M-001 se extiende hasta la mitad
         ],
         "reclasificar": [
             # Tiras de orilla de recámaras que salieron Moret -> Royal Walnut.

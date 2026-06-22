@@ -53,7 +53,7 @@ def _retipo(p):
                        "corte_ancho" if largo_ok else "corte_esquina")
 
 
-def recortar(anotadas, muros_path, ignorar=None):
+def recortar(anotadas, muros_path, ignorar=None, trim_muros=False):
     """Recorta las piezas según los MUROS y la frontera de material:
       * En la recámara manda Royal: las piezas Moret que pisan Royal se recortan
         a la parte que NO pisa Royal (corte de pared/transición que faltaba).
@@ -141,8 +141,10 @@ def recortar(anotadas, muros_path, ignorar=None):
                     recortadas += 1
                     continue
                 recortadas += 1
-        # 2) Corte por muros estructurales (delgados)
-        if not muros.is_empty:
+        # 2) Corte por muros estructurales (delgados). Por defecto NO se hace:
+        #    el despiece original ya viene ajustado a los muros; recortar otra vez
+        #    desfasa las piezas (y confunde linternillas con muros).
+        if trim_muros and not muros.is_empty:
             res = trim(p, muros)
             if res is None:
                 recortadas += 1
@@ -399,7 +401,8 @@ def cargar_anotado(modelo="Cabernet"):
 
     # Recorte por muros y frontera de material (Royal manda en la recámara)
     anotadas, cargar_anotado.recortadas = recortar(
-        anotadas, cfg.get("muros", ""), cfg.get("muros_ignorar", []))
+        anotadas, cfg.get("muros", ""), cfg.get("muros_ignorar", []),
+        cfg.get("recortar_muros", False))
 
     # Zonas que NO se despiezan (escalera, boiler, hueco de cancelería): se
     # quitan al final para que tampoco sobrevivan piezas rellenadas en ese hueco.
