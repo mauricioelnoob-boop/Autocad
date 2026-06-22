@@ -107,6 +107,11 @@ MODELOS = {
         "excluir_royal_baja": True,
         "piezas_extra": [],
         "reclasificar": [],
+        # La tira vertical del pasillo (x≈329) se coló a la recámara como Royal;
+        # es pasillo, va en Moret.
+        "forzar_material": [
+            {"box": (328.85, 329.30, -130.60, -124.70), "material": "Moret"},
+        ],
     },
     "Chardonnay": {
         "dwg": "planos/chardonnay.dwg",

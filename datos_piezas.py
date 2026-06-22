@@ -198,15 +198,39 @@ def rellenar_huecos(anotadas):
     return buenos
 
 
-def completar_tope_royal(anotadas, regiones):
-    """En cada recámara (región dada), alinea el tope de cada columna de Royal
-    Walnut con el muro de arriba: si la columna no llega, agrega el recorte que
-    falta encima. Así no quedan huecos contra el muro superior."""
+def completar_tope_royal(anotadas, regiones=None):
+    """Termina cada tablón de recámara HASTA el muro de arriba. Detecta cada
+    recámara como un grupo conexo de tablones de Royal Walnut (componentes
+    conexas) y, en cada columna que no llega al tope del grupo, agrega el recorte
+    que falta. Si se pasan `regiones`, sólo trabaja dentro de ellas."""
+    royals = [p for p in anotadas if p["material"] == "Royal Walnut"]
+    if regiones:
+        royals = [p for p in royals
+                  if any(x0 <= p["x"] <= x1 and y0 <= p["y"] <= y1
+                         for (x0, x1, y0, y1) in regiones)]
+    n = len(royals)
+    par = list(range(n))
+
+    def find(a):
+        while par[a] != a:
+            par[a] = par[par[a]]; a = par[a]
+        return a
+
+    def cerca(a, b):
+        return not (a["x0"] + a["wx"] + 0.12 < b["x0"] or b["x0"] + b["wx"] + 0.12 < a["x0"]
+                    or a["y0"] + a["hy"] + 0.12 < b["y0"] or b["y0"] + b["hy"] + 0.12 < a["y0"])
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if cerca(royals[i], royals[j]):
+                par[find(i)] = find(j)
+    grupos = defaultdict(list)
+    for i, p in enumerate(royals):
+        grupos[find(i)].append(p)
+
     nuevos = []
-    for (x0, x1, y0, y1) in regiones:
-        g = [p for p in anotadas if p["material"] == "Royal Walnut"
-             and x0 <= p["x"] <= x1 and y0 <= p["y"] <= y1]
-        if not g:
+    for g in grupos.values():
+        if len(g) < 4:                                  # ignora restos sueltos
             continue
         ytop = max(p["y0"] + p["hy"] for p in g)
         cols = defaultdict(list)
@@ -282,7 +306,22 @@ def cargar_anotado(modelo="Cabernet"):
 
     royal_ids, otro_ids = clusters_royal_y_otro(piezas)
 
+    # Overrides por región: corrige clasificaciones donde un tablón de pasillo se
+    # coló a una recámara (Royal por error) o al revés. material=None excluye.
+    #   {"box": (x0, x1, y0, y1), "material": "Moret"|"Royal Walnut"|None}
+    forzar = cfg.get("forzar_material", [])
+
+    def forzado(p):
+        for f in forzar:
+            x0, x1, y0, y1 = f["box"]
+            if x0 <= p["x"] <= x1 and y0 <= p["y"] <= y1:
+                return f["material"], True
+        return None, False
+
     def material_de(p):
+        mat_f, hit = forzado(p)
+        if hit:
+            return mat_f                     # override explícito (incl. None=excluir)
         if id(p) in otro_ids:
             return None                      # baño / otro piso -> excluir
         if id(p) in royal_ids:
