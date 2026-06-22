@@ -85,8 +85,8 @@ def main():
           f"(Moret {sum(1 for p in piezas if p['material']=='Moret')}, "
           f"Royal {sum(1 for p in piezas if p['material']=='Royal Walnut')}).")
 
-    for material, suf in [("Moret", "Moret"), ("Royal Walnut", "RoyalWalnut")]:
-        path = f"{suf}_{args.modelo}_Despiece_EDITADO.pdf"
+    for material, suf in [("Moret", "Moret-Arena"), ("Royal Walnut", "Royal-Walnut")]:
+        path = f"{args.modelo}_Despiece-Piso_{suf}_EDITADO.pdf"
         r = pdf_material.hacer_pdf(piezas, material, path, args.modelo + " (editado)")
         print(f"  {material}: {r[0]} piezas / {r[1]} cajas -> {path}")
 

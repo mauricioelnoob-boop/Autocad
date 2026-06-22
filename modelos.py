@@ -112,6 +112,11 @@ MODELOS = {
         "forzar_material": [
             {"box": (328.85, 329.30, -130.60, -124.70), "material": "Moret"},
         ],
+        # Baño de planta baja (claves 5/5 = Urbania): el despiece dejó el Moret
+        # continuo; ese piso es otro material, se excluye. (Por confirmar.)
+        "cajas_excluir": [
+            (322.30, 324.10, -129.05, -128.00),   # baño P.B.
+        ],
     },
     "Chardonnay": {
         "dwg": "planos/chardonnay.dwg",
@@ -129,5 +134,11 @@ MODELOS = {
         "excluir_royal_baja": True,
         "piezas_extra": [],
         "reclasificar": [],
+        # Baño de planta baja (claves 5/5/2/4 = Urbania/Malla/concreto): el
+        # despiece dejó el Moret continuo cruzando el muro; ese piso es otro
+        # material, se excluye.
+        "cajas_excluir": [
+            (277.85, 281.25, -67.00, -65.78),   # baño P.B.
+        ],
     },
 }
