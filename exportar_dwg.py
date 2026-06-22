@@ -43,6 +43,7 @@ LAYERS = {
     "PISO-MORET": 30, "PISO-ROYAL-WALNUT": 4, "ETIQUETAS": 7,
     "CORTE-TILE": 7, "CORTE-RECORTE": 3, "CORTE-SOBRANTE": 2,
     "CORTE-DESPERDICIO": 1, "CORTE-TEXTO": 5,
+    "SOBRANTES-MAPA": 6, "SOBRANTES-RECORTE": 2, "SOBRANTES-TEXTO": 6,
 }
 
 
@@ -56,6 +57,33 @@ def _txt(msp, s, x, y, h, layer):
     t.set_placement((x, y), align=ezdxf.enums.TextEntityAlignment.MIDDLE_CENTER)
 
 
+def dibujar_mapa_sobrantes(msp, piezas):
+    """En CADA recorte del plano, dibuja el tablón COMPLETO del que sale, extendido
+    hacia AFUERA de la casa: así, apagando lo demás, queda un mapa de todos los
+    sobrantes y de dónde salen. (Si es orilla, sale por fuera; si no, se encima.)"""
+    cx = sum(p["x"] for p in piezas) / len(piezas)
+    cy = sum(p["y"] for p in piezas) / len(piezas)
+    for p in piezas:
+        if p["completa"]:
+            continue
+        W, L = PISOS[p["material"]]          # W = ancho (x), L = largo (y) del tablón
+        W = max(W, p["wx"]); L = max(L, p["hy"])
+        dx = 1 if p["x"] >= cx else -1
+        dy = 1 if p["y"] >= cy else -1
+        tx = p["x0"] if dx > 0 else p["x0"] + p["wx"] - W
+        ty = p["y0"] if dy > 0 else p["y0"] + p["hy"] - L
+        # tablón completo (contorno) y el sobrante (lo que NO es el recorte)
+        _rect(msp, tx, ty, W, L, "SOBRANTES-MAPA")
+        sob_w = round(W - p["wx"], 3); sob_l = round(L - p["hy"], 3)
+        if sob_w > 0.02:                      # sobrante de ancho
+            ox = (p["x0"] + p["wx"]) if dx > 0 else tx
+            _rect(msp, ox, p["y0"], W - p["wx"], p["hy"], "SOBRANTES-RECORTE")
+        if sob_l > 0.02:                      # sobrante de largo
+            oy = (p["y0"] + p["hy"]) if dy > 0 else ty
+            _rect(msp, p["x0"], oy, p["wx"], L - p["hy"], "SOBRANTES-RECORTE")
+        _txt(msp, p["id"], tx + W / 2, ty + L / 2, min(0.05, W / 4), "SOBRANTES-TEXTO")
+
+
 def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
     """Dibuja, debajo del plano, cada baldosa que se abre con sus recortes puestos."""
     y_top = y0_plan - 2.0
@@ -64,9 +92,9 @@ def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
         if not baldosas:
             continue
         pc = PREF_CORTE[material]
-        cols = 26
-        cellw = anchoB + 0.18
-        cellh = largoB + 0.45
+        cols = 22
+        cellw = anchoB + 0.45          # más separación horizontal
+        cellh = largoB + 0.70          # más separación vertical (texto no se encima)
         _txt(msp, f"PLAN DE CORTE - {material.upper()}  ({len(baldosas)} baldosas a abrir)",
              x0_plan + 3, y_top + 0.5, 0.25, "CORTE-TEXTO")
         for i, b in enumerate(baldosas):
@@ -75,12 +103,10 @@ def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
             ox = x0_plan + col * cellw
             oy = y_top - (row + 1) * cellh
             _rect(msp, ox, oy, anchoB, largoB, "CORTE-TILE")
-            _txt(msp, f"{pc}-{i+1:02d}", ox + anchoB / 2, oy + largoB + 0.10, 0.07, "CORTE-TEXTO")
+            _txt(msp, f"{pc}-{i+1:02d}", ox + anchoB / 2, oy + largoB + 0.14, 0.06, "CORTE-TEXTO")
             for (x, y, w, l, pid, rot) in b.piezas:
                 _rect(msp, ox + x, oy + y, w, l, "CORTE-RECORTE")
-                dest = mapa.get(pid)
-                etq = pid + (f"->({dest['x']:.1f},{dest['y']:.1f})" if dest else "")
-                _txt(msp, etq, ox + x + w / 2, oy + y + l / 2, min(0.05, w / 3.5), "CORTE-TEXTO")
+                _txt(msp, pid, ox + x + w / 2, oy + y + l / 2, min(0.035, w / 4.5), "CORTE-TEXTO")
             for (fx, fy, fw, fl) in b.libres:
                 if fw <= 0.005 or fl <= 0.005:
                     continue
@@ -104,6 +130,9 @@ def exportar(modelo):
         _rect(msp, x0, y0, w, h, CAPA[p["material"]])
         th = min(max(0.03, min(w, h) * 0.30), 0.09)
         _txt(msp, p["id"], p["x"], p["y"], th, "ETIQUETAS")
+
+    # --- Mapa de sobrantes (sobre el plano, saliendo hacia afuera) ---
+    dibujar_mapa_sobrantes(msp, piezas)
 
     # --- Plan de corte (debajo del plano) ---
     minx = min(p["x0"] for p in piezas)

@@ -145,44 +145,66 @@ def recortar(anotadas, muros_path):
 
 
 def rellenar_huecos(anotadas):
-    """Genera las piezas que el DWG olvidó dibujar: huecos DENTRO de una columna
-    (hay pieza arriba y abajo) de hasta ~1 tablón de alto y con vecino lateral
-    (=dentro del piso, no un vacío entre cuartos). No genera fantasmas."""
-    from collections import defaultdict
-    cols = defaultdict(list)
-    for p in anotadas:
-        cols[(p["planta"], p["material"], round(p["x0"], 2))].append(p)
-
-    def vecino_lateral(mat, cx_izq, cx_der, cy):
-        for q in anotadas:
-            if q["material"] != mat:
-                continue
-            if q["y0"] - 0.05 <= cy <= q["y0"] + q["hy"] + 0.05:
-                if abs((q["x0"] + q["wx"]) - cx_izq) < 0.25 or abs(q["x0"] - cx_der) < 0.25:
-                    return True
-        return False
-
+    """Genera las piezas que el DWG olvidó dibujar: huecos ENTRE piezas dentro de
+    una misma columna o fila (hay pieza a ambos lados del hueco), de hasta ~1
+    tablón. No rellena orillas abiertas ni vacíos grandes entre cuartos."""
     nuevos = []
-    for (pl, mat, _), lst in cols.items():
-        if len(lst) < 2:
+    for eje in ("col", "fila"):
+        bandas = defaultdict(list)
+        for p in anotadas:
+            clave = round(p["x0"], 2) if eje == "col" else round(p["y0"], 2)
+            bandas[(p["planta"], p["material"], clave)].append(p)
+        for (pl, mat, _), lst in bandas.items():
+            if len(lst) < 2:
+                continue
+            if eje == "col":
+                lst.sort(key=lambda p: p["y0"])
+                ext = sorted(p["wx"] for p in lst)[len(lst) // 2]   # ancho típico
+                lim = PISOS[mat][1] + 0.05                          # 1 tablón de largo
+            else:
+                lst.sort(key=lambda p: p["x0"])
+                ext = sorted(p["hy"] for p in lst)[len(lst) // 2]
+                lim = PISOS[mat][0] + 0.05
+            for a, b in zip(lst, lst[1:]):
+                if eje == "col":
+                    ini = a["y0"] + a["hy"]; gap = b["y0"] - ini
+                else:
+                    ini = a["x0"] + a["wx"]; gap = b["x0"] - ini
+                if not (0.06 < gap <= lim):
+                    continue
+                if eje == "col":
+                    p = _nueva(mat, pl, a["x0"], ini, ext, gap)
+                else:
+                    p = _nueva(mat, pl, ini, a["y0"], gap, ext)
+                nuevos.append(p)
+
+    # Seguridad anti-fantasmas: descarta rellenos que se encimen con una pieza
+    # real o con otro relleno (=el "hueco" en realidad estaba ocupado).
+    try:
+        from shapely.geometry import box
+        from shapely.ops import unary_union
+        reales = unary_union([box(q["x0"], q["y0"], q["x0"] + q["wx"], q["y0"] + q["hy"])
+                              for q in anotadas])
+    except Exception:
+        return nuevos
+    buenos = []
+    ocupado = reales
+    for p in sorted(nuevos, key=lambda q: -q["wx"] * q["hy"]):
+        r = box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+        if r.area <= 0 or r.intersection(ocupado).area > 0.10 * r.area:
             continue
-        lst.sort(key=lambda p: p["y0"])
-        w = sorted(p["wx"] for p in lst)[len(lst) // 2]
-        for a, b in zip(lst, lst[1:]):
-            top = a["y0"] + a["hy"]
-            gap = b["y0"] - top
-            if not (0.06 < gap <= 1.25):
-                continue
-            x0 = a["x0"]; cy = top + gap / 2
-            if not vecino_lateral(mat, x0, x0 + w, cy):
-                continue
-            p = {"material": mat, "x0": round(x0, 4), "y0": round(top, 4),
-                 "wx": round(w, 4), "hy": round(gap, 4),
-                 "x": round(x0 + w / 2, 3), "y": round(top + gap / 2, 3),
-                 "planta": pl, "relleno": True}
-            _retipo(p)
-            nuevos.append(p)
-    return nuevos
+        buenos.append(p)
+        ocupado = unary_union([ocupado, r])
+    return buenos
+
+
+def _nueva(mat, pl, x0, y0, wx, hy):
+    p = {"material": mat, "x0": round(x0, 4), "y0": round(y0, 4),
+         "wx": round(wx, 4), "hy": round(hy, 4),
+         "x": round(x0 + wx / 2, 3), "y": round(y0 + hy / 2, 3),
+         "planta": pl, "relleno": True}
+    _retipo(p)
+    return p
 
 
 def cargar_anotado(modelo="Cabernet"):
