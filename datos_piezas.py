@@ -424,11 +424,49 @@ def cargar_anotado(modelo="Cabernet"):
             anotadas.remove(cerca)
             excluidas += 1
 
+    # Resolver SOLAPES: el despiece original puede traer polilíneas duplicadas y
+    # mis piezas agregadas (extra/relleno) pueden encimarse con una original ya
+    # restaurada. Se prioriza la pieza ORIGINAL y la más grande; se descarta la
+    # que se encima >40% de su área.
+    anotadas = _quitar_solapes(anotadas)
+
     # IDs y pieza de corte, por (planta, material)
     asignar_ids_corte(anotadas)
 
     cargar_anotado.excluidas = excluidas
     return anotadas
+
+
+def _quitar_solapes(piezas):
+    try:
+        from shapely.geometry import box
+    except Exception:
+        return piezas
+
+    def agregada(p):
+        return 1 if (p.get("extra") or p.get("relleno")) else 0
+
+    # Originales primero, y de mayor a menor área (se conserva la pieza "real" grande).
+    orden = sorted(piezas, key=lambda p: (agregada(p), -(p["wx"] * p["hy"])))
+    keep, rects = [], []
+    for p in orden:
+        r = box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+        if r.area <= 0:
+            continue
+        dup = False
+        for q, rq in rects:
+            if abs(p["x"] - q["x"]) > 1.6 or abs(p["y"] - q["y"]) > 1.6:
+                continue
+            if r.intersection(rq).area > 0.40 * min(r.area, rq.area):
+                dup = True
+                break
+        if not dup:
+            keep.append(p); rects.append((p, r))
+    _quitar_solapes.quitadas = len(piezas) - len(keep)
+    return keep
+
+
+_quitar_solapes.quitadas = 0
 
 
 def asignar_ids_corte(anotadas):
