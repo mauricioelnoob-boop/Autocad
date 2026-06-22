@@ -141,16 +141,28 @@ def recortar(anotadas, muros_path, ignorar=None, trim_muros=False):
                     recortadas += 1
                     continue
                 recortadas += 1
-        # 2) Corte por muros estructurales (delgados). Por defecto NO se hace:
-        #    el despiece original ya viene ajustado a los muros; recortar otra vez
-        #    desfasa las piezas (y confunde linternillas con muros).
+        # 2) Muros REALES (capa A-MUROS): quita las tiras finas de Moret que caen
+        #    sobre un muro (líneas de zoclo) y recorta las piezas anchas que cruzan
+        #    un muro. Respeta los tablones angostos de Royal (orilla de recámara).
         if trim_muros and not muros.is_empty:
-            res = trim(p, muros)
-            if res is None:
+            r = rect(p)
+            frac = r.intersection(muros).area / r.area
+            corto = min(p["wx"], p["hy"])
+            if corto < 0.20 and p["material"] == "Royal Walnut":
+                pass                                   # tablón de recámara: respetar
+            elif corto < 0.10:                         # demasiado fina = junta/zoclo
                 recortadas += 1
                 continue
-            if res:
+            elif corto < 0.20 and frac > 0.35:         # tira fina sobre muro = zoclo
                 recortadas += 1
+                continue
+            elif frac > 0.30:                          # pieza que cruza el muro
+                res = trim(p, muros)
+                if res is None:
+                    recortadas += 1
+                    continue
+                if res:
+                    recortadas += 1
         salida.append(p)
     return salida, recortadas
 
@@ -181,7 +193,7 @@ def rellenar_huecos(anotadas):
                     ini = a["y0"] + a["hy"]; gap = b["y0"] - ini
                 else:
                     ini = a["x0"] + a["wx"]; gap = b["x0"] - ini
-                if not (0.06 < gap <= lim):
+                if not (0.20 < gap <= lim):       # <0.20 = junta/zoclo, no es pieza
                     continue
                 if eje == "col":
                     p = _nueva(mat, pl, a["x0"], ini, ext, gap)
@@ -399,10 +411,16 @@ def cargar_anotado(modelo="Cabernet"):
     topes = completar_tope_royal(anotadas, cfg.get("tope_royal_regiones", []))
     anotadas.extend(topes)
 
-    # Recorte por muros y frontera de material (Royal manda en la recámara)
+    # Recorte por MUROS REALES (capa A-MUROS del DWG) y frontera de material:
+    # quita las piezas que caen sobre un muro (líneas de zoclo mal interpretadas)
+    # y recorta las que cruzan un muro. Usa muros_real_<modelo> si existe.
+    import os
+    muros_path = f"muros_real_{modelo.lower()}.json"
+    if not os.path.exists(muros_path):
+        muros_path = cfg.get("muros", "")
     anotadas, cargar_anotado.recortadas = recortar(
-        anotadas, cfg.get("muros", ""), cfg.get("muros_ignorar", []),
-        cfg.get("recortar_muros", False))
+        anotadas, muros_path, cfg.get("muros_ignorar", []),
+        cfg.get("recortar_muros", True))
 
     # Zonas que NO se despiezan (escalera, boiler, hueco de cancelería): se
     # quitan al final para que tampoco sobrevivan piezas rellenadas en ese hueco.
