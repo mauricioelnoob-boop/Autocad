@@ -306,6 +306,16 @@ def cargar_anotado(modelo="Cabernet"):
     # Recorte por muros y frontera de material (Royal manda en la recámara)
     anotadas, cargar_anotado.recortadas = recortar(anotadas, cfg.get("muros", ""))
 
+    # Zonas que NO se despiezan (escalera, boiler, hueco de cancelería): se
+    # quitan al final para que tampoco sobrevivan piezas rellenadas en ese hueco.
+    cajas = cfg.get("cajas_excluir", [])
+    if cajas:
+        def _excluida(p):
+            return any(c[0] <= p["x"] <= c[1] and c[2] <= p["y"] <= c[3] for c in cajas)
+        antes = len(anotadas)
+        anotadas = [p for p in anotadas if not _excluida(p)]
+        excluidas += antes - len(anotadas)
+
     # IDs y pieza de corte, por (planta, material)
     asignar_ids_corte(anotadas)
 

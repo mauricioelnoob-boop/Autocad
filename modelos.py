@@ -41,6 +41,21 @@ MODELOS = {
         "piezas_extra": [_ARRANQUE_CABERNET],
         "reclasificar": [
             {"x": 503.04, "y": -84.90, "material": "Moret", "completa": False},
+            # Tiras delgadas en la orilla de las recámaras: son Royal Walnut, no Moret.
+            {"x": 507.79, "y": -83.17, "material": "Royal Walnut", "completa": False},
+            {"x": 507.79, "y": -84.33, "material": "Royal Walnut", "completa": False},
+            {"x": 502.61, "y": -85.51, "material": "Royal Walnut", "completa": False},
+            {"x": 504.08, "y": -90.36, "material": "Royal Walnut", "completa": False},
+            {"x": 507.76, "y": -90.47, "material": "Royal Walnut", "completa": False},
+            {"x": 507.78, "y": -91.62, "material": "Royal Walnut", "completa": False},
+            {"x": 507.78, "y": -92.78, "material": "Royal Walnut", "completa": False},
+        ],
+        # Zonas que NO se despiezan: escalera (dos hileras), boiler y el hueco de
+        # cancelería (tira de 8 cm). Se excluyen por ubicación.
+        "cajas_excluir": [
+            (499.70, 502.80, -89.10, -86.70),   # escalera
+            (496.70, 497.60, -88.65, -88.00),   # boiler
+            (489.00, 497.00, -83.21, -83.11),   # hueco de cancelería (tira de 8 cm)
         ],
     },
     "Merlot": {
