@@ -159,7 +159,7 @@ def recortar(anotadas, muros_path, ignorar=None, trim_muros=False):
             elif corto < 0.20 and frac > 0.35:         # tira fina sobre muro = zoclo
                 recortadas += 1
                 continue
-            elif frac > 0.30:                          # pieza que cruza el muro
+            elif frac > 0.18:                          # pieza que cruza el muro (sigue su forma)
                 res = trim(p, muros)
                 if res is None:
                     recortadas += 1
