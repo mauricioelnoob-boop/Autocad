@@ -28,7 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v2.6"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v2.7"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
@@ -118,60 +118,70 @@ def hacer_pdf(todas, material, path, modelo=""):
         fig.tight_layout()
         guardar(fig)
 
-        # ---------- Página 1b: MAPA DE CORTES (a dónde brinca cada sobrante) ----------
+        # ---------- Página 1b: RECORTES CON SU PIEZA COMPLETA ----------
         pc = PREF_CORTE[material]
         recortes_plan = [p for p in focal if not p["completa"]]
+        cxh = sum(p["x"] for p in focal) / len(focal) if focal else 0
+        cyh = sum(p["y"] for p in focal) / len(focal) if focal else 0
         if recortes_plan:
-            cxh = sum(p["x"] for p in focal) / len(focal)
-            cyh = sum(p["y"] for p in focal) / len(focal)
             fig, ax = plt.subplots(figsize=(min(24, W * 1.4), min(16, H * 1.4) + 1))
-            # contexto: el plano completo, muy tenue
             for p in focal:
                 ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
                                        facecolor="#eef3f8" if p["completa"] else "#ffffff",
                                        edgecolor="#d5d8dc", lw=0.3))
-            for idx, b in enumerate(baldosas, 1):
-                color = PAL[(idx - 1) % len(PAL)]
-                cents = []
-                for (x, y, w, l, pid, rot) in b.piezas:
-                    p = mapa.get(pid)
-                    if not p:
-                        continue
-                    aw, al = PISOS[material]
-                    # pieza completa de la que sale (extendida hacia afuera de la casa)
-                    Wt = max(aw, p["wx"]); Lt = max(al, p["hy"])
-                    tx = p["x0"] if p["x"] >= cxh else p["x0"] + p["wx"] - Wt
-                    ty = p["y0"] if p["y"] >= cyh else p["y0"] + p["hy"] - Lt
-                    ax.add_patch(Rectangle((tx, ty), Wt, Lt, fill=False,
-                                           edgecolor=color, lw=0.5, ls="--", alpha=0.5))
-                    # el sobrante de esa baldosa (lo que no es el recorte)
-                    if Wt - p["wx"] > 0.02:
-                        ox = (p["x0"] + p["wx"]) if p["x"] >= cxh else tx
-                        ax.add_patch(Rectangle((ox, p["y0"]), Wt - p["wx"], p["hy"],
-                                               facecolor="#fcf3cf", edgecolor="#b7950b",
-                                               lw=0.3, alpha=0.6, hatch=".."))
-                    if Lt - p["hy"] > 0.02:
-                        oy = (p["y0"] + p["hy"]) if p["y"] >= cyh else ty
-                        ax.add_patch(Rectangle((p["x0"], oy), p["wx"], Lt - p["hy"],
-                                               facecolor="#fcf3cf", edgecolor="#b7950b",
-                                               lw=0.3, alpha=0.6, hatch=".."))
-                    # el recorte (en su lugar real del plano)
-                    ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
-                                           facecolor=color, edgecolor="#222", lw=0.6))
-                    th = min(max(0.05, min(p["wx"], p["hy"]) * 0.35), 0.10)
-                    ax.text(p["x"], p["y"], f"{pid}\n{pc}-{idx:02d}", ha="center", va="center",
-                            fontsize=3.8, rotation=0 if p["wx"] >= p["hy"] else 90)
-                    cents.append((p["x"], p["y"]))
-                # flecha: a dónde brinca el sobrante (siguiente recorte de la misma baldosa)
-                for a, bb in zip(cents, cents[1:]):
-                    ax.annotate("", xy=bb, xytext=a,
-                                arrowprops=dict(arrowstyle="->", color=color, lw=0.7,
-                                                alpha=0.55, shrinkA=2, shrinkB=2))
+            for p in recortes_plan:
+                aw, al = PISOS[material]
+                Wt = max(aw, p["wx"]); Lt = max(al, p["hy"])
+                tx = p["x0"] if p["x"] >= cxh else p["x0"] + p["wx"] - Wt
+                ty = p["y0"] if p["y"] >= cyh else p["y0"] + p["hy"] - Lt
+                # baldosa completa de la que sale (contorno punteado, pegada al recorte)
+                ax.add_patch(Rectangle((tx, ty), Wt, Lt, fill=False,
+                                       edgecolor="#7f8c8d", lw=0.5, ls="--"))
+                # el sobrante (lo que NO es el recorte)
+                if Wt - p["wx"] > 0.02:
+                    ox = (p["x0"] + p["wx"]) if p["x"] >= cxh else tx
+                    ax.add_patch(Rectangle((ox, p["y0"]), Wt - p["wx"], p["hy"],
+                                           facecolor="#fcf3cf", edgecolor="#b7950b",
+                                           lw=0.3, alpha=0.7, hatch=".."))
+                if Lt - p["hy"] > 0.02:
+                    oy = (p["y0"] + p["hy"]) if p["y"] >= cyh else ty
+                    ax.add_patch(Rectangle((p["x0"], oy), p["wx"], Lt - p["hy"],
+                                           facecolor="#fcf3cf", edgecolor="#b7950b",
+                                           lw=0.3, alpha=0.7, hatch=".."))
+                # el recorte en su lugar real (un solo color neutro)
+                ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                       facecolor="#aed6f1", edgecolor="#1b4f72", lw=0.6))
+                ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
+                        fontsize=3.6, rotation=0 if p["wx"] >= p["hy"] else 90)
             ax.set_xlim(minx - 0.6, maxx + 0.6); ax.set_ylim(miny - 0.6, maxy + 0.6)
             ax.set_aspect("equal"); ax.axis("off")
-            ax.set_title(f"MAPA DE CORTES {modelo.upper()} — PISO {material.upper()}\n"
-                         "cada recorte (color) con su baldosa completa (línea punteada) y el sobrante "
-                         "(amarillo); la flecha indica a dónde brinca el sobrante",
+            ax.set_title(f"RECORTES Y SU PIEZA COMPLETA — {modelo.upper()} · {material.upper()}\n"
+                         "cada recorte (azul) con la baldosa entera de la que sale (línea punteada) "
+                         "y el sobrante (amarillo), pegado en su lugar",
+                         fontsize=11)
+            guardar(fig)
+
+        # ---------- Página 1c: MAPA DE SOBRANTES (dónde encaja cada uno) ----------
+        reusados = [(idx, b.piezas[k], mapa.get(b.piezas[k][4]))
+                    for idx, b in enumerate(baldosas, 1)
+                    for k in range(1, len(b.piezas))]
+        reusados = [(idx, t, p) for (idx, t, p) in reusados if p]
+        if reusados:
+            fig, ax = plt.subplots(figsize=(min(24, W * 1.4), min(16, H * 1.4) + 1))
+            for p in focal:
+                ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                       facecolor="#ffffff", edgecolor="#e5e8e8", lw=0.3))
+            for idx, t, p in reusados:
+                ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                       facecolor="#f9e79f", edgecolor="#b7950b", lw=0.7))
+                ax.text(p["x"], p["y"], f"{p['id']}\n(sobra {pc}-{idx:02d})",
+                        ha="center", va="center", fontsize=3.4,
+                        rotation=0 if p["wx"] >= p["hy"] else 90)
+            ax.set_xlim(minx - 0.6, maxx + 0.6); ax.set_ylim(miny - 0.6, maxy + 0.6)
+            ax.set_aspect("equal"); ax.axis("off")
+            ax.set_title(f"MAPA DE SOBRANTES — {modelo.upper()} · {material.upper()}\n"
+                         f"los recortes que ENCAJAN aprovechando un sobrante (amarillo); "
+                         f"entre paréntesis, la baldosa de la que sobra ({len(reusados)} aprovechados)",
                          fontsize=11)
             guardar(fig)
 

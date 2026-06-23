@@ -89,8 +89,7 @@ MODELOS = {
         # Zonas que NO se despiezan: escalera (dos hileras), boiler y el hueco de
         # cancelería (tira de 8 cm). Se excluyen por ubicación.
         "cajas_excluir": [
-            (499.70, 502.80, -89.10, -86.70),   # escalera planta alta (A-ESCALON)
-            (489.45, 492.90, -89.15, -86.60),   # escalera planta baja (A-ESCALON)
+            (499.70, 502.80, -89.10, -86.70),   # escalera planta alta = vacío (A-ESCALON)
             (496.70, 497.60, -88.65, -88.00),   # boiler
             (489.00, 497.00, -83.21, -83.11),   # hueco de cancelería (tira de 8 cm)
             (496.10, 496.60, -91.47, -91.40),   # tiritas de 4 cm (polilínea no cerrada) der. de PB-M-135
@@ -151,8 +150,8 @@ MODELOS = {
         "cajas_excluir": [
             # (era "baño P.B." — en realidad es el cuarto de lavado con piso Moret;
             #  el piso sigue hasta el muro, no se excluye)
-            (316.35, 319.55, -128.10, -125.35),   # escalera planta baja (A-ESCALON)
-            (325.90, 329.10, -128.10, -125.35),   # escalera planta alta (A-ESCALON)
+            # planta baja: el piso va POR DEBAJO de la escalera, no se excluye.
+            (325.90, 329.10, -128.10, -125.35),   # escalera planta alta = vacío (A-ESCALON)
         ],
     },
     "Chardonnay": {
@@ -206,8 +205,8 @@ MODELOS = {
         # material, se excluye.
         "cajas_excluir": [
             (277.85, 281.25, -67.00, -65.78),   # baño P.B.
-            (272.35, 275.30, -70.85, -67.75),   # escalera planta baja (A-ESCALON)
-            (282.75, 285.70, -70.85, -67.75),   # escalera planta alta (A-ESCALON)
+            # planta baja: el piso va POR DEBAJO de la escalera, no se excluye.
+            (282.75, 285.70, -70.85, -67.75),   # escalera planta alta = vacío (A-ESCALON)
         ],
     },
 }
