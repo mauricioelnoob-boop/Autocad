@@ -272,6 +272,52 @@ def completar_tope_royal(anotadas, regiones=None):
     return nuevos
 
 
+def rellenar_interior(anotadas, muros_path, cfg, claves):
+    """Cierra los huecos del despiece: cualquier zona DENTRO de la casa (rodeada
+    de piso y/o muros) que quedó sin pieza —porque la polilínea del A-PISO no se
+    cerró bien— se rellena con un recorte del material de alrededor. NO rellena
+    regaderas / concreto (claves 2/4/5) ni el exterior de la casa."""
+    try:
+        from shapely.geometry import box, Polygon
+        from shapely.ops import unary_union
+    except Exception:
+        return []
+    import os
+    if not anotadas or not muros_path or not os.path.exists(muros_path):
+        return []
+    walls = unary_union([Polygon(p).buffer(0) for p in json.load(open(muros_path))])
+    floor = unary_union([box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+                         for p in anotadas])
+    solid = unary_union([floor, walls])
+    closed = solid.buffer(0.35, join_style=2).buffer(-0.35, join_style=2)
+    gaps = closed.difference(solid)
+
+    def otro_piso_cerca(gx, gy):
+        if not claves:
+            return False
+        c = min(claves, key=lambda k: (k[1] - gx) ** 2 + (k[2] - gy) ** 2)
+        return c[0] in ("2", "4", "5") and (c[1] - gx) ** 2 + (c[2] - gy) ** 2 < 0.9
+
+    cajas = cfg.get("cajas_excluir", [])
+    nuevos = []
+    for g in getattr(gaps, "geoms", [gaps]):
+        if g.area < 0.02 or g.area > 1.2:                    # ni hilitos ni cuartos enteros
+            continue
+        if g.buffer(0.04).intersection(floor).area < 0.02:   # no toca piso -> exterior
+            continue
+        gx, gy = g.centroid.x, g.centroid.y
+        if any(c[0] <= gx <= c[1] and c[2] <= gy <= c[3] for c in cajas):
+            continue
+        if otro_piso_cerca(gx, gy):                          # regadera / concreto
+            continue
+        x0, y0, x1, y1 = g.bounds
+        if g.area < 0.55 * (x1 - x0) * (y1 - y0):            # sólo huecos ~rectangulares
+            continue
+        cerca = min(anotadas, key=lambda p: (p["x"] - gx) ** 2 + (p["y"] - gy) ** 2)
+        nuevos.append(_nueva(cerca["material"], cerca["planta"], x0, y0, x1 - x0, y1 - y0))
+    return nuevos
+
+
 def _nueva(mat, pl, x0, y0, wx, hy):
     p = {"material": mat, "x0": round(x0, 4), "y0": round(y0, 4),
          "wx": round(wx, 4), "hy": round(hy, 4),
@@ -444,6 +490,13 @@ def cargar_anotado(modelo="Cabernet"):
         if (cerca["x"] - ex)**2 + (cerca["y"] - ey)**2 <= 0.09:   # dentro de 0.30 m
             anotadas.remove(cerca)
             excluidas += 1
+
+    # Cerrar los HUECOS del despiece original: cualquier zona dentro de la casa
+    # (rodeada de piso y/o muros) que quedó sin pieza porque la polilínea no se
+    # cerró bien, se rellena con un recorte del material de alrededor.
+    rellenos_int = rellenar_interior(anotadas, muros_path, cfg, claves)
+    anotadas += rellenos_int
+    cargar_anotado.rellenos_interior = len(rellenos_int)
 
     # Limpieza final: fragmentos sin sentido (junta o esquirla del dibujo) que no
     # son una pieza real de piso. Se conservan las tiras de orilla legítimas
