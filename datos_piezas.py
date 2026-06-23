@@ -445,6 +445,14 @@ def cargar_anotado(modelo="Cabernet"):
             anotadas.remove(cerca)
             excluidas += 1
 
+    # Limpieza final: fragmentos sin sentido (junta o esquirla del dibujo) que no
+    # son una pieza real de piso. Se conservan las tiras de orilla legítimas
+    # (≥4 cm de lado y ≥0.012 m²).
+    antes = len(anotadas)
+    anotadas = [p for p in anotadas
+                if p["wx"] * p["hy"] >= 0.012 and min(p["wx"], p["hy"]) >= 0.04]
+    excluidas += antes - len(anotadas)
+
     # Resolver SOLAPES: el despiece original puede traer polilíneas duplicadas y
     # mis piezas agregadas (extra/relleno) pueden encimarse con una original ya
     # restaurada. Se prioriza la pieza ORIGINAL y la más grande; se descarta la
