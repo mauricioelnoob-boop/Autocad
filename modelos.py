@@ -61,13 +61,12 @@ MODELOS = {
             # bolsa der. de PA-M-009: ancho hasta la cara de la jamba (x504.35) para
             # NO pisar el muro/jamba (detalle del usuario):
             _recorte("Moret", 503.946, -86.555, 0.404, 0.685),
-            # recortito faltante a la der. de PA-M-018, contra muro/escalera (cian):
-            _recorte("Moret", 506.224, -87.428, 0.386, 0.500),
         ],
         # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna,
         # PB-M-150 hasta la esquina, y unir PA-M-003+009 (la línea no es muro) hasta PA-M-005:
         "redimensionar": [
             {"x": 490.12, "y": -83.77, "x0": 489.539, "y0": -84.346, "wx": 0.600, "hy": 1.146},  # arriba de PB-M-054
+            {"x": 506.117, "y": -87.084, "x0": 506.010, "y0": -87.428, "wx": 0.634, "hy": 0.688},  # recorte esquina escalera = UNA sola pieza hasta el borde de piso (x506.644)
             {"x": 490.12, "y": -92.05, "x0": 489.539, "y0": -92.572, "wx": 0.600, "hy": 1.050},  # izq. de PB-M-159
             {"x": 497.47, "y": -91.94, "x0": 497.365, "y0": -92.530, "wx": 0.214, "hy": 1.068},  # PB-M-150 a la esquina
             {"x": 504.20, "y": -85.68, "x0": 503.946, "y0": -85.860, "wx": 0.580, "hy": 0.800},  # unir PA-M-009+003 y dar continuidad a PA-M-005
