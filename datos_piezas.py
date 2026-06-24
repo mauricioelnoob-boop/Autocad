@@ -224,11 +224,14 @@ def rellenar_huecos(anotadas):
     return buenos
 
 
-def completar_tope_royal(anotadas, regiones=None):
+def completar_tope_royal(anotadas, regiones=None, excluir=None):
     """Termina cada tablón de recámara HASTA el muro de arriba. Detecta cada
     recámara como un grupo conexo de tablones de Royal Walnut (componentes
     conexas) y, en cada columna que no llega al tope del grupo, agrega el recorte
-    que falta. Si se pasan `regiones`, sólo trabaja dentro de ellas."""
+    que falta. Si se pasan `regiones`, sólo trabaja dentro de ellas. `excluir` =
+    cajas (x0,x1,y0,y1) donde NO se debe agregar tope (p.ej. un cuadrito que en
+    realidad es Moret)."""
+    excluir = excluir or []
     royals = [p for p in anotadas if p["material"] == "Royal Walnut"]
     if regiones:
         royals = [p for p in royals
@@ -268,6 +271,9 @@ def completar_tope_royal(anotadas, regiones=None):
             if 0.12 < gap < 0.70:                       # hueco real contra el muro
                 xx = min(p["x0"] for p in lst)
                 wx = max(p["wx"] for p in lst)
+                cx, cy = xx + wx / 2, top + gap / 2
+                if any(x0 <= cx <= x1 and y0 <= cy <= y1 for (x0, x1, y0, y1) in excluir):
+                    continue                            # zona forzada a Moret: no rellenar Royal
                 nuevos.append(_nueva("Royal Walnut", lst[0]["planta"], xx, top, wx, gap))
     return nuevos
 
@@ -457,7 +463,8 @@ def cargar_anotado(modelo="Cabernet"):
 
     # Terminar cada tablón de recámara HASTA el muro de arriba: rellena el recorte
     # que falta encima de cada columna de Royal Walnut que no llega al muro.
-    topes = completar_tope_royal(anotadas, cfg.get("tope_royal_regiones", []))
+    topes = completar_tope_royal(anotadas, cfg.get("tope_royal_regiones", []),
+                                 cfg.get("tope_royal_excluir", []))
     anotadas.extend(topes)
 
     # Recorte por MUROS REALES (capa A-MUROS del DWG) y frontera de material:

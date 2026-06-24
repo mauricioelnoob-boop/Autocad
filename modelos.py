@@ -58,6 +58,7 @@ MODELOS = {
             _recorte("Moret", 506.010, -89.730, 0.214, 0.600),   # debajo de PA-M-050 (izq. del muro/jamba)
             _recorte("Moret", 506.344, -89.730, 0.268, 0.600),   # debajo de PA-M-050 (der. del muro/jamba)
             _recorte("Moret", 495.205, -91.240, 0.184, 0.900),   # continuidad PB-M-136 <-> PB-M-122 (puerta)
+            _recorte("Moret", 503.946, -86.555, 0.520, 0.685),   # bolsa vacía a la der. de PA-M-009 (amarillo img.1)
         ],
         # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna,
         # PB-M-150 hasta la esquina, y unir PA-M-003+009 (la línea no es muro) hasta PA-M-005:
@@ -110,7 +111,13 @@ MODELOS = {
             (329.6, 333.8, -132.3, -128.4),
         ],
         "excluir_royal_baja": True,
-        "piezas_extra": [],
+        # Recorte Moret en "L" (sigue el muro) que el DWG dejó vacío: el bbox de la
+        # polilínea entra a la región Royal y el pipeline lo descartó. Se repone como
+        # dos rectángulos que trazan la L (img.2, cuadro cian).
+        "piezas_extra": [
+            _recorte("Moret", 329.847, -123.624, 0.596, 0.608),   # L superior
+            _recorte("Moret", 329.847, -124.210, 0.364, 0.586),   # L inferior-izq
+        ],
         "reclasificar": [
             # Tiras de orilla de recámaras que salieron Moret -> son Royal Walnut.
             {"x": 326.05, "y": -125.05, "material": "Royal Walnut"},
@@ -193,18 +200,34 @@ MODELOS = {
             {"x": 288.14, "y": -65.54, "material": "Moret"},
             {"x": 288.14, "y": -66.49, "material": "Moret"},
             {"x": 288.89, "y": -66.49, "material": "Moret"},
+            # AR-101 es Moret (clave 1), no Royal.
+            {"x": 287.71, "y": -64.63, "material": "Moret"},
+        ],
+        # "Cuadrito" debajo de PA-M-036 que conecta al baño de arriba = Moret
+        # (clave 1). Las dos hileras (x288.0-289.05, y-67.05..-66.35). El override
+        # por caja es robusto a la renumeración de piezas.
+        "forzar_material": [
+            {"box": (288.00, 289.05, -67.05, -66.35), "material": "Moret"},
+        ],
+        # No rellenar tope Royal dentro del cuadrito (ya es Moret).
+        "tope_royal_excluir": [
+            (288.00, 289.05, -67.10, -66.30),
         ],
         # Fantasmas / donde va muro: se eliminan.
         "eliminar": [
             (272.75, -70.78),   # PB: va muro
             (273.36, -70.78),   # PB: va muro
             (272.75, -60.64),   # PB: no debe existir
+            (286.75, -64.68),   # PA-M-026: ahí va muro (casi no debe existir)
         ],
         # Baño de planta baja (claves 5/5/2/4 = Urbania/Malla/concreto): el
         # despiece dejó el Moret continuo cruzando el muro; ese piso es otro
         # material, se excluye.
         "cajas_excluir": [
-            (277.85, 281.25, -67.00, -65.78),   # baño P.B.
+            # baño P.B.: SÓLO la zona de regadera/concreto/urbania (claves 4/2/5).
+            # La parte izquierda (x<279) es lavandería con piso Moret y SÍ lleva piso
+            # (faltaban los recortes a la der. de PB-M-094/104).
+            (279.00, 281.30, -67.00, -65.78),
             # planta baja: el piso va POR DEBAJO de la escalera, no se excluye.
             (282.75, 285.70, -70.85, -67.75),   # escalera planta alta = vacío (A-ESCALON)
         ],
