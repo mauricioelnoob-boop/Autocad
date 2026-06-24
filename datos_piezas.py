@@ -522,6 +522,7 @@ def cargar_anotado(modelo="Cabernet"):
 def _quitar_solapes(piezas):
     try:
         from shapely.geometry import box
+        from shapely.ops import unary_union
     except Exception:
         return piezas
 
@@ -535,15 +536,13 @@ def _quitar_solapes(piezas):
         r = box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
         if r.area <= 0:
             continue
-        dup = False
-        for q, rq in rects:
-            if abs(p["x"] - q["x"]) > 1.6 or abs(p["y"] - q["y"]) > 1.6:
-                continue
-            if r.intersection(rq).area > 0.40 * min(r.area, rq.area):
-                dup = True
-                break
-        if not dup:
-            keep.append(p); rects.append((p, r))
+        # traslape acumulado con TODO lo ya conservado cerca (no sólo pieza a pieza):
+        # así se cazan los duplicados del despiece original que pisan a 2 vecinos.
+        cerca = [rq for q, rq in rects
+                 if abs(p["x"] - q["x"]) <= 1.6 and abs(p["y"] - q["y"]) <= 1.6]
+        if cerca and r.intersection(unary_union(cerca)).area > 0.35 * r.area:
+            continue
+        keep.append(p); rects.append((p, r))
     _quitar_solapes.quitadas = len(piezas) - len(keep)
     return keep
 
