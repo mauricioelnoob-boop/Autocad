@@ -58,7 +58,11 @@ MODELOS = {
             _recorte("Moret", 506.010, -89.730, 0.214, 0.600),   # debajo de PA-M-050 (izq. del muro/jamba)
             _recorte("Moret", 506.344, -89.730, 0.268, 0.600),   # debajo de PA-M-050 (der. del muro/jamba)
             _recorte("Moret", 495.205, -91.240, 0.184, 0.900),   # continuidad PB-M-136 <-> PB-M-122 (puerta)
-            _recorte("Moret", 503.946, -86.555, 0.520, 0.685),   # bolsa vacía a la der. de PA-M-009 (amarillo img.1)
+            # bolsa der. de PA-M-009: ancho hasta la cara de la jamba (x504.35) para
+            # NO pisar el muro/jamba (detalle del usuario):
+            _recorte("Moret", 503.946, -86.555, 0.404, 0.685),
+            # recortito faltante a la der. de PA-M-018, contra muro/escalera (cian):
+            _recorte("Moret", 506.224, -87.428, 0.386, 0.500),
         ],
         # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna,
         # PB-M-150 hasta la esquina, y unir PA-M-003+009 (la línea no es muro) hasta PA-M-005:
