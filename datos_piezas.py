@@ -310,10 +310,12 @@ def _leer_dwg_capas(cfg, frags):
     return out
 
 
-def _decompose(geom, minside=0.045, minarea=0.013):
+def _decompose(geom, minside=0.045, minarea=0.013, mincell=0.012):
     """Descompone un polígono ortogonal (con posibles HUECOS = jambas) en
     rectángulos (x0,y0,x1,y1). Usa una rejilla por las coordenadas de todos los
-    bordes (exterior e interiores) y prueba el centro de cada celda; luego fusiona."""
+    bordes (exterior e interiores) y prueba el centro de cada celda; luego fusiona.
+    `mincell` = ancho mínimo de celda de la rejilla (bájalo para capturar bandas
+    finas, p.ej. un entrante de muro de ~1 cm)."""
     from shapely.geometry import Point
     polys = [geom] if geom.geom_type == "Polygon" else list(getattr(geom, "geoms", []))
     out = []
@@ -327,10 +329,10 @@ def _decompose(geom, minside=0.045, minarea=0.013):
         xs, ys = sorted(xset), sorted(yset)
         cells = []
         for xa, xb in zip(xs, xs[1:]):
-            if xb - xa < 0.012:
+            if xb - xa < mincell:
                 continue
             for ya, yb in zip(ys, ys[1:]):
-                if yb - ya < 0.012:
+                if yb - ya < mincell:
                     continue
                 if g.contains(Point((xa + xb) / 2, (ya + yb) / 2)):
                     cells.append([xa, ya, xb, yb])
@@ -363,11 +365,41 @@ def _decompose(geom, minside=0.045, minarea=0.013):
             and (r[2] - r[0]) * (r[3] - r[1]) >= minarea]
 
 
+def _mascara_muros(cfg):
+    """Define TODOS los muros como una sola máscara. Lee las cuatro capas de muro
+    (A-MUROS estructural, A-TABLAROCA/jambas, A-MUROS BAJOS, A-CANCELERIA) y se
+    queda con las BANDAS DELGADAS (ancho medio < 0.35 m); descarta cualquier
+    relleno de cuarto. Devuelve la unión (o None) y guarda el ancho del muro más
+    grueso para poder engrosar un poco la máscara y no dejar piso dentro."""
+    try:
+        from shapely.geometry import Polygon
+        from shapely.ops import unary_union
+    except Exception:
+        return None
+    obst = []
+    for tipo, pts in _leer_dwg_capas(cfg, ("A-MUROS", "TABLAROCA", "CANCELERIA")):
+        if len(pts) < 3:
+            continue
+        try:
+            pg = Polygon(pts).buffer(0)
+        except Exception:
+            continue
+        if pg.is_empty or pg.area <= 0.001 or pg.length <= 0:
+            continue
+        ancho = 2 * pg.area / pg.length          # ancho medio de la banda
+        if ancho < 0.35:                          # es muro (banda), no relleno de cuarto
+            obst.append(pg)
+    if not obst:
+        return None
+    return unary_union(obst)
+
+
 def recortar_muros_interiores(anotadas, cfg):
-    """Recorta el piso para que RESPETE los muros interiores (tablaroca, muros
-    bajos, cancelería) y la cara de muro marcada por el ZOCLO. Cada pieza cuyo
-    bbox invade un muro/jamba se vuelve a partir en rectángulos que rodean el muro
-    (el despiece original a veces dibujaba la pieza entera encima del muro)."""
+    """Recorta el piso para que RESPETE TODOS los muros (estructural A-MUROS,
+    tablaroca/jambas, muros bajos, cancelería). Ninguna pieza puede quedar dentro
+    de un muro: a cada pieza se le RESTA la máscara de muros y se conserva UNA sola
+    pieza por región conexa (el muro queda como entrante/notch). El despiece
+    original a veces dibujaba la pieza entera encima del muro."""
     try:
         from shapely.geometry import box, Polygon, Point, LineString
         from shapely.ops import unary_union
@@ -378,25 +410,14 @@ def recortar_muros_interiores(anotadas, cfg):
     def rect(p):
         return box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
 
-    obst = []
-    # muros interiores dibujados (tablaroca / jambas, muros bajos, cancelería).
-    # Son los que el zoclo rodea y sobre los que el despiece a veces dibujó la
-    # pieza entera. Se descartan los polígonos grandes (cuartos), sólo bandas.
-    for tipo, pts in _leer_dwg_capas(cfg, ("TABLAROCA", "A-MUROS BAJOS", "A-CANCELERIA")):
-        try:
-            pg = Polygon(pts).buffer(0)
-            if pg.area > 0.001 and pg.area < 2.5:
-                obst.append(pg)
-        except Exception:
-            pass
-    if not obst:
+    muros = _mascara_muros(cfg)
+    if muros is None or muros.is_empty:
         return anotadas
-    muros = unary_union(obst)
 
     salida = []
     for p in anotadas:
         r = rect(p)
-        if r.area <= 0 or r.intersection(muros).area < 0.012:
+        if r.area <= 0 or r.intersection(muros).area < 0.002:
             salida.append(p); continue
         libre = r.difference(muros)
         if libre.is_empty or libre.area < 0.012:
@@ -404,6 +425,8 @@ def recortar_muros_interiores(anotadas, cfg):
         # Una pieza por REGIÓN CONEXA (no por rectángulo): si un muro/jamba sólo
         # muerde la pieza, sigue siendo UNA sola pieza con UN solo recorte; el
         # hueco del muro se guarda como "notch" (entrante) para dibujarlo rodeado.
+        # El bbox se ajusta a la región conexa y el entrante se captura COMPLETO
+        # (umbral fino) para que NADA de piso quede dentro del muro.
         comps = [libre] if libre.geom_type == "Polygon" else list(getattr(libre, "geoms", []))
         for comp in comps:
             if comp.is_empty or comp.area < 0.012:
@@ -416,8 +439,9 @@ def recortar_muros_interiores(anotadas, cfg):
             # entrante(s) del muro dentro del bbox de la pieza (lo que NO es piso)
             hueco = box(x0, y0, x1, y1).difference(comp)
             q["notch"] = ([[round(a, 4), round(b, 4), round(c, 4), round(d, 4)]
-                           for (a, b, c, d) in _decompose(hueco)]
-                          if (not hueco.is_empty and hueco.area > 0.004) else [])
+                           for (a, b, c, d) in _decompose(hueco, minside=0.007,
+                                                          minarea=0.0004, mincell=0.006)]
+                          if (not hueco.is_empty and hueco.area > 0.0006) else [])
             q.pop("id", None)
             _retipo(q)
             salida.append(q)
