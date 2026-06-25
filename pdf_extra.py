@@ -38,15 +38,20 @@ def urbania_despiece(modelo):
     W = 3.60
     H = round(area / W, 2)
     piezas = []
+    # La hilera de recorte (altura parcial) va ABAJO: se calcula el residuo y se
+    # coloca como primera fila (y=0); encima van las hileras completas.
+    n_full = int(H / th + 1e-9)
+    rem = round(H - n_full * th, 4)
+    row_h = ([rem] if rem > 0.01 else []) + [th] * n_full
     y = 0.0
-    while y < H - 1e-6:
-        hh = min(th, H - y); x = 0.0
+    for hh in row_h:
+        x = 0.0
         while x < W - 1e-6:
             ww = min(tw, W - x)
             completa = abs(ww - tw) < 0.01 and abs(hh - th) < 0.01
             piezas.append((x, y, ww, hh, completa))
             x += tw
-        y += th
+        y += hh
     comp = sum(1 for *_, c in piezas if c)
     rec = len(piezas) - comp
     pzas = comp + rec
