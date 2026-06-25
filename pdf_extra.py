@@ -218,61 +218,77 @@ def real_datos(modelo):
     return out
 
 
+# Desperdicio que el PRESUPUESTO aplica sobre la base (lo suministrado = base +
+# este %). De aquí se deriva la base y se compara contra el % que de verdad se
+# necesita. Ajustable si algún presupuesto usara otro %.
+BUDGET_PCT = 0.03
+
+
 def pagina_comparativo(pdf, modelo):
     R = real_datos(modelo); P = PRESUP[modelo]
+    bp = int(round(BUDGET_PCT * 100))
     fig = plt.figure(figsize=(11.7, 8.3))
     ax = fig.add_subplot(111); ax.axis("off")
-    ax.set_title(f"GENERADORES (con DESPERDICIO REAL) vs PRESUPUESTO · {modelo.upper()}",
+    ax.set_title(f"GENERADORES — % DE DESPERDICIO REAL vs PRESUPUESTO · {modelo.upper()}",
                  fontsize=14.5, fontweight="bold", y=0.97)
 
-    cols = ["MATERIAL", "NETO\n(m²)", "SOBRANTE\nREUSABLE (m²)", "MERMA\nREAL (m²)",
-            "REQUERIDO\n(m² / cajas)", "SUMINISTRADO\n(m² / cajas)", "DIFERENCIA\n(m² / cajas)"]
+    cols = ["MATERIAL", "NETO\n(m²)", f"BASE\nPRESUP. (cajas)",
+            f"SUMINISTRADO\nbase + {bp}% (cajas)", "REQUERIDO\nREAL (cajas)",
+            "% REAL\nNECESARIO", "FALTAN\n(cajas)"]
     spec = [("PISO Moret Arena", "Moret", P["Moret"]),
             ("PISO Royal Walnut", "Royal Walnut", P["Royal"]),
             ("Urbania White", "Urbania", P["Urbania"])]
     cell, colors = [], []
+    cortos = []
     for (etq, key, sumin) in spec:
-        r = R[key]
-        caja_m2 = r["comprado"] / r["cajas"] if r["cajas"] else 0.0
-        req_m2 = r["comprado"]; sumin_m2 = sumin * caja_m2
-        dif_c = sumin - r["cajas"]; dif_m2 = sumin_m2 - req_m2
-        cell.append([etq, f"{r['neto']:.2f}", f"{r.get('reusable',0):.2f}",
-                     f"{r.get('merma',0):.2f}",
-                     f"{req_m2:.2f} m²\n{r['cajas']} cajas",
-                     f"{sumin_m2:.2f} m²\n{sumin} cajas",
-                     f"{dif_m2:+.2f} m²\n{dif_c:+d} cajas"])
-        cd = "#d5f5e3" if dif_c >= 0 else "#f5b7b1"
-        colors.append(["#f4f6f7", "#fdfefe", "#eafaf1", "#fdf2e9", "#fdfefe", "#eaf2f8", cd])
-    # Malla (en piezas; no se maneja por m²)
-    req_pz = R["Malla_pz"]; sum_pz = P["Malla_pz"]; difp = sum_pz - req_pz
-    cdp = "#d5f5e3" if difp >= 0 else "#f5b7b1"
-    cell.append(["Malla Lyndhurst (pz)", f"{req_pz} pz", "—", "—", f"{req_pz} pz",
-                 f"{sum_pz} pz", f"{difp:+d} pz"])
-    colors.append(["#f4f6f7", "#fdfefe", "#eafaf1", "#fdf2e9", "#fdfefe", "#eaf2f8", cdp])
+        r = R[key]; req = r["cajas"]
+        base = int(round(sumin / (1 + BUDGET_PCT))) or 1
+        realpct = (req / base - 1) * 100
+        faltan = max(0, req - sumin)
+        cd = "#d5f5e3" if faltan == 0 else "#f5b7b1"
+        cell.append([etq, f"{r['neto']:.2f}", f"{base}", f"{sumin}", f"{req}",
+                     f"{realpct:.1f} %", f"{faltan}" if faltan else "—"])
+        colors.append(["#f4f6f7", "#fdfefe", "#eafaf1", "#eaf2f8", "#fdfefe", cd, cd])
+        if faltan:
+            cortos.append(f"{etq.replace('PISO ', '')}: {realpct:.0f}% (faltan {faltan})")
+    # Malla (piezas): mismo esquema en pz
+    req_pz = R["Malla_pz"]; sum_pz = P["Malla_pz"]
+    base_pz = int(round(sum_pz / (1 + BUDGET_PCT))) or 1
+    realpct_pz = (req_pz / base_pz - 1) * 100
+    faltan_pz = max(0, req_pz - sum_pz)
+    cdp = "#d5f5e3" if faltan_pz == 0 else "#f5b7b1"
+    cell.append(["Malla Lyndhurst (pz)", f"{req_pz} pz", f"{base_pz}", f"{sum_pz}",
+                 f"{req_pz}", f"{realpct_pz:.1f} %", f"{faltan_pz}" if faltan_pz else "—"])
+    colors.append(["#f4f6f7", "#fdfefe", "#eafaf1", "#eaf2f8", "#fdfefe", cdp, cdp])
+    if faltan_pz:
+        cortos.append(f"Malla: {realpct_pz:.0f}% (faltan {faltan_pz})")
 
     t = ax.table(cellText=cell, colLabels=cols, cellColours=colors,
-                 cellLoc="center", loc="center", bbox=[0.0, 0.34, 1.0, 0.5])
-    t.auto_set_font_size(False); t.set_fontsize(9); t.scale(1, 2.3)
+                 cellLoc="center", loc="center", bbox=[0.0, 0.36, 1.0, 0.48],
+                 colWidths=[0.21, 0.11, 0.14, 0.16, 0.13, 0.13, 0.12])
+    t.auto_set_font_size(False); t.set_fontsize(9.5); t.scale(1, 2.4)
     for (rr, cc), c in t.get_celld().items():
         if rr == 0:
             c.set_facecolor("#1b4f72"); c.set_text_props(color="white", weight="bold")
-        if cc == 0 and rr > 0:
+        if rr > 0 and cc == 0:
+            c.set_text_props(weight="bold", ha="left")
+        if rr > 0 and cc == 5:
             c.set_text_props(weight="bold")
 
-    falta = [s[0] for s in spec if (P[{"Moret":"Moret","Royal Walnut":"Royal","Urbania":"Urbania"}[s[1]]] - R[s[1]]["cajas"]) < 0]
-    estado = ("⚠ Aún con el reuso óptimo, el presupuesto QUEDA CORTO en: " + ", ".join(falta)
-              if falta else "✓ El presupuesto alcanza en todos los materiales.")
-    ax.text(0.5, 0.27, estado, ha="center", fontsize=11, fontweight="bold",
-            color="#922b21" if falta else "#1e8449", transform=ax.transAxes)
+    estado = ("⚠ Para que ALCANCE hay que pedir más % de desperdicio en: " + " · ".join(cortos)
+              if cortos else f"✓ El {bp}% del presupuesto alcanza en todos los materiales.")
+    ax.text(0.5, 0.29, estado, ha="center", fontsize=10.5, fontweight="bold",
+            color="#922b21" if cortos else "#1e8449", transform=ax.transAxes)
 
-    nota = ("REQUERIDO = cajas que de verdad se ocupan, empacando TODOS los recortes juntos y REUSANDO el sobrante\n"
-            "de cada baldosa (con rotación) antes de abrir tabla nueva.  El 'desperdicio' se separa en:\n"
-            "  • SOBRANTE REUSABLE (≥10 cm) = pedazos que SÍ sirven para otra pieza (stock, no se pierde).\n"
-            "  • MERMA REAL (<10 cm) = lo único que de verdad se tira (es chica).\n"
-            "DIFERENCIA = SUMINISTRADO − REQUERIDO (verde = alcanza; rojo = faltan cajas aún con reuso óptimo).")
-    ax.text(0.02, 0.20, nota, fontsize=8.5, color="#444", transform=ax.transAxes, va="top",
+    nota = (f"CÓMO LEERLO:  el PRESUPUESTO surte la BASE + {bp}% de desperdicio = lo SUMINISTRADO\n"
+            f"   (ej. Merlot Moret: base 95 + {bp}% ≈ 98 cajas).\n"
+            "REQUERIDO REAL = cajas que de verdad se ocupan (despiece con reuso máximo de sobrantes).\n"
+            f"% REAL NECESARIO = desperdicio que en realidad se necesita sobre la base (base → requerido).\n"
+            f"   Si es mayor al {bp}% presupuestado, hay que pedir ese % (ej. Merlot Moret ≈ 5%, no {bp}%).\n"
+            "FALTAN = cajas que hay que reponer (rojo) para que alcance.")
+    ax.text(0.02, 0.225, nota, fontsize=8.5, color="#444", transform=ax.transAxes, va="top",
             bbox=dict(boxstyle="round", facecolor="#fef9e7", edgecolor="#b7950b"))
-    fig.text(0.5, 0.03, f"{PIE}        Generadores (desperdicio real) vs Presupuesto — {modelo}        {FECHA}",
+    fig.text(0.5, 0.03, f"{PIE}        Generadores — % de desperdicio real — {modelo}        {FECHA}",
              ha="center", fontsize=8, color="#555")
     pdf.savefig(fig); plt.close(fig)
 
