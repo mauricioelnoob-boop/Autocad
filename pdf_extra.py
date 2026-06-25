@@ -284,6 +284,78 @@ def comparativo(salida="Viñas Norte - Generadores.pdf"):
     print("->", salida)
 
 
+def generadores_excel(salida="Viñas Norte - Generadores.xlsx"):
+    """Mismo comparativo, pero en Excel MODIFICABLE: el Suministrado (cajas) es
+    editable y el m², la diferencia en cajas y en m² se recalculan con fórmulas."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.formatting.rule import CellIsRule
+    HDR = PatternFill("solid", fgColor="1F4E78"); SUB = PatternFill("solid", fgColor="D6E4F0")
+    VERDE = PatternFill("solid", fgColor="D5F5E3"); ROJO = PatternFill("solid", fgColor="F5B7B1")
+    WH = Font(color="FFFFFF", bold=True); B = Font(bold=True)
+    thin = Side(style="thin", color="BBBBBB"); BORD = Border(thin, thin, thin, thin)
+    CEN = Alignment(horizontal="center")
+    CAJA = {"Moret": G.MORET_CAJA, "Royal Walnut": G.ROYAL_CAJA, "Urbania": G.URB_CAJA}
+    PKEY = {"Moret": "Moret", "Royal Walnut": "Royal", "Urbania": "Urbania"}
+    ETQ = [("PISO Moret Arena", "Moret"), ("PISO Royal Walnut", "Royal Walnut"),
+           ("Urbania White", "Urbania")]
+    cols = ["Material", "Neto (m²)", "Sobrante reusable (m²)", "Merma real (m²)",
+            "Requerido (cajas)", "Requerido (m²)", "Suministrado (cajas)",
+            "Suministrado (m²)", "Diferencia (cajas)", "Diferencia (m²)"]
+
+    wb = openpyxl.Workbook(); wb.remove(wb.active)
+    for modelo in ("Cabernet", "Merlot", "Chardonnay"):
+        R = real_datos(modelo); P = PRESUP[modelo]
+        ws = wb.create_sheet(modelo)
+        ws.merge_cells("A1:J1")
+        ws["A1"] = f"GENERADORES (con desperdicio real) vs PRESUPUESTO — {modelo.upper()}"
+        ws["A1"].font = Font(bold=True, size=13, color="FFFFFF"); ws["A1"].fill = HDR
+        ws["A1"].alignment = CEN
+        for c, h in enumerate(cols, 1):
+            cell = ws.cell(3, c, h); cell.font = WH; cell.fill = HDR
+            cell.alignment = Alignment(horizontal="center", wrap_text=True); cell.border = BORD
+        r = 4
+        for (etq, key) in ETQ:
+            d = R[key]; cm = CAJA[key]; sumin = P[PKEY[key]]
+            ws.cell(r, 1, etq).font = B
+            ws.cell(r, 2, round(d["neto"], 2))
+            ws.cell(r, 3, round(d.get("reusable", 0), 2))
+            ws.cell(r, 4, round(d.get("merma", 0), 2))
+            ws.cell(r, 5, d["cajas"])
+            ws.cell(r, 6, round(d["cajas"] * cm, 2))            # requerido m²
+            ws.cell(r, 7, sumin)                                # suministrado cajas (editable)
+            ws.cell(r, 8, f"=G{r}*{cm}")                        # suministrado m²
+            ws.cell(r, 9, f"=G{r}-E{r}")                        # diferencia cajas
+            ws.cell(r, 10, f"=H{r}-F{r}")                       # diferencia m²
+            for c in range(1, 11):
+                ws.cell(r, c).border = BORD; ws.cell(r, c).alignment = CEN
+            ws.cell(r, 1).alignment = Alignment(horizontal="left")
+            r += 1
+        # Malla (en piezas)
+        ws.cell(r, 1, "Malla Lyndhurst (pz)").font = B
+        ws.cell(r, 5, R["Malla_pz"]); ws.cell(r, 7, P["Malla_pz"])
+        ws.cell(r, 9, f"=G{r}-E{r}")
+        for c in range(1, 11):
+            ws.cell(r, c).border = BORD; ws.cell(r, c).alignment = CEN
+        ws.cell(r, 1).alignment = Alignment(horizontal="left")
+        last = r
+        # colorear diferencias (cajas y m²): verde >=0, rojo <0
+        for col in ("I", "J"):
+            rng = f"{col}4:{col}{last}"
+            ws.conditional_formatting.add(rng, CellIsRule(operator="greaterThanOrEqual",
+                                          formula=["0"], fill=VERDE))
+            ws.conditional_formatting.add(rng, CellIsRule(operator="lessThan",
+                                          formula=["0"], fill=ROJO))
+        ws.cell(last + 2, 1, "Suministrado (cajas) es editable; m², diferencia en cajas y en m² se recalculan solas.").font = Font(italic=True, color="555555")
+        ws.cell(last + 3, 1, f"{PIE}    ·    {FECHA}").font = Font(italic=True, color="888888")
+        widths = [22, 10, 14, 12, 12, 12, 14, 13, 12, 12]
+        for c, w in enumerate(widths, 1):
+            ws.column_dimensions[chr(64 + c)].width = w
+        ws.row_dimensions[3].height = 30
+    wb.save(salida)
+    print("->", salida)
+
+
 def main(modelo):
     out_u = f"Viñas Norte - {modelo} Urbania.pdf"
     with PdfPages(out_u) as pdf:
