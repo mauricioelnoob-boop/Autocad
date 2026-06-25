@@ -23,6 +23,13 @@ PRESUP = {
 EXTRAS = ["Boquilla Cantera", "Boquilla Chocolate", "Boquilla Blanco",
           "Boquilla Plata", "Impermeabilizante para charola", "", ""]
 
+# Lotes suministrados: (lote, manzana, modelo). Agregar aquí cada lote nuevo.
+LOTES = [
+    (34, 14, "Cabernet"),
+    (9,   7, "Merlot"),
+    (10,  7, "Merlot"),
+]
+
 HDR = PatternFill("solid", fgColor="1F4E78")
 SUB = PatternFill("solid", fgColor="D6E4F0")
 EXT = PatternFill("solid", fgColor="FCF3CF")
@@ -104,8 +111,63 @@ def hoja(ws, modelo):
         ws.column_dimensions[chr(64 + c)].width = w
 
 
+def hoja_lotes(ws):
+    """Control por LOTE: cada lote (lote/manzana) se liga a su modelo y se compara
+    lo requerido (generador del modelo) contra lo suministrado, por material."""
+    ws.merge_cells("A1:I1")
+    ws["A1"] = "CONTROL DE LOTES — SUMINISTRADO vs REQUERIDO"
+    ws["A1"].font = Font(bold=True, size=14, color="FFFFFF"); ws["A1"].fill = HDR
+    ws["A1"].alignment = CEN
+    ws.merge_cells("A2:I2")
+    ws["A2"] = ("Cada lote se liga a su modelo. 'Requerido' sale del generador del modelo; "
+                "'Suministrado' arranca con el presupuesto y se puede editar conforme llega material.")
+    ws["A2"].alignment = Alignment(horizontal="center"); ws["A2"].font = Font(italic=True, color="555555")
+
+    r = 4
+    hdrs = ["Lote", "Manzana", "Modelo", "Material", "Presentación",
+            "Requerido (cajas)", "Suministrado (cajas)", "Diferencia", "Observaciones"]
+    for c, h in enumerate(hdrs, 1):
+        cell = ws.cell(r, c, h); cell.font = WH; cell.fill = HDR
+        cell.alignment = CEN; cell.border = BORD
+    r += 1
+
+    MAT = [("Piso Moret Arena", "caja 1.42 m² (2 pz)", "Moret"),
+           ("Piso Royal Walnut", "caja 1.20 m² (5 pz)", "Royal"),
+           ("Urbania White", "caja 1.36 m² (10 pz)", "Urbania"),
+           ("Malla Lyndhurst", "pieza 0.30×0.60 m", "Malla_pz")]
+
+    for (lote, mza, modelo) in LOTES:
+        rm, rr, ru, rmalla = req_cajas(modelo)
+        req = {"Moret": rm, "Royal": rr, "Urbania": ru, "Malla_pz": rmalla}
+        sup = PRESUP[modelo]
+        fila0 = r
+        for (nombre, pres, key) in MAT:
+            ws.cell(r, 4, nombre).font = B
+            ws.cell(r, 5, pres)
+            rq = req[key]; sm = sup[key]; dif = sm - rq
+            ws.cell(r, 6, rq).alignment = CEN
+            ws.cell(r, 7, sm).alignment = CEN
+            dc = ws.cell(r, 8, dif); dc.alignment = CEN
+            dc.font = Font(bold=True, color=("1E8449" if dif >= 0 else "C0392B"))
+            ws.cell(r, 9, "Suficiente" if dif >= 0 else "Falta")
+            for c in range(1, 10):
+                ws.cell(r, c).border = BORD
+            r += 1
+        # celdas agrupadas del lote (lote/manzana/modelo) sobre las 4 filas
+        for col, val in ((1, f"L{lote}"), (2, f"M{mza}"), (3, modelo)):
+            ws.merge_cells(start_row=fila0, start_column=col, end_row=r - 1, end_column=col)
+            cell = ws.cell(fila0, col, val)
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            cell.font = B; cell.fill = SUB
+        r += 1   # renglón en blanco entre lotes
+
+    for c, w in enumerate([8, 9, 13, 20, 20, 16, 18, 12, 22], 1):
+        ws.column_dimensions[chr(64 + c)].width = w
+
+
 def main():
     wb = openpyxl.Workbook(); wb.remove(wb.active)
+    hoja_lotes(wb.create_sheet("Control de Lotes"))
     for m in ['Cabernet', 'Merlot', 'Chardonnay']:
         hoja(wb.create_sheet(m), m)
     out = "Inventario_Acabados.xlsx"
