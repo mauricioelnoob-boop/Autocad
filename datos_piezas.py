@@ -128,6 +128,9 @@ def recortar(anotadas, muros_path, ignorar=None, trim_muros=False):
     for p in anotadas:
         if rect(p).area <= 0:
             salida.append(p); continue
+        if p.get("extra"):
+            salida.append(p); continue       # pieza puesta a mano: se respeta (el
+            # muro real se atiende al final con recortar_muros_interiores / A-MUROS)
         # 1) En la recámara manda Royal: una pieza Moret mayoritariamente dentro
         #    de Royal es un error del despiece -> se quita; si sólo asoma, se recorta.
         if p["material"] == "Moret":
@@ -731,6 +734,8 @@ def cargar_anotado(modelo="Cabernet"):
     cajas = cfg.get("cajas_excluir", [])
     if cajas:
         def _excluida(p):
+            if p.get("extra"):
+                return False               # las piezas agregadas a mano se respetan
             return any(c[0] <= p["x"] <= c[1] and c[2] <= p["y"] <= c[3] for c in cajas)
         antes = len(anotadas)
         anotadas = [p for p in anotadas if not _excluida(p)]

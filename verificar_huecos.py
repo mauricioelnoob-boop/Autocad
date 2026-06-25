@@ -42,6 +42,13 @@ def huecos(m):
             continue
         if g.buffer(0.04).intersection(floor).area < 0.02:
             continue
+        # Descarta la RED DELGADA junto a muros (artefacto del cierre buffer): un
+        # hueco real es COMPACTO; el artefacto se extiende por todo el plano con un
+        # área mínima respecto a su bbox.
+        bx0, by0, bx1, by1 = g.bounds
+        bbox_area = (bx1 - bx0) * (by1 - by0)
+        if bbox_area > 3.0 and g.area < 0.15 * bbox_area:
+            continue
         gx, gy = g.centroid.x, g.centroid.y
         if any(c[0] <= gx <= c[1] and c[2] <= gy <= c[3] for c in cajas):
             continue

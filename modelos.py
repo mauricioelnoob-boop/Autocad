@@ -120,6 +120,7 @@ MODELOS = {
         "piezas_extra": [
             _recorte("Moret", 329.847, -123.624, 0.596, 0.608),   # L superior
             _recorte("Moret", 329.847, -124.210, 0.364, 0.586),   # L inferior-izq
+            _recorte("Moret", 323.635, -128.774, 0.433, 0.354),   # recorte chico debajo de PB-M-095 (esquina)
         ],
         "reclasificar": [
             # Tiras de orilla de recámaras que salieron Moret -> son Royal Walnut.
@@ -181,6 +182,10 @@ MODELOS = {
         "piezas_extra": [
             _recorte("Moret", 277.503, -67.672, 0.180, 0.750),   # continuidad PB-M-120 <-> PB-M-106 (puerta)
             _recorte("Royal Walnut", 287.70, -61.215, 0.180, 0.483),  # mitad Royal junto a PA-M-001
+            # recortes del cuarto de lavado, debajo de PB-M-088/089/090
+            _recorte("Moret", 279.075, -66.142, 0.600, 0.316),
+            _recorte("Moret", 279.678, -66.142, 0.600, 0.316),
+            _recorte("Moret", 280.279, -66.142, 0.302, 0.316),
         ],
         "redimensionar": [
             {"x": 288.32, "y": -60.97, "x0": 287.88, "y0": -61.215, "wx": 0.692, "hy": 0.483},  # PA-M-001 se extiende hasta la mitad
@@ -210,7 +215,10 @@ MODELOS = {
         # (clave 1). Las dos hileras (x288.0-289.05, y-67.05..-66.35). El override
         # por caja es robusto a la renumeración de piezas.
         "forzar_material": [
-            {"box": (288.00, 289.05, -67.05, -66.35), "material": "Moret"},
+            # hilera BAJA del cuadrito (y-67.09..-66.84) -> Royal Walnut (recámara).
+            {"box": (288.00, 289.05, -67.12, -66.84), "material": "Royal Walnut"},
+            # hilera ALTA -> Moret (clave 1, conecta al baño de arriba).
+            {"box": (288.00, 289.05, -66.84, -66.35), "material": "Moret"},
         ],
         # No rellenar tope Royal dentro del cuadrito (ya es Moret).
         "tope_royal_excluir": [
@@ -227,9 +235,9 @@ MODELOS = {
         # despiece dejó el Moret continuo cruzando el muro; ese piso es otro
         # material, se excluye.
         "cajas_excluir": [
-            # baño P.B.: SÓLO la zona de regadera/concreto/urbania (claves 4/2/5).
-            # La parte izquierda (x<279) es lavandería con piso Moret y SÍ lleva piso
-            # (faltaban los recortes a la der. de PB-M-094/104).
+            # baño P.B.: zona de regadera/concreto/urbania. Los recortes de piso
+            # Moret del cuarto de lavado (debajo de PB-M-088/089/090) se reponen
+            # como piezas_extra, que NO se excluyen.
             (279.00, 281.30, -67.00, -65.78),
             # planta baja: el piso va POR DEBAJO de la escalera, no se excluye.
             (282.75, 285.70, -70.85, -67.75),   # escalera planta alta = vacío (A-ESCALON)
