@@ -106,6 +106,9 @@ def pagina_plano(pdf, modelo):
         col = "#fbe6c8" if p["material"] == "Moret" else "#e8e8e8"
         ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
                      facecolor=col, edgecolor="#d9d9d9", lw=0.2))
+        for (a, b, c, d) in p.get("notch", []):
+            ax.add_patch(Rectangle((a, b), c - a, d - b, facecolor="#ffffff",
+                         edgecolor="#d9d9d9", lw=0.2, zorder=2))
     for a, b in muros:
         ax.plot([a[0], b[0]], [a[1], b[1]], color="#cc2222", lw=1.0, zorder=3)
     for a, b in escal:

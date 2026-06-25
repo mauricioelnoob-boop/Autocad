@@ -401,11 +401,23 @@ def recortar_muros_interiores(anotadas, cfg):
         libre = r.difference(muros)
         if libre.is_empty or libre.area < 0.012:
             continue                                   # toda la pieza es muro -> quitar
-        for (x0, y0, x1, y1) in _decompose(libre):
+        # Una pieza por REGIÓN CONEXA (no por rectángulo): si un muro/jamba sólo
+        # muerde la pieza, sigue siendo UNA sola pieza con UN solo recorte; el
+        # hueco del muro se guarda como "notch" (entrante) para dibujarlo rodeado.
+        comps = [libre] if libre.geom_type == "Polygon" else list(getattr(libre, "geoms", []))
+        for comp in comps:
+            if comp.is_empty or comp.area < 0.012:
+                continue
+            x0, y0, x1, y1 = comp.bounds
             q = dict(p)
             q["x0"], q["y0"] = round(x0, 4), round(y0, 4)
             q["wx"], q["hy"] = round(x1 - x0, 4), round(y1 - y0, 4)
             q["x"], q["y"] = round((x0 + x1) / 2, 3), round((y0 + y1) / 2, 3)
+            # entrante(s) del muro dentro del bbox de la pieza (lo que NO es piso)
+            hueco = box(x0, y0, x1, y1).difference(comp)
+            q["notch"] = ([[round(a, 4), round(b, 4), round(c, 4), round(d, 4)]
+                           for (a, b, c, d) in _decompose(hueco)]
+                          if (not hueco.is_empty and hueco.area > 0.004) else [])
             q.pop("id", None)
             _retipo(q)
             salida.append(q)
@@ -712,14 +724,15 @@ def cargar_anotado(modelo="Cabernet"):
     # restaurada. Se prioriza la pieza ORIGINAL y la más grande; se descarta la
     # que se encima >40% de su área.
     anotadas = _quitar_solapes(anotadas)
-
-    # AL FINAL (después de rellenos y de-solape): respetar MUROS INTERIORES
-    # (tablaroca / muros bajos / cancelería) y la cara de muro del ZOCLO. Parte las
-    # piezas que el despiece dibujó encima de un muro para que el piso lo RODEE.
-    anotadas = recortar_muros_interiores(anotadas, cfg)
-    anotadas = _quitar_solapes(anotadas)
     anotadas = _resolver_solapes(anotadas)                              # partición limpia
     anotadas = [p for p in anotadas if min(p["wx"], p["hy"]) >= 0.05]   # sin esquirlas
+
+    # AL FINAL (después de rellenos, de-solape y partición): respetar MUROS
+    # INTERIORES (tablaroca / muros bajos / cancelería). En vez de fragmentar la
+    # pieza en varios rectángulos, se conserva UNA pieza por región conexa y el
+    # muro se guarda como "notch" (el piso lo RODEA, no lo encima). Va de último
+    # para que nada vuelva a partir la pieza con su entrante.
+    anotadas = recortar_muros_interiores(anotadas, cfg)
 
     # IDs y pieza de corte, por (planta, material)
     asignar_ids_corte(anotadas)

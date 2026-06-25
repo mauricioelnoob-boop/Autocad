@@ -70,6 +70,26 @@ def _rect(msp, x, y, w, h, layer):
                        close=True, dxfattribs={"layer": layer})
 
 
+def _contorno_notch(msp, p, layer):
+    """Dibuja el CONTORNO real de una pieza con entrante (bbox menos el muro):
+    una sola polilínea que rodea la jamba. Si el resultado se parte, dibuja cada
+    parte; así el piso queda RODEANDO el muro, no encima."""
+    try:
+        from shapely.geometry import box
+    except Exception:
+        return _rect(msp, p["x0"], p["y0"], p["wx"], p["hy"], layer)
+    g = box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+    for (a, b, c, d) in p.get("notch", []):
+        g = g.difference(box(a, b, c, d))
+    polys = [g] if g.geom_type == "Polygon" else list(getattr(g, "geoms", []))
+    for gg in polys:
+        if gg.is_empty:
+            continue
+        pts = [(round(x, 4), round(y, 4)) for x, y in gg.exterior.coords[:-1]]
+        if len(pts) >= 3:
+            msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": layer})
+
+
 def _txt(msp, s, x, y, h, layer):
     t = msp.add_text(s, dxfattribs={"layer": layer, "height": h})
     t.set_placement((x, y), align=ezdxf.enums.TextEntityAlignment.MIDDLE_CENTER)
@@ -145,7 +165,10 @@ def exportar(modelo):
     # --- Plano: piezas + IDs ---
     for p in piezas:
         x0, y0, w, h = p["x0"], p["y0"], p["wx"], p["hy"]
-        _rect(msp, x0, y0, w, h, CAPA[p["material"]])
+        if p.get("notch"):
+            _contorno_notch(msp, p, CAPA[p["material"]])
+        else:
+            _rect(msp, x0, y0, w, h, CAPA[p["material"]])
         th = min(max(0.03, min(w, h) * 0.30), 0.09)
         _txt(msp, p["id"], p["x"], p["y"], th, "ETIQUETAS")
 

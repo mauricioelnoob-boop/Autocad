@@ -28,9 +28,18 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v4.2"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v4.3"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
+
+
+def _tapar_notch(ax, p, face="#ffffff", edge="#333", lw=0.4):
+    """Dibuja el ENTRANTE del muro (jamba) como hueco dentro de la pieza: una
+    pieza con notch es UNA sola pieza que RODEA el muro (no lo encima)."""
+    from matplotlib.patches import Rectangle
+    for (a, b, c, d) in p.get("notch", []):
+        ax.add_patch(Rectangle((a, b), c - a, d - b, facecolor=face,
+                               edgecolor=edge, lw=lw, zorder=6))
 PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
        "#f1948a", "#73c6b6", "#f8c471", "#aab7b8", "#a3e4d7", "#d7bde2"]
 
@@ -100,6 +109,7 @@ def hacer_pdf(todas, material, path, modelo=""):
             ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
                                    facecolor=est["face"], edgecolor="#333",
                                    lw=0.4 if p["completa"] else 0.7))
+            _tapar_notch(ax, p)
             fs = min(max(1.8, min(p["wx"], p["hy"]) * 14), 4.5)
             ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
                     fontsize=fs, rotation=0 if p["wx"] >= p["hy"] else 90)
@@ -160,6 +170,7 @@ def hacer_pdf(todas, material, path, modelo=""):
                 # el recorte en su lugar real (un solo color neutro)
                 ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
                                        facecolor="#aed6f1", edgecolor="#1b4f72", lw=0.6))
+                _tapar_notch(ax, p, edge="#1b4f72")
                 ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
                         fontsize=3.6, rotation=0 if p["wx"] >= p["hy"] else 90)
             ax.set_xlim(minx - 0.6, maxx + 0.6); ax.set_ylim(miny - 0.6, maxy + 0.6)
@@ -183,6 +194,7 @@ def hacer_pdf(todas, material, path, modelo=""):
             for idx, t, p in reusados:
                 ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
                                        facecolor="#f9e79f", edgecolor="#b7950b", lw=0.7))
+                _tapar_notch(ax, p, edge="#b7950b")
                 ax.text(p["x"], p["y"], f"{p['id']}\n(sobra {pc}-{idx:02d})",
                         ha="center", va="center", fontsize=3.4,
                         rotation=0 if p["wx"] >= p["hy"] else 90)
