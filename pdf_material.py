@@ -28,7 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v4.9"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v5.0"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 
@@ -121,6 +121,73 @@ def pagina_zoclo(pdf, guardar, modelo, material):
     guardar(fig)
 
 
+def _dibujar_pared(ax, titulo, w, h, piezas):
+    from matplotlib.patches import Rectangle
+    for p in piezas:
+        col = "#f5b66b" if p["completa"] else "#aed6f1"
+        ax.add_patch(Rectangle((p["x"], p["y"]), p["w"], p["h"], facecolor=col,
+                     edgecolor="#5b3a08" if p["completa"] else "#1b4f72", lw=0.5))
+    ax.set_xlim(-0.05, w + 0.05); ax.set_ylim(-0.05, h + 0.05)
+    ax.set_aspect("equal"); ax.set_title(titulo, fontsize=7.5)
+    ax.tick_params(labelsize=6)
+
+
+def pagina_despiece_regadera(pdf, guardar, modelo):
+    """DESPIECE del muro de regadera: las 3 caras (fondo + 2 laterales) de cada
+    regadera, con piezas completas (naranja) y recortes (azul), y su resumen de
+    sobrante/desperdicio (incluido también en la tabla global)."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+    import despiece_extra as DE
+    paredes = DE.regadera_paredes(modelo)
+    res = DE.regadera_resumen(modelo)
+    n = len(paredes)
+    cols = 3
+    rows = (n + cols - 1) // cols
+    fig, axes = plt.subplots(rows, cols, figsize=(11.7, 2.6 * rows + 1.2))
+    axes = axes.flatten() if hasattr(axes, "flatten") else [axes]
+    for ax, (titulo, w, h, pzs) in zip(axes, paredes):
+        _dibujar_pared(ax, titulo, w, h, pzs)
+    for ax in axes[n:]:
+        ax.axis("off")
+    fig.suptitle(f"DESPIECE — MURO DE REGADERA (piso Moret acostado) · {modelo.upper()}\n"
+                 f"{res['completas']} completas + {res['recortes']} recortes = {res['m2']:.2f} m²  ·  "
+                 f"≈ {res['cajas']} cajas (incluido en la tabla de sobrante/desperdicio)",
+                 fontsize=12, fontweight="bold")
+    fig.legend(handles=[Patch(facecolor="#f5b66b", edgecolor="#5b3a08", label="pieza completa"),
+                        Patch(facecolor="#aed6f1", edgecolor="#1b4f72", label="recorte")],
+               loc="lower center", ncol=2, fontsize=9)
+    fig.tight_layout(rect=[0, 0.05, 1, 0.92])
+    guardar(fig)
+
+
+def pagina_despiece_escalera(pdf, guardar, modelo):
+    """DESPIECE de la escalera: superficie DESARROLLADA (peraltes + huellas) en
+    piso Moret. Peralte 0.175 m (dato), huella 0.28 m, alto entre niveles 3.00 m,
+    ancho 1.20 m. Piezas completas (naranja) y recortes (azul)."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+    import despiece_extra as DE
+    tramos, npe, nhu = DE.escalera_tramos(modelo)
+    res = DE.escalera_resumen(modelo)
+    titulo, w, h, pzs = tramos[0]
+    fig, ax = plt.subplots(figsize=(8.3, 11.0))
+    _dibujar_pared(ax, titulo, w, h, pzs)
+    ax.set_xlabel("ancho de escalera (m)", fontsize=8)
+    ax.set_ylabel("desarrollo: peraltes + huellas (m)", fontsize=8)
+    fig.suptitle(f"DESPIECE — ESCALERA (Moret, superficie desarrollada) · {modelo.upper()}\n"
+                 f"{res['completas']} completas + {res['recortes']} recortes = {res['m2']:.2f} m² ≈ {res['cajas']} cajas",
+                 fontsize=12, fontweight="bold")
+    fig.legend(handles=[Patch(facecolor="#f5b66b", edgecolor="#5b3a08", label="pieza completa"),
+                        Patch(facecolor="#aed6f1", edgecolor="#1b4f72", label="recorte")],
+               loc="lower center", ncol=2, fontsize=9)
+    fig.text(0.5, 0.055, "Medidas: peralte 0.175 m (dato del cliente), huella 0.28 m, "
+             "altura entre niveles 3.00 m (2.75 + losa 0.25), ancho 1.20 m. Ajustar si el plano difiere.",
+             ha="center", fontsize=7.5, color="#666")
+    fig.tight_layout(rect=[0, 0.07, 1, 0.93])
+    guardar(fig)
+
+
 def pagina_muro_regadera(pdf, guardar, modelo):
     """Despiece del PISO EN MURO DE REGADERA (Moret acostado). Muro de fondo
     1.50 m de ancho × alto (NPT − losa: P.B. 2.75 / P.A. 2.90 m). La VENTANA va
@@ -158,7 +225,7 @@ def pagina_muro_regadera(pdf, guardar, modelo):
                 ha="center", va="center", fontsize=7, color="#1b4f72", zorder=6)
         # nicho (recesado 0.09 m): RECARGADO a la izquierda (lado del monomando,
         # donde va la pieza completa). Se marca con doble contorno.
-        nx, ny = 0.10, vy - 0.45 - NH
+        nx, ny = 0.0, vy - 0.45 - NH
         ax.add_patch(Rectangle((nx, ny), NA, NH, fill=False, edgecolor="#c0392b",
                      lw=1.8, zorder=6))
         ax.add_patch(Rectangle((nx + 0.03, ny + 0.03), NA - 0.06, NH - 0.06, fill=False,
@@ -204,8 +271,30 @@ def hacer_pdf(todas, material, path, modelo=""):
     otro = [p for p in todas if p["material"] != material]
 
     baldosas, mapa, (ancho, largo) = empacar(todas, material)
+
+    # EXTRAS Moret (muro de regadera + escalera): se empacan también y entran al
+    # conteo de cajas y a las tablas de sobrante/desperdicio (además de su propia
+    # página de despiece). Sólo aplican al PDF de Moret.
+    extra_reg = extra_esc = None
+    extra_baldosas = []
+    extra_completas = 0
+    if material == "Moret" and modelo:
+        try:
+            import despiece_extra as DE
+            from optimizador_recortes import ajustar as _aj, empaquetar as _emp
+            extra_reg = DE.regadera_resumen(modelo)
+            extra_esc = DE.escalera_resumen(modelo)
+            for res in (extra_reg, extra_esc):
+                extra_completas += res["completas"]
+                ent = [(*_aj(p["ancho"], p["largo"], ancho, largo), "X")
+                       for p in res["piezas"] if not p["completa"]]
+                extra_baldosas += _emp(ent, material, 0.0, False)
+        except Exception:
+            extra_reg = extra_esc = None
+
+    baldosas_all = baldosas + extra_baldosas
     area_reut = area_desp = 0.0
-    for b in baldosas:
+    for b in baldosas_all:
         for (fx, fy, fw, fl) in b.libres:
             if fw <= 0.005 or fl <= 0.005:
                 continue
@@ -215,7 +304,7 @@ def hacer_pdf(todas, material, path, modelo=""):
                 area_desp += fw * fl
 
     completas = sum(1 for p in focal if p["completa"])
-    total_pzas = completas + len(baldosas)
+    total_pzas = completas + extra_completas + len(baldosas_all)
     cfg = CAJAS[material]
     cajas = math.ceil(total_pzas / cfg["pzas_caja"])
 
@@ -432,10 +521,18 @@ def hacer_pdf(todas, material, path, modelo=""):
         except Exception:
             pass
 
-        # ---------- Página: PISO EN MURO DE REGADERA (sólo Moret) — antes de las tablas ----------
+        # ---------- Páginas: MURO DE REGADERA y ESCALERA (sólo Moret) — antes de las tablas ----------
         if material == "Moret":
             try:
-                pagina_muro_regadera(pdf, guardar, modelo)
+                pagina_muro_regadera(pdf, guardar, modelo)        # alzado tipo (ventana + nicho)
+            except Exception:
+                pass
+            try:
+                pagina_despiece_regadera(pdf, guardar, modelo)    # despiece 3 caras + recortes
+            except Exception:
+                pass
+            try:
+                pagina_despiece_escalera(pdf, guardar, modelo)    # despiece escalera (peralte 0.175)
             except Exception:
                 pass
 
@@ -443,7 +540,7 @@ def hacer_pdf(todas, material, path, modelo=""):
         from collections import Counter
         reut = Counter()      # (w,l) -> cantidad
         desp = Counter()
-        for b in baldosas:
+        for b in baldosas_all:
             for (fx, fy, fw, fl) in b.libres:
                 if fw <= 0.005 or fl <= 0.005:
                     continue
@@ -471,12 +568,14 @@ def hacer_pdf(todas, material, path, modelo=""):
 
         area_inst = sum(min(p["wx"], PISOS[material][0]) * min(p["hy"], PISOS[material][1])
                         for p in focal)
+        if material == "Moret":
+            area_inst += (extra_reg["m2"] if extra_reg else 0) + (extra_esc["m2"] if extra_esc else 0)
         area_comprada = cajas * cfg["m2_caja"]
         total_sobra = area_reut + area_desp
         cab = (f"Total de piezas: {total_pzas}  ·  {cajas} cajas  ·  {area_comprada:.2f} m²    |    "
                f"Área neta instalada: {area_inst:.2f} m²\n"
-               f"Recortes acomodados en {len(baldosas)} piezas, reusando al máximo cada sobrante "
-               f"para otro recorte.")
+               f"Recortes acomodados en {len(baldosas_all)} piezas (piso + muro de regadera + escalera), "
+               f"reusando al máximo cada sobrante.")
         fig.text(0.06, 0.91, cab, fontsize=10.5, va="top", family="monospace")
 
         resumen = (

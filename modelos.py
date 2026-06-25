@@ -61,6 +61,8 @@ MODELOS = {
             # bolsa der. de PA-M-009: ancho hasta la cara de la jamba (x504.35) para
             # NO pisar el muro/jamba (detalle del usuario):
             _recorte("Moret", 503.946, -86.555, 0.404, 0.685),
+            # recortito Royal que faltaba ARRIBA de PA-R-177 (orilla derecha recámara)
+            _recorte("Royal Walnut", 507.742, -91.022, 0.072, 0.600),
         ],
         # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna,
         # PB-M-150 hasta la esquina, y unir PA-M-003+009 (la línea no es muro) hasta PA-M-005:

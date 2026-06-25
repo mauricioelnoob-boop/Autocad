@@ -73,11 +73,20 @@ def reporte(modelo):
     R.append(('URBANIA WHITE lavandería (0.30x0.45)', f'{g["urbania_m2"]:.2f} m2 -> {up} pzas', f'{math.ceil(g["urbania_m2"]*1.1/URB_CAJA)} cajas (+10%, 10 pz/caja)'))
     nch=len(g['regaderas']); mm2=nch*MALLA_M2_CHAROLA; mp=math.ceil(mm2/MALLA_M2)
     R.append(('MALLA LYNDHURST charolas (0.30x0.60)', f'{nch} charolas x 1.5 m2 = {mm2:.2f} m2 -> {mp} pzas', f'{mp} pzas (+desperdicio)'))
-    # piso en muro de regadera (Moret colocado vertical), descontando la ventana
-    bruto=sum(REG_PERIM*h for _,h in g['regaderas'])
-    wm2=max(0.0, bruto - nch*VENTANA_M2)
-    wp=math.ceil(wm2/M_M2)
-    R.append(('PISO EN MURO DE REGADERA (Moret)', f'{nch} reg x {REG_PERIM} ml x alto - ventana = {wm2:.2f} m2 -> {wp} pzas', f'{math.ceil(wm2*1.1/MORET_CAJA)} cajas (+10%)'))
+    # piso en muro de regadera y ESCALERA (Moret acostado) — del despiece real
+    try:
+        import despiece_extra as DE
+        reg=DE.regadera_resumen(modelo); esc=DE.escalera_resumen(modelo)
+        R.append(('PISO EN MURO DE REGADERA (Moret, 3 caras)',
+                  f'{nch} reg (fondo 1.50 + 2 lados 1.20) - ventana = {reg["m2"]:.2f} m2',
+                  f'{reg["cajas"]} cajas (+10%)'))
+        R.append(('PISO EN ESCALERA (Moret, peralte 0.175)',
+                  f'{esc["n_peraltes"]} peraltes + {esc["n_huellas"]} huellas x 1.20 m = {esc["m2"]:.2f} m2',
+                  f'{esc["cajas"]} cajas (+10%)'))
+    except Exception:
+        bruto=sum(REG_PERIM*h for _,h in g['regaderas'])
+        wm2=max(0.0, bruto - nch*VENTANA_M2); wp=math.ceil(wm2/M_M2)
+        R.append(('PISO EN MURO DE REGADERA (Moret)', f'{nch} reg - ventana = {wm2:.2f} m2 -> {wp} pzas', f'{math.ceil(wm2*1.1/MORET_CAJA)} cajas (+10%)'))
     return R
 
 if __name__=='__main__':
