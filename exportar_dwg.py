@@ -240,8 +240,10 @@ def exportar(modelo):
     # --- Despiece de ESCALERA y ZOCLO (a la derecha del plano) ---
     dibujar_despiece_extra(msp, modelo, maxx + 3.0, maxy)
 
-    dxf = f"Viñas Norte - {modelo}.dxf"
-    dwg = f"Viñas Norte - {modelo}.dwg"
+    # Nombre ASCII (sin ñ) para los CAD: evita que AutoCAD falle al resolver la
+    # ruta por el carácter especial. Los PDF/Excel sí conservan "Viñas".
+    dxf = f"Vinas Norte - {modelo}.dxf"
+    dwg = f"Vinas Norte - {modelo}.dwg"
     doc.saveas(dxf)
     if os.path.exists(DXF2DWG):
         subprocess.run([DXF2DWG, "-y", "-o", dwg, dxf], check=True, stderr=subprocess.DEVNULL)
