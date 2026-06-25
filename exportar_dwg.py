@@ -208,7 +208,7 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
 
 def exportar(modelo):
     piezas = cargar_anotado(modelo)
-    doc = ezdxf.new("R2010", setup=True)
+    doc = ezdxf.new("R2000", setup=True)   # R2000 = máxima compatibilidad (AutoCAD 2000+)
     doc.units = ezdxf.units.M
     msp = doc.modelspace()
     for nombre, color in LAYERS.items():
