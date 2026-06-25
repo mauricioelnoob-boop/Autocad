@@ -80,9 +80,15 @@ def reporte(modelo):
         R.append(('PISO EN MURO DE REGADERA (Moret, 3 caras)',
                   f'{nch} reg (fondo 1.50 + 2 lados 1.20) - ventana = {reg["m2"]:.2f} m2',
                   f'{reg["cajas"]} cajas (+10%)'))
-        R.append(('PISO EN ESCALERA (Moret, peralte 0.175)',
-                  f'{esc["n_peraltes"]} peraltes + {esc["n_huellas"]} huellas x 1.20 m = {esc["m2"]:.2f} m2',
-                  f'{esc["cajas"]} cajas (+10%)'))
+        tr='+'.join(str(t) for t in esc['tramos'])
+        R.append(('PISO EN ESCALERA (Moret, peralte 0.175, huella 0.27)',
+                  f'ancho 1.15, escalones {tr}, {esc["n_escalones"]} peraltes + {esc["n_escalones"]} huellas = {esc["m2"]:.2f} m2',
+                  f'{esc["cajas"]} cajas (+15%)'))
+        if esc.get('zoclo_orilla'):
+            zml=5.0   # ml aprox. de la orilla de la escalera desde el 1er descanso (Chardonnay)
+            zp,zm2,zc=zoclo(zml,MORET_CAJA)
+            R.append(('ZOCLO ESCALERA Chardonnay (0.15, orilla pegada al muro)',
+                      f'~{zml:.1f} ml -> {zp} pzas / {zm2:.2f} m2', f'{math.ceil(zc*1.1)} cajas (+10%)'))
     except Exception:
         bruto=sum(REG_PERIM*h for _,h in g['regaderas'])
         wm2=max(0.0, bruto - nch*VENTANA_M2); wp=math.ceil(wm2/M_M2)

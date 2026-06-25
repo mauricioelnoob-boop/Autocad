@@ -7,29 +7,25 @@ Despiece de los acabados Moret que NO van en el piso plano:
 
   1) MURO DE REGADERA  (piso Moret ACOSTADO en las 3 caras: fondo 1.50 m + 2
      laterales 1.20 m; alto = NPT-losa; se descuenta la ventana del fondo).
-  2) ESCALERA          (piso Moret en peraltes y huellas; peralte 0.175 m dato
-     del cliente; huella 0.28 m; alto entre niveles 3.00 m = 2.75 + losa 0.25;
-     ancho de escalera 1.20 m).  Superficie DESARROLLADA (peraltes + huellas).
-
-Devuelve, por concepto, la lista de piezas (acostadas) marcando completas y
-recortes, con su posición para dibujarlas, además de ancho/largo para empacarlas
-con el optimizador y sacar sobrantes/desperdicio.
+  2) ESCALERA          (piso Moret en PERALTES y HUELLAS). Datos del cliente:
+     ancho 1.15 m, peralte 0.175 m, huella 0.27 m.
+        - Cabernet y Merlot: 7 escalones + descanso (2 piezas enteras + 2 recortes
+          grandes) + 7 escalones (el 8º es la losa de entrepiso).
+        - Chardonnay: 6 escalones + descanso (1 entera + 1 recorte grande) + 2
+          escalones + descanso (1 entera + 1 recorte grande) + 6 escalones.
+          Lleva zoclo de 0.15 m por la orilla, pegado al muro, desde el 1er descanso.
+     Cada peralte (P1, P2, …) y cada huella (H1, H2, …) es un RECORTE que se saca
+     de una baldosa completa; el despiece muestra de qué baldosa sale cada uno.
 """
 import math
 import generadores as G
 
-TW, TH = G.MORET[0], G.MORET[1]      # acostado: 1.194 ancho x 0.596 alto
+TW, TH = G.MORET[0], G.MORET[1]      # baldosa: 1.194 (largo) x 0.596 (corto)
 M_M2 = TW * TH
 
-PERALTE = 0.175        # alto del escalón (dato del cliente)
-HUELLA = 0.28          # fondo del escalón (típico residencial)
-ENTRE_NIVELES = 3.00   # NPT a NPT (2.75 + losa 0.25)
-ESC_ANCHO = 1.20       # ancho de la escalera (m)
-
-
+# ----- regadera -----
 def _tile_pared(w, h, etiqueta):
-    """Despieza una pared w (ancho) x h (alto) con piezas acostadas TWxTH.
-    Devuelve piezas con x,y,w,h (dibujo) y ancho/largo/completa (corte)."""
+    """Despieza una pared w (ancho) x h (alto) con piezas acostadas TWxTH."""
     pzs = []
     y = 0.0
     while y < h - 1e-6:
@@ -49,10 +45,8 @@ def _tile_pared(w, h, etiqueta):
 
 
 def regadera_paredes(modelo):
-    """Lista de (titulo, ancho, alto, piezas) por cada cara de cada regadera."""
     out = []
     for k, (planta, h) in enumerate(G.GEN[modelo]["regaderas"], 1):
-        # fondo: se enchapa SÓLO bajo la ventana (la ventana va pegada al plafón)
         hf = max(0.0, h - G.VENTANA_ALTO)
         out.append((f"Regadera {k} ({planta}) — fondo {G.REG_FONDO:.2f}×{hf:.2f}",
                     G.REG_FONDO, hf, _tile_pared(G.REG_FONDO, hf, f"R{k}-fondo")))
@@ -62,45 +56,70 @@ def regadera_paredes(modelo):
     return out
 
 
-def escalera_tramos(modelo):
-    """Superficie DESARROLLADA de la escalera (peraltes + huellas), como una sola
-    'pared' de ancho ESC_ANCHO y alto = n_peraltes*peralte + n_huellas*huella."""
-    n_peraltes = round(ENTRE_NIVELES / PERALTE)        # 3.00/0.175 ≈ 17
-    n_huellas = n_peraltes - 1                          # 16
-    desarrollo = n_peraltes * PERALTE + n_huellas * HUELLA
-    titulo = (f"Escalera — desarrollo {ESC_ANCHO:.2f} × {desarrollo:.2f} m  "
-              f"({n_peraltes} peraltes×{PERALTE:.3f} + {n_huellas} huellas×{HUELLA:.2f})")
-    return [(titulo, ESC_ANCHO, desarrollo,
-             _tile_pared(ESC_ANCHO, desarrollo, "escalera"))], n_peraltes, n_huellas
-
-
-def _resumen(piezas):
-    comp = sum(1 for p in piezas if p["completa"])
-    rec = sum(1 for p in piezas if not p["completa"])
-    area = sum(p["w"] * p["h"] for p in piezas)
-    return comp, rec, area
-
-
 def regadera_resumen(modelo):
     pzs = [p for _t, _w, _h, ps in regadera_paredes(modelo) for p in ps]
-    comp, rec, area = _resumen(pzs)
+    comp = sum(1 for p in pzs if p["completa"])
+    rec = sum(1 for p in pzs if not p["completa"])
+    area = sum(p["w"] * p["h"] for p in pzs)
     return {"piezas": pzs, "completas": comp, "recortes": rec, "m2": area,
             "cajas": math.ceil(area * 1.1 / G.MORET_CAJA)}
 
 
+# ----- escalera -----
+ESC_ANCHO = 1.15
+PERALTE = 0.175
+HUELLA = 0.27
+DESC_REC_LARGO = 0.70     # largo del "recorte grande" del descanso (ancho = 0.596)
+
+ESCALERA = {
+    "Cabernet":   {"tramos": [7, 7],    "descansos": [(2, 2)]},
+    "Merlot":     {"tramos": [7, 7],    "descansos": [(2, 2)]},
+    "Chardonnay": {"tramos": [6, 2, 6], "descansos": [(1, 1), (1, 1)], "zoclo_orilla": True},
+}
+
+
+def escalera_piezas(modelo):
+    """Lista de piezas de la escalera. Peraltes/huellas y recortes de descanso son
+    RECORTES; las piezas enteras de descanso son completas. ancho<=largo."""
+    cfg = ESCALERA[modelo]
+    n = sum(cfg["tramos"])
+    pzs = []
+    for i in range(n):
+        pzs.append({"id": f"P{i+1}", "ancho": PERALTE, "largo": ESC_ANCHO,
+                    "completa": False, "tipo": "peralte"})
+    for i in range(n):
+        pzs.append({"id": f"H{i+1}", "ancho": HUELLA, "largo": ESC_ANCHO,
+                    "completa": False, "tipo": "huella"})
+    d = 0
+    for (ent, rec) in cfg["descansos"]:
+        d += 1
+        for j in range(ent):
+            pzs.append({"id": f"D{d}-E{j+1}", "ancho": round(TH, 3), "largo": round(TW, 3),
+                        "completa": True, "tipo": "descanso-entera"})
+        for j in range(rec):
+            pzs.append({"id": f"D{d}-R{j+1}", "ancho": round(TH, 3), "largo": DESC_REC_LARGO,
+                        "completa": False, "tipo": "descanso-recorte"})
+    return pzs
+
+
 def escalera_resumen(modelo):
-    tramos, npe, nhu = escalera_tramos(modelo)
-    pzs = [p for _t, _w, _h, ps in tramos for p in ps]
-    comp, rec, area = _resumen(pzs)
+    cfg = ESCALERA[modelo]
+    pzs = escalera_piezas(modelo)
+    n = sum(cfg["tramos"])
+    comp = sum(1 for p in pzs if p["completa"])
+    rec = sum(1 for p in pzs if not p["completa"])
+    # m2 instalado: peraltes + huellas + descansos
+    area = sum(p["ancho"] * p["largo"] for p in pzs)
     return {"piezas": pzs, "completas": comp, "recortes": rec, "m2": area,
-            "cajas": math.ceil(area * 1.1 / G.MORET_CAJA),
-            "n_peraltes": npe, "n_huellas": nhu}
+            "n_escalones": n, "tramos": cfg["tramos"], "descansos": cfg["descansos"],
+            "zoclo_orilla": cfg.get("zoclo_orilla", False),
+            "cajas": math.ceil(area * 1.15 / G.MORET_CAJA)}
 
 
 if __name__ == "__main__":
     import sys
     for m in (sys.argv[1:] or ["Cabernet", "Merlot", "Chardonnay"]):
         r = regadera_resumen(m); e = escalera_resumen(m)
-        print(f"{m}: regadera {r['m2']:.2f} m2 ({r['completas']}c/{r['recortes']}r) "
-              f"-> {r['cajas']} cajas  |  escalera {e['m2']:.2f} m2 "
-              f"({e['completas']}c/{e['recortes']}r) -> {e['cajas']} cajas")
+        print(f"{m}: regadera {r['m2']:.2f} m2 ({r['completas']}c/{r['recortes']}r) -> {r['cajas']} cajas"
+              f"  |  escalera {e['n_escalones']} escalones, {e['m2']:.2f} m2 "
+              f"({e['completas']}c/{e['recortes']}r) -> {e['cajas']} cajas  zoclo_orilla={e['zoclo_orilla']}")

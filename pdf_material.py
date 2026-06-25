@@ -162,29 +162,71 @@ def pagina_despiece_regadera(pdf, guardar, modelo):
 
 
 def pagina_despiece_escalera(pdf, guardar, modelo):
-    """DESPIECE de la escalera: superficie DESARROLLADA (peraltes + huellas) en
-    piso Moret. Peralte 0.175 m (dato), huella 0.28 m, alto entre niveles 3.00 m,
-    ancho 1.20 m. Piezas completas (naranja) y recortes (azul)."""
+    """DESPIECE de la escalera tipo CATÁLOGO DE CORTE: cada baldosa completa con
+    los recortes que se le sacan, marcados P1, P2… (peraltes), H1, H2… (huellas) y
+    D#-R# (recortes de descanso). Datos del cliente: ancho 1.15 m, peralte 0.175 m,
+    huella 0.27 m. Cada peralte/huella es un recorte de una baldosa."""
     import matplotlib.pyplot as plt
-    from matplotlib.patches import Patch
+    from matplotlib.patches import Rectangle, Patch
     import despiece_extra as DE
-    tramos, npe, nhu = DE.escalera_tramos(modelo)
+    from optimizador_recortes import ajustar, empaquetar, PISOS
     res = DE.escalera_resumen(modelo)
-    titulo, w, h, pzs = tramos[0]
-    fig, ax = plt.subplots(figsize=(8.3, 11.0))
-    _dibujar_pared(ax, titulo, w, h, pzs)
-    ax.set_xlabel("ancho de escalera (m)", fontsize=8)
-    ax.set_ylabel("desarrollo: peraltes + huellas (m)", fontsize=8)
-    fig.suptitle(f"DESPIECE — ESCALERA (Moret, superficie desarrollada) · {modelo.upper()}\n"
-                 f"{res['completas']} completas + {res['recortes']} recortes = {res['m2']:.2f} m² ≈ {res['cajas']} cajas",
-                 fontsize=12, fontweight="bold")
-    fig.legend(handles=[Patch(facecolor="#f5b66b", edgecolor="#5b3a08", label="pieza completa"),
-                        Patch(facecolor="#aed6f1", edgecolor="#1b4f72", label="recorte")],
-               loc="lower center", ncol=2, fontsize=9)
-    fig.text(0.5, 0.055, "Medidas: peralte 0.175 m (dato del cliente), huella 0.28 m, "
-             "altura entre niveles 3.00 m (2.75 + losa 0.25), ancho 1.20 m. Ajustar si el plano difiere.",
-             ha="center", fontsize=7.5, color="#666")
-    fig.tight_layout(rect=[0, 0.07, 1, 0.93])
+    aT, lT = PISOS["Moret"]                          # 0.596 x 1.194
+    recortes = [p for p in res["piezas"] if not p["completa"]]
+    enteras = [p for p in res["piezas"] if p["completa"]]
+    entradas = [(*ajustar(p["ancho"], p["largo"], aT, lT), p["id"]) for p in recortes]
+    baldosas = empaquetar(entradas, "Moret", 0.0, False)
+
+    def color_for(pid):
+        return "#aed6f1" if pid.startswith("P") else "#f5b66b" if pid.startswith("H") else "#c39bd3"
+
+    nb = len(baldosas) + len(enteras)
+    cols = 5
+    rows = (nb + cols - 1) // cols
+    fig, axes = plt.subplots(rows, cols, figsize=(11.7, 2.5 * rows + 1.5))
+    axes = axes.flatten() if hasattr(axes, "flatten") else [axes]
+    ai = 0
+    for idx, b in enumerate(baldosas, 1):
+        ax = axes[ai]; ai += 1
+        ax.add_patch(Rectangle((0, 0), aT, lT, facecolor="#fbfbfb", edgecolor="#333", lw=1.4))
+        for (x, y, w, l, pid, rot) in b.piezas:
+            ax.add_patch(Rectangle((x, y), w, l, facecolor=color_for(pid),
+                         edgecolor="#333", lw=0.5))
+            ax.text(x + w / 2, y + l / 2, pid, ha="center", va="center",
+                    fontsize=5.5, rotation=90 if l > w else 0)
+        for (fx, fy, fw, fl) in b.libres:
+            if fw > 0.02 and fl > 0.02:
+                ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#efefef",
+                             edgecolor="#cfcfcf", lw=0.3))
+        ax.set_xlim(-0.03, aT + 0.03); ax.set_ylim(-0.03, lT + 0.03)
+        ax.set_aspect("equal"); ax.set_title(f"Baldosa {idx}", fontsize=7)
+        ax.set_xticks([]); ax.set_yticks([])
+    for p in enteras:
+        ax = axes[ai]; ai += 1
+        ax.add_patch(Rectangle((0, 0), aT, lT, facecolor="#f5b66b", edgecolor="#333", lw=1.4))
+        ax.text(aT / 2, lT / 2, p["id"] + "\n(entera)", ha="center", va="center", fontsize=6)
+        ax.set_xlim(-0.03, aT + 0.03); ax.set_ylim(-0.03, lT + 0.03)
+        ax.set_aspect("equal"); ax.set_title("Descanso", fontsize=7)
+        ax.set_xticks([]); ax.set_yticks([])
+    for ax in axes[ai:]:
+        ax.axis("off")
+
+    cfg = DE.ESCALERA[modelo]
+    tramos = " + ".join(f"{t} escal." for t in cfg["tramos"])
+    zoclo = ("  ·  + ZOCLO 0.15 m en la orilla (desde 1er descanso)"
+             if res["zoclo_orilla"] else "")
+    fig.suptitle(f"DESPIECE — ESCALERA (catálogo de corte) · {modelo.upper()}\n"
+                 f"ancho 1.15 m · peralte 0.175 m · huella 0.27 m · {tramos} · "
+                 f"{len(cfg['descansos'])} descanso(s){zoclo}\n"
+                 f"{res['n_escalones']} peraltes (P) + {res['n_escalones']} huellas (H) + descansos · "
+                 f"{nb} baldosas ≈ {res['cajas']} cajas (sumadas a la tabla)",
+                 fontsize=10.5, fontweight="bold")
+    fig.legend(handles=[Patch(facecolor="#aed6f1", label="Peralte (P#)"),
+                        Patch(facecolor="#f5b66b", label="Huella (H#) / entera"),
+                        Patch(facecolor="#c39bd3", label="Recorte de descanso (D#-R#)"),
+                        Patch(facecolor="#efefef", label="sobrante")],
+               loc="lower center", ncol=4, fontsize=8)
+    fig.tight_layout(rect=[0, 0.05, 1, 0.90])
     guardar(fig)
 
 
