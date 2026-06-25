@@ -221,23 +221,28 @@ def pagina_comparativo(pdf, modelo):
                  fontsize=14.5, fontweight="bold", y=0.97)
 
     cols = ["MATERIAL", "NETO\n(m²)", "SOBRANTE\nREUSABLE (m²)", "MERMA\nREAL (m²)",
-            "REQUERIDO\n(cajas)", "SUMINISTRADO\n(cajas)", "DIFERENCIA\n(cajas)"]
+            "REQUERIDO\n(m² / cajas)", "SUMINISTRADO\n(m² / cajas)", "DIFERENCIA\n(m² / cajas)"]
     spec = [("PISO Moret Arena", "Moret", P["Moret"]),
             ("PISO Royal Walnut", "Royal Walnut", P["Royal"]),
             ("Urbania White", "Urbania", P["Urbania"])]
     cell, colors = [], []
     for (etq, key, sumin) in spec:
         r = R[key]
-        dif_c = sumin - r["cajas"]
+        caja_m2 = r["comprado"] / r["cajas"] if r["cajas"] else 0.0
+        req_m2 = r["comprado"]; sumin_m2 = sumin * caja_m2
+        dif_c = sumin - r["cajas"]; dif_m2 = sumin_m2 - req_m2
         cell.append([etq, f"{r['neto']:.2f}", f"{r.get('reusable',0):.2f}",
-                     f"{r.get('merma',0):.2f}", f"{r['cajas']}", f"{sumin}", f"{dif_c:+d}"])
+                     f"{r.get('merma',0):.2f}",
+                     f"{req_m2:.2f} m²\n{r['cajas']} cajas",
+                     f"{sumin_m2:.2f} m²\n{sumin} cajas",
+                     f"{dif_m2:+.2f} m²\n{dif_c:+d} cajas"])
         cd = "#d5f5e3" if dif_c >= 0 else "#f5b7b1"
         colors.append(["#f4f6f7", "#fdfefe", "#eafaf1", "#fdf2e9", "#fdfefe", "#eaf2f8", cd])
-    # Malla (en piezas)
+    # Malla (en piezas; no se maneja por m²)
     req_pz = R["Malla_pz"]; sum_pz = P["Malla_pz"]; difp = sum_pz - req_pz
     cdp = "#d5f5e3" if difp >= 0 else "#f5b7b1"
     cell.append(["Malla Lyndhurst (pz)", f"{req_pz} pz", "—", "—", f"{req_pz} pz",
-                 f"{sum_pz} pz", f"{difp:+d}"])
+                 f"{sum_pz} pz", f"{difp:+d} pz"])
     colors.append(["#f4f6f7", "#fdfefe", "#eafaf1", "#fdf2e9", "#fdfefe", "#eaf2f8", cdp])
 
     t = ax.table(cellText=cell, colLabels=cols, cellColours=colors,
