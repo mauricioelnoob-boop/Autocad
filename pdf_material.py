@@ -28,18 +28,20 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v4.4"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v4.5"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 
 
 def _tapar_notch(ax, p, face="#ffffff", edge="#333", lw=0.4):
-    """Dibuja el ENTRANTE del muro (jamba) como hueco dentro de la pieza: una
-    pieza con notch es UNA sola pieza que RODEA el muro (no lo encima)."""
-    from matplotlib.patches import Rectangle
-    for (a, b, c, d) in p.get("notch", []):
-        ax.add_patch(Rectangle((a, b), c - a, d - b, facecolor=face,
-                               edgecolor=edge, lw=lw, zorder=6))
+    """Dibuja el ENTRANTE (muro/jamba/escalera) como hueco dentro de la pieza: una
+    pieza con notch es UNA sola pieza que RODEA el obstáculo (no lo encima). El
+    notch es el contorno real (polígono), así sigue diagonales de escalera."""
+    from matplotlib.patches import Polygon as MplPolygon
+    for ring in p.get("notch", []):
+        if len(ring) >= 3:
+            ax.add_patch(MplPolygon(ring, closed=True, facecolor=face,
+                                    edgecolor=edge, lw=lw, zorder=6))
 PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
        "#f1948a", "#73c6b6", "#f8c471", "#aab7b8", "#a3e4d7", "#d7bde2"]
 

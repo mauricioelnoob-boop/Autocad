@@ -394,12 +394,13 @@ def _mascara_muros(cfg):
     return unary_union(obst)
 
 
-def recortar_muros_interiores(anotadas, cfg):
+def recortar_muros_interiores(anotadas, cfg, extra_obst=None):
     """Recorta el piso para que RESPETE TODOS los muros (estructural A-MUROS,
-    tablaroca/jambas, muros bajos, cancelería). Ninguna pieza puede quedar dentro
-    de un muro: a cada pieza se le RESTA la máscara de muros y se conserva UNA sola
-    pieza por región conexa (el muro queda como entrante/notch). El despiece
-    original a veces dibujaba la pieza entera encima del muro."""
+    tablaroca/jambas, muros bajos, cancelería) y el VACÍO de la escalera. Ninguna
+    pieza puede quedar dentro de un muro/escalera: a cada pieza se le RESTA la
+    máscara y se conserva UNA sola pieza por región conexa (lo restado queda como
+    entrante/notch). El despiece original a veces dibujaba la pieza entera encima
+    del muro o invadiendo la escalera."""
     try:
         from shapely.geometry import box, Polygon, Point, LineString
         from shapely.ops import unary_union
@@ -411,6 +412,8 @@ def recortar_muros_interiores(anotadas, cfg):
         return box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
 
     muros = _mascara_muros(cfg)
+    if extra_obst is not None and not extra_obst.is_empty:
+        muros = extra_obst if muros is None else unary_union([muros, extra_obst])
     if muros is None or muros.is_empty:
         return anotadas
 
@@ -422,11 +425,10 @@ def recortar_muros_interiores(anotadas, cfg):
         libre = r.difference(muros)
         if libre.is_empty or libre.area < 0.012:
             continue                                   # toda la pieza es muro -> quitar
-        # Una pieza por REGIÓN CONEXA (no por rectángulo): si un muro/jamba sólo
-        # muerde la pieza, sigue siendo UNA sola pieza con UN solo recorte; el
-        # hueco del muro se guarda como "notch" (entrante) para dibujarlo rodeado.
-        # El bbox se ajusta a la región conexa y el entrante se captura COMPLETO
-        # (umbral fino) para que NADA de piso quede dentro del muro.
+        # Una pieza por REGIÓN CONEXA (no por rectángulo): si un muro/jamba/escalera
+        # sólo muerde la pieza, sigue siendo UNA sola pieza con UN solo recorte; el
+        # hueco se guarda como "notch" (entrante) —POLÍGONO real, sirve para muros
+        # ortogonales y para el filo DIAGONAL de la escalera— y se dibuja rodeado.
         comps = [libre] if libre.geom_type == "Polygon" else list(getattr(libre, "geoms", []))
         for comp in comps:
             if comp.is_empty or comp.area < 0.012:
@@ -436,14 +438,21 @@ def recortar_muros_interiores(anotadas, cfg):
             q["x0"], q["y0"] = round(x0, 4), round(y0, 4)
             q["wx"], q["hy"] = round(x1 - x0, 4), round(y1 - y0, 4)
             q["x"], q["y"] = round((x0 + x1) / 2, 3), round((y0 + y1) / 2, 3)
-            # entrante(s) del muro dentro del bbox de la pieza (lo que NO es piso)
-            hueco = box(x0, y0, x1, y1).difference(comp)
-            q["notch"] = ([[round(a, 4), round(b, 4), round(c, 4), round(d, 4)]
-                           for (a, b, c, d) in _decompose(hueco, minside=0.007,
-                                                          minarea=0.0004, mincell=0.006)]
-                          if (not hueco.is_empty and hueco.area > 0.0006) else [])
+            # entrante(s) = lo que NO es piso dentro del bbox; se guarda el contorno
+            # exacto de cada hueco (incluye diagonales de escalera).
+            hueco = box(x0, y0, x1, y1).difference(comp.buffer(0))
+            notch = []
+            for g in ([hueco] if hueco.geom_type == "Polygon" else getattr(hueco, "geoms", [])):
+                if g.is_empty or g.area < 0.0006:
+                    continue
+                notch.append([[round(cx, 4), round(cy, 4)] for cx, cy in g.exterior.coords])
+            q["notch"] = notch
             q.pop("id", None)
             _retipo(q)
+            if notch:                       # con entrante NO es baldosa completa
+                q["completa"] = False
+                if q["tipo_corte"] == "completa":
+                    q["tipo_corte"] = "corte_esquina"
             salida.append(q)
     return salida
 
@@ -702,11 +711,20 @@ def cargar_anotado(modelo="Cabernet"):
         anotadas, muros_path, cfg.get("muros_ignorar", []),
         cfg.get("recortar_muros", True))
 
-    # Recorte por ESCALERA / ESCALÓN de PLANTA ALTA (vacío): el bbox de algunas
-    # piezas pisa la escalera (el corte original era diagonal). Se recortan/quitan.
+    # ESCALERA / ESCALÓN de PLANTA ALTA (vacío): se trata como obstáculo y se
+    # RESTA junto con los muros en el paso final (recortar_muros_interiores), para
+    # que una pieza que sólo roza la escalera conserve su parte de piso como UNA
+    # sola pieza con la escalera de entrante (no se guillotina dejando vacíos).
+    escalon_zonas = None
     escalon_path = f"escalon_{modelo.lower()}.json"
     if os.path.exists(escalon_path):
-        anotadas = recortar_escalon(anotadas, escalon_path)
+        try:
+            from shapely.geometry import Polygon
+            from shapely.ops import unary_union
+            escalon_zonas = unary_union([Polygon(p).buffer(0)
+                                         for p in json.load(open(escalon_path))])
+        except Exception:
+            escalon_zonas = None
 
     # Zonas que NO se despiezan (escalera, boiler, hueco de cancelería): se
     # quitan al final para que tampoco sobrevivan piezas rellenadas en ese hueco.
@@ -756,7 +774,7 @@ def cargar_anotado(modelo="Cabernet"):
     # pieza en varios rectángulos, se conserva UNA pieza por región conexa y el
     # muro se guarda como "notch" (el piso lo RODEA, no lo encima). Va de último
     # para que nada vuelva a partir la pieza con su entrante.
-    anotadas = recortar_muros_interiores(anotadas, cfg)
+    anotadas = recortar_muros_interiores(anotadas, cfg, extra_obst=escalon_zonas)
 
     # IDs y pieza de corte, por (planta, material)
     asignar_ids_corte(anotadas)

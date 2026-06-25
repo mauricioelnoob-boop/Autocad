@@ -75,12 +75,13 @@ def _contorno_notch(msp, p, layer):
     una sola polilínea que rodea la jamba. Si el resultado se parte, dibuja cada
     parte; así el piso queda RODEANDO el muro, no encima."""
     try:
-        from shapely.geometry import box
+        from shapely.geometry import box, Polygon
     except Exception:
         return _rect(msp, p["x0"], p["y0"], p["wx"], p["hy"], layer)
     g = box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
-    for (a, b, c, d) in p.get("notch", []):
-        g = g.difference(box(a, b, c, d))
+    for ring in p.get("notch", []):
+        if len(ring) >= 3:
+            g = g.difference(Polygon(ring).buffer(0))
     polys = [g] if g.geom_type == "Polygon" else list(getattr(g, "geoms", []))
     for gg in polys:
         if gg.is_empty:
