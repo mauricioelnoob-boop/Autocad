@@ -25,13 +25,17 @@ M_M2 = TW * TH
 
 # ----- regadera -----
 def _tile_pared(w, h, etiqueta):
-    """Despieza una pared w (ancho) x h (alto) con piezas acostadas TWxTH."""
+    """Despieza una pared w (ancho) x h (alto) con piezas acostadas TWxTH.
+
+    Un residuo final menor a 2 cm (p.ej. 1.20 m de pared con tabla de 1.194 m
+    deja 6 mm) NO genera pieza: es tolerancia de boquilla, no un recorte real."""
+    RES = 0.02
     pzs = []
     y = 0.0
-    while y < h - 1e-6:
+    while y < h - RES:
         hh = min(TH, h - y)
         x = 0.0
-        while x < w - 1e-6:
+        while x < w - RES:
             ww = min(TW, w - x)
             corto, largo = min(ww, hh), max(ww, hh)
             completa = abs(ww - TW) < 0.012 and abs(hh - TH) < 0.012

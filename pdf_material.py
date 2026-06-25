@@ -328,11 +328,23 @@ def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
             cortes = sorted(c["cortes"], key=lambda k: k["orden"])
             ordmap = {ct["orden"]: i + 1 for i, ct in enumerate(cortes)}
             for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
-                ax.add_patch(Rectangle((x, y), w, l, facecolor=PALo[(ordmap.get(orden, 1) - 1) % len(PALo)],
+                o = ordmap.get(orden, 1)
+                ax.add_patch(Rectangle((x, y), w, l, facecolor=PALo[(o - 1) % len(PALo)],
                              edgecolor="#333", lw=0.5))
                 src = "tabla" if origen == "TABLA" else "sobra"
-                ax.text(x + w / 2, y + l / 2, f"{ordmap.get(orden,1)}°\n{etq.split()[0]}\n({src})",
-                        ha="center", va="center", fontsize=4.3, rotation=0 if w >= l else 90)
+                # La etiqueta se adapta al tamaño de la pieza para NO encimarse:
+                # piezas muy angostas llevan solo el orden; las medianas, orden+clave;
+                # las amplias, las 3 líneas. La fuente escala con el lado corto.
+                smin = min(w, l)
+                fs = max(2.6, min(5.0, smin * 26))
+                if smin < 0.09:
+                    txt = f"{o}°"
+                elif smin < 0.20:
+                    txt = f"{o}° {etq.split()[0]}"
+                else:
+                    txt = f"{o}°\n{etq.split()[0]}\n({src})"
+                ax.text(x + w / 2, y + l / 2, txt, ha="center", va="center",
+                        fontsize=fs, rotation=0 if w >= l else 90)
             for (fx, fy, fw, fl, *_z) in b.libres:
                 if fw > 0.05 and fl > 0.05:
                     ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#eeeeee",
@@ -342,16 +354,21 @@ def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
             ax.set_xticks([]); ax.set_yticks([])
         for ax in axes[len(grupo):]:
             ax.axis("off")
+        ttl = (f"PLAN DE CORTE — ORDEN Y REUSO DE SOBRANTES · {modelo.upper()} · {material.upper()}"
+               if primero else
+               f"PLAN DE CORTE — ORDEN Y REUSO (cont.) · {modelo.upper()} · {material.upper()}")
+        fig.suptitle(ttl, fontsize=12, fontweight="bold", y=0.985)
         if primero:
-            fig.suptitle(f"PLAN DE CORTE — ORDEN Y REUSO DE SOBRANTES · {modelo.upper()} · {material.upper()}\n"
-                         f"{len(ch)} tablas se abren para recortes; {len(multi)} APROVECHAN el sobrante para 2+ piezas "
-                         f"(ahorro de {len(multi)} tablas).  El número = orden de corte; '(sobra)' = sale del sobrante de la pieza anterior.",
-                         fontsize=10.5, fontweight="bold")
+            fig.text(0.5, 0.945,
+                     f"{len(ch)} tablas se abren para recortes; {len(multi)} aprovechan el sobrante "
+                     f"para 2+ piezas (ahorro de {len(multi)} tablas).",
+                     ha="center", fontsize=8.5, color="#444")
+            fig.text(0.5, 0.925,
+                     "El número = orden de corte · '(tabla)' = corte de tabla nueva · "
+                     "'(sobra)' = sale del sobrante de la pieza anterior.",
+                     ha="center", fontsize=8.5, color="#444")
             primero = False
-        else:
-            fig.suptitle(f"PLAN DE CORTE — ORDEN Y REUSO (cont.) · {modelo.upper()} · {material.upper()}",
-                         fontsize=10.5, fontweight="bold")
-        fig.tight_layout(rect=[0, 0.0, 1, 0.92])
+        fig.tight_layout(rect=[0, 0.0, 1, 0.90])
         guardar(fig)
 
 
@@ -359,7 +376,7 @@ def hacer_pdf(todas, material, path, modelo=""):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from matplotlib.patches import Rectangle, Patch
+    from matplotlib.patches import Rectangle, Patch, FancyBboxPatch
     from matplotlib.backends.backend_pdf import PdfPages
 
     focal = [p for p in todas if p["material"] == material]
@@ -381,9 +398,10 @@ def hacer_pdf(todas, material, path, modelo=""):
             extra_esc = DE.escalera_resumen(modelo)
             for res in (extra_reg, extra_esc):
                 extra_completas += res["completas"]
-                ent = [(*_aj(p["ancho"], p["largo"], ancho, largo), "X")
+                ent = [(*_aj(p["ancho"], p["largo"], ancho, largo),
+                        p.get("id") or p.get("pared") or "extra")
                        for p in res["piezas"] if not p["completa"]]
-                extra_baldosas += _emp(ent, material, 0.0, False)
+                extra_baldosas += _emp(ent, material, 0.0, True)
         except Exception:
             extra_reg = extra_esc = None
 
@@ -577,26 +595,51 @@ def hacer_pdf(todas, material, path, modelo=""):
 
         # ---------- Página 2: RESUMEN ----------
         fig = plt.figure(figsize=(11.7, 8.3))
-        fig.suptitle(f"PISO {material} — Resumen", fontsize=16, weight="bold", y=0.9)
-        lineas = [
-            f"Piezas completas        : {completas}",
-            f"Piezas con recorte      : {len(baldosas)}  (reusando sobrantes)",
-            f"Total de piezas         : {total_pzas}",
-            f"En cajas                : {cajas} cajas de {cfg['pzas_caja']} pzas "
-            f"= {cajas*cfg['pzas_caja']} piezas",
-            f"Equivale a              : {cajas*cfg['m2_caja']:.2f} m²  "
-            f"(caja = {cfg['m2_caja']:g} m²)",
-            "",
-            f"Sobrante reutilizable   : {area_reut:.2f} m²",
-            f"Desperdicio (merma)     : {area_desp:.2f} m²",
+        axr = fig.add_axes([0, 0, 1, 1]); axr.axis("off")
+        axr.set_xlim(0, 1); axr.set_ylim(0, 1)
+        # banda de título
+        axr.add_patch(Rectangle((0, 0.88), 1, 0.12, facecolor="#1b4f72", edgecolor="none"))
+        axr.text(0.5, 0.94, f"PISO {material.upper()} — RESUMEN", ha="center", va="center",
+                 fontsize=20, fontweight="bold", color="white")
+        axr.text(0.5, 0.905, f"{modelo}", ha="center", va="center",
+                 fontsize=11, color="#d6eaf8")
+        # tarjetas KPI (3 arriba: piezas / cajas / m² instalados)
+        kpis = [
+            ("PIEZAS TOTALES", f"{total_pzas}", f"{completas} enteras · {len(baldosas)} con recorte", "#eaf2f8", "#2471a3"),
+            ("CAJAS", f"{cajas}", f"{cfg['pzas_caja']} pzas/caja = {cajas*cfg['pzas_caja']} pzas", "#eafaf1", "#1e8449"),
+            ("SUPERFICIE", f"{cajas*cfg['m2_caja']:.1f} m²", f"caja = {cfg['m2_caja']:g} m²", "#fef9e7", "#b7950b"),
         ]
-        fig.text(0.1, 0.66, "\n".join(lineas), fontsize=13, va="top", family="monospace",
-                 bbox=dict(boxstyle="round", facecolor="#fcf3cf", edgecolor="#b7950b"))
-        fig.text(0.1, 0.30,
-                 "En las páginas siguientes: cada pieza que se corta, qué recortes\n"
-                 "salen, a dónde van y qué sobra (amarillo = reutilizable, rojo =\n"
-                 "desperdicio). Royal Walnut sólo en planta alta (recámaras).",
-                 fontsize=11, va="top")
+        xs = [0.06, 0.385, 0.71]; cw = 0.23
+        for (titulo, valor, sub, fc, ec), x in zip(kpis, xs):
+            axr.add_patch(FancyBboxPatch((x, 0.62), cw, 0.18,
+                          boxstyle="round,pad=0.012,rounding_size=0.02",
+                          facecolor=fc, edgecolor=ec, lw=1.4))
+            axr.text(x + cw/2, 0.762, titulo, ha="center", va="center",
+                     fontsize=9.5, fontweight="bold", color=ec)
+            axr.text(x + cw/2, 0.705, valor, ha="center", va="center",
+                     fontsize=22, fontweight="bold", color="#1b2631")
+            axr.text(x + cw/2, 0.648, sub, ha="center", va="center",
+                     fontsize=8, color="#566573")
+        # franja de aprovechamiento (sobrante reutilizable vs merma)
+        axr.add_patch(FancyBboxPatch((0.06, 0.40), 0.88, 0.15,
+                      boxstyle="round,pad=0.012,rounding_size=0.02",
+                      facecolor="#fbfcfc", edgecolor="#aeb6bf", lw=1.2))
+        axr.text(0.10, 0.51, "APROVECHAMIENTO DEL MATERIAL", ha="left", va="center",
+                 fontsize=10.5, fontweight="bold", color="#1b4f72")
+        axr.text(0.10, 0.455, "Sobrante reutilizable (≥10 cm, sirve para otra pieza)",
+                 ha="left", va="center", fontsize=10, color="#566573")
+        axr.text(0.90, 0.455, f"{area_reut:.2f} m²", ha="right", va="center",
+                 fontsize=12, fontweight="bold", color="#1e8449")
+        axr.text(0.10, 0.420, "Desperdicio real / merma (<10 cm, ya no sirve)",
+                 ha="left", va="center", fontsize=10, color="#566573")
+        axr.text(0.90, 0.420, f"{area_desp:.2f} m²", ha="right", va="center",
+                 fontsize=12, fontweight="bold", color="#c0392b")
+        # nota guía
+        axr.text(0.06, 0.30,
+                 "En las páginas siguientes se detalla cada pieza que se corta, qué recortes salen, a dónde\n"
+                 "van y qué sobra (amarillo = reutilizable · rojo = desperdicio). El plan de corte indica el\n"
+                 "ORDEN y de qué sobrante sale cada pieza. Royal Walnut sólo en recámaras (planta alta).",
+                 fontsize=10.5, va="top", color="#2c3e50")
         guardar(fig)
 
         # ---------- Págs 3+: DESPERDICIOS / RECORTES ----------
