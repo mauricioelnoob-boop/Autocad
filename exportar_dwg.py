@@ -240,8 +240,8 @@ def exportar(modelo):
     # --- Despiece de ESCALERA y ZOCLO (a la derecha del plano) ---
     dibujar_despiece_extra(msp, modelo, maxx + 3.0, maxy)
 
-    dxf = f"{modelo}_editable.dxf"
-    dwg = f"{modelo}_editable.dwg"
+    dxf = f"Viñas Norte - {modelo}.dxf"
+    dwg = f"Viñas Norte - {modelo}.dwg"
     doc.saveas(dxf)
     if os.path.exists(DXF2DWG):
         subprocess.run([DXF2DWG, "-y", "-o", dwg, dxf], check=True, stderr=subprocess.DEVNULL)

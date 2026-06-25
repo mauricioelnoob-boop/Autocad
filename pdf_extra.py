@@ -277,7 +277,7 @@ def pagina_comparativo(pdf, modelo):
     pdf.savefig(fig); plt.close(fig)
 
 
-def comparativo(salida="Generadores-Resumen_Comparativo.pdf"):
+def comparativo(salida="Viñas Norte - Generadores.pdf"):
     with PdfPages(salida) as pdf:
         for m in ("Cabernet", "Merlot", "Chardonnay"):
             pagina_comparativo(pdf, m)
@@ -285,14 +285,10 @@ def comparativo(salida="Generadores-Resumen_Comparativo.pdf"):
 
 
 def main(modelo):
-    out_u = f"{modelo}_Urbania-White_Despiece.pdf"
+    out_u = f"Viñas Norte - {modelo} Urbania.pdf"
     with PdfPages(out_u) as pdf:
         pagina_urbania(pdf, modelo)
     print("->", out_u)
-    out_r = f"{modelo}_Generadores-Resumen.pdf"
-    with PdfPages(out_r) as pdf:
-        pagina_resumen(pdf, modelo)
-    print("->", out_r)
 
 
 if __name__ == "__main__":

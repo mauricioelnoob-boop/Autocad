@@ -847,8 +847,8 @@ def hacer_pdf(todas, material, path, modelo=""):
 
 def main(modelo="Cabernet"):
     todas = cargar_anotado(modelo)
-    salidas = {"Moret": f"{modelo}_Despiece-Piso_Moret-Arena.pdf",
-               "Royal Walnut": f"{modelo}_Despiece-Piso_Royal-Walnut.pdf"}
+    salidas = {"Moret": f"Viñas Norte - {modelo} Moret.pdf",
+               "Royal Walnut": f"Viñas Norte - {modelo} Royal.pdf"}
     for material, path in salidas.items():
         pzas, cajas, reut, desp = hacer_pdf(todas, material, path, modelo)
         print(f"{modelo} · {material}: {pzas} piezas / {cajas} cajas  ·  reutilizable "

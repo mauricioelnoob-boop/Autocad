@@ -170,7 +170,7 @@ def main():
     hoja_lotes(wb.create_sheet("Control de Lotes"))
     for m in ['Cabernet', 'Merlot', 'Chardonnay']:
         hoja(wb.create_sheet(m), m)
-    out = "Inventario_Acabados_y_Lotes.xlsx"
+    out = "Viñas Norte - Inventario.xlsx"
     wb.save(out)
     print("->", out)
 
