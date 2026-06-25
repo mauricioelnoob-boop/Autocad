@@ -481,6 +481,15 @@ def hacer_pdf(todas, material, path, modelo=""):
         recortes_plan = [p for p in focal if not p["completa"]]
         cxh = sum(p["x"] for p in focal) / len(focal) if focal else 0
         cyh = sum(p["y"] for p in focal) / len(focal) if focal else 0
+        # Según el empaque: de dónde sale cada recorte. "TABLA" = se corta de una
+        # baldosa nueva; cualquier otra etiqueta = sale del SOBRANTE de esa pieza
+        # (no se abre tabla nueva).
+        origen_de = {}
+        for b in baldosas:
+            for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+                origen_de[etq] = origen
+        n_sobra = sum(1 for p in recortes_plan
+                      if origen_de.get(p["id"], "TABLA") != "TABLA")
         if recortes_plan:
             fig, ax = plt.subplots(figsize=(min(24, W * 1.4), min(16, H * 1.4) + 1))
             for p in focal:
@@ -488,6 +497,17 @@ def hacer_pdf(todas, material, path, modelo=""):
                                        facecolor="#eef3f8" if p["completa"] else "#ffffff",
                                        edgecolor="#d5d8dc", lw=0.3))
             for p in recortes_plan:
+                org = origen_de.get(p["id"], "TABLA")
+                if org != "TABLA":
+                    # Sale del sobrante de otra pieza: NO se corta tabla nueva.
+                    # Se marca en morado para indicar que ya está "de sobra".
+                    ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                           facecolor="#d2b4de", edgecolor="#6c3483", lw=0.7))
+                    _tapar_notch(ax, p, edge="#6c3483")
+                    ax.text(p["x"], p["y"], f"{p['id']}\n(de {org.split()[0]})",
+                            ha="center", va="center", fontsize=3.2,
+                            rotation=0 if p["wx"] >= p["hy"] else 90, color="#4a235a")
+                    continue
                 aw, al = PISOS[material]
                 Wt = max(aw, p["wx"]); Lt = max(al, p["hy"])
                 tx = p["x0"] if p["x"] >= cxh else p["x0"] + p["wx"] - Wt
@@ -514,9 +534,19 @@ def hacer_pdf(todas, material, path, modelo=""):
                         fontsize=3.6, rotation=0 if p["wx"] >= p["hy"] else 90)
             ax.set_xlim(minx - 0.6, maxx + 0.6); ax.set_ylim(miny - 0.6, maxy + 0.6)
             ax.set_aspect("equal"); ax.axis("off")
+            ax.legend(handles=[
+                Patch(facecolor="#aed6f1", edgecolor="#1b4f72",
+                      label="recorte cortado de tabla nueva"),
+                Patch(facecolor="#fcf3cf", edgecolor="#b7950b",
+                      label="sobrante de ese corte"),
+                Patch(facecolor="#d2b4de", edgecolor="#6c3483",
+                      label="sale de un sobrante previo (sin corte nuevo)"),
+            ], loc="upper center", ncol=3, fontsize=9, bbox_to_anchor=(0.5, -0.02))
             ax.set_title(f"RECORTES Y SU PIEZA COMPLETA — {modelo.upper()} · {material.upper()}\n"
-                         "cada recorte (azul) con la baldosa entera de la que sale (línea punteada) "
-                         "y el sobrante (amarillo), pegado en su lugar",
+                         "azul = recorte que se corta de tabla nueva (línea punteada = baldosa entera, "
+                         "amarillo = su sobrante)\n"
+                         f"morado = recorte que SALE de un sobrante previo, no se corta tabla nueva "
+                         f"({n_sobra} piezas)",
                          fontsize=11)
             guardar(fig)
 
