@@ -55,12 +55,16 @@ MODELOS = {
             _recorte("Moret", 495.389, -91.460, 0.170, 1.120),   # izq. de PB-M-135
             _recorte("Moret", 495.389, -92.530, 0.170, 1.068),   # izq. de PB-M-151
             _recorte("Moret", 502.654, -85.960, 0.090, 0.900),   # der. de PA-M-005 (junto al Royal)
+            _recorte("Moret", 503.944, -90.810, 0.090, 0.900),   # der. de PA-M-039/037: tirita de continuidad con la tira Royal PA-R-149
             _recorte("Moret", 506.010, -89.730, 0.214, 0.600),   # debajo de PA-M-050 (izq. del muro/jamba)
             _recorte("Moret", 506.344, -89.730, 0.268, 0.600),   # debajo de PA-M-050 (der. del muro/jamba)
             _recorte("Moret", 495.205, -91.240, 0.184, 0.900),   # continuidad PB-M-136 <-> PB-M-122 (puerta)
             # bolsa der. de PA-M-009: ancho hasta la cara de la jamba (x504.35) para
             # NO pisar el muro/jamba (detalle del usuario):
-            _recorte("Moret", 503.946, -86.555, 0.404, 0.685),
+            # PA-M-011: pieza grande de abajo; su tope sube hasta la boquilla de
+            # PA-M-001/010 (y=-85.496). Llega a x504.466; la jamba (x504.35, debajo
+            # de y-85.86) la muerde sola como entrante vía la máscara de muros.
+            _recorte("Moret", 503.946, -86.555, 0.520, 1.059),
             # tira Royal de la orilla derecha (arriba de PA-R-177): una sola pieza
             # que llega hasta el tope de la columna Royal (incluye el recortito de
             # arriba que el usuario marcó como parte de la misma pieza).
@@ -73,7 +77,7 @@ MODELOS = {
             {"x": 506.117, "y": -87.084, "x0": 506.010, "y0": -87.428, "wx": 0.634, "hy": 0.688},  # recorte esquina escalera = UNA sola pieza hasta el borde de piso (x506.644)
             {"x": 490.12, "y": -92.05, "x0": 489.539, "y0": -92.572, "wx": 0.600, "hy": 1.050},  # izq. de PB-M-159
             {"x": 497.47, "y": -91.94, "x0": 497.365, "y0": -92.530, "wx": 0.214, "hy": 1.068},  # PB-M-150 a la esquina
-            {"x": 504.20, "y": -85.68, "x0": 503.946, "y0": -85.860, "wx": 0.518, "hy": 0.800},  # unir PA-M-009+003 (sin encimar a PA-M-004)
+            {"x": 504.20, "y": -85.68, "x0": 503.946, "y0": -85.496, "wx": 0.520, "hy": 0.436},  # PA-M-003: chica arriba, junta alineada con boquilla de 001/010 (y-85.496)
         ],
         "eliminar": [
             (504.20, -85.28),    # PA-M-003: se absorbe en la pieza unida (009)
