@@ -1,5 +1,35 @@
 # Optimizador de recortes de piso
 
+> **ENTREGA "VIÑAS NORTE" — guía rápida (lee esto primero)**
+>
+> **Reconstruir TODO con un comando:**
+> ```bash
+> pip install -r requirements.txt        # shapely, matplotlib, ezdxf, openpyxl
+> python3 build.py                       # DWG→JSON (si falta) → VALIDA → genera → ZIP
+> ```
+> `build.py` aborta si la validación falla, así que nunca se entrega un despiece inválido.
+> Para validar sin generar: `python3 validar.py` (0 huecos, 0 solapes, 0 piezas en muro,
+> el área cuadra y cada corrección manual aplica). Sale con código ≠0 si algo falla.
+>
+> **Entregables (en el ZIP `Vinas Norte - Despiece de Pisos (Entrega Final).zip`):**
+> - `01 Despieces de Piso/` — 6 despieces (Cabernet/Merlot/Chardonnay × Moret/Royal) + 3 Urbania.
+> - `02 Generadores e Inventario/` — Generadores PDF (% desperdicio real vs presupuesto),
+>   Generadores Excel (editable) e Inventario Excel (control por lote, con fórmulas).
+> - `03 Editables CAD (DXF)/` — 3 DXF R2000 (abren en AutoCAD; los `.dwg` salen vacíos, usar DXF).
+>
+> **Fuente única de datos del cliente:** `datos_cliente.py` (SUMINISTRADO, % presupuestado,
+> LOTES). Los m² de zoclo/Urbania/charolas viven en `generadores.py` (`GEN`). NO duplicar
+> estos números en otros archivos: importarlos de ahí.
+>
+> **Prerrequisito externo:** LibreDWG 0.13.x en `/tmp/libredwg-0.13.3/programs/` (binarios
+> `dwgread`/`dxf2dwg`). Sin ellos, `build.py` usa los `piezas_<modelo>.json` ya extraídos.
+>
+> **Alcance:** cubre piso, zoclo, regadera, escalera, Urbania y malla. **No** incluye
+> adhesivo/mortero, boquilla, niveladores ni impermeabilizante (cotizar aparte). Pedir todo
+> el material del **mismo lote/tono**.
+
+---
+
 Programa para sacar, a partir del **despiece ya dibujado en el plano de AutoCAD**,
 qué piezas de piso hay que **recortar** y **dónde reusar esos recortes** para no
 cortar baldosas enteras y desperdiciar menos material.

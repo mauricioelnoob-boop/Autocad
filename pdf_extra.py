@@ -154,11 +154,8 @@ def pagina_resumen(pdf, modelo):
 # ---------------------------------------------------------------- Comparativo
 # Suministrado (presupuesto) — datos del cliente. Cabernet/Merlot en cajas;
 # Chardonnay venía en m² (Moret 180.75, Royal 38.27, Urbania 10.12, Malla 5 m²).
-PRESUP = {
-    "Cabernet":   {"Moret": 117, "Royal": 41, "Urbania": 8, "Malla_pz": 28},
-    "Merlot":     {"Moret": 98,  "Royal": 37, "Urbania": 8, "Malla_pz": 17},
-    "Chardonnay": {"Moret": 127, "Royal": 32, "Urbania": 8, "Malla_pz": 28},
-}
+# Datos del cliente desde la fuente única (suministrado + % presupuestado).
+from datos_cliente import PRESUP, BUDGET_PCT
 
 
 def _zoclo_tablas(modelo, material):
@@ -218,12 +215,6 @@ def real_datos(modelo):
     return out
 
 
-# Desperdicio que el PRESUPUESTO aplica sobre la base (lo suministrado = base +
-# este %). De aquí se deriva la base y se compara contra el % que de verdad se
-# necesita. Ajustable si algún presupuesto usara otro %.
-BUDGET_PCT = 0.03
-
-
 def pagina_comparativo(pdf, modelo):
     R = real_datos(modelo); P = PRESUP[modelo]
     bp = int(round(BUDGET_PCT * 100))
@@ -246,19 +237,27 @@ def pagina_comparativo(pdf, modelo):
         realpct = (req / base - 1) * 100
         faltan = max(0, req - sumin)
         cd = "#d5f5e3" if faltan == 0 else "#f5b7b1"
+        # display: % real nunca negativo (si sobra, no se necesita % extra);
+        # FALTAN muestra "sobra N" cuando suministrado supera lo requerido.
+        pct_disp = f"{max(0.0, realpct):.1f} %"
+        falt_disp = f"{faltan}" if faltan else (f"sobra {sumin-req}" if sumin > req else "—")
         cell.append([etq, f"{r['neto']:.2f}", f"{base}", f"{sumin}", f"{req}",
-                     f"{realpct:.1f} %", f"{faltan}" if faltan else "—"])
+                     pct_disp, falt_disp])
         colors.append(["#f4f6f7", "#fdfefe", "#eafaf1", "#eaf2f8", "#fdfefe", cd, cd])
         if faltan:
             cortos.append(f"{etq.replace('PISO ', '')}: {realpct:.0f}% (faltan {faltan})")
+        if key == "Moret":
+            ej = (modelo, base, sumin, req, max(0.0, realpct))   # ejemplo de ESTA hoja
     # Malla (piezas): mismo esquema en pz
     req_pz = R["Malla_pz"]; sum_pz = P["Malla_pz"]
     base_pz = int(round(sum_pz / (1 + BUDGET_PCT))) or 1
     realpct_pz = (req_pz / base_pz - 1) * 100
     faltan_pz = max(0, req_pz - sum_pz)
     cdp = "#d5f5e3" if faltan_pz == 0 else "#f5b7b1"
+    pct_pz_disp = f"{max(0.0, realpct_pz):.1f} %"
+    falt_pz_disp = f"{faltan_pz}" if faltan_pz else (f"sobra {sum_pz-req_pz}" if sum_pz > req_pz else "—")
     cell.append(["Malla Lyndhurst (pz)", f"{req_pz} pz", f"{base_pz}", f"{sum_pz}",
-                 f"{req_pz}", f"{realpct_pz:.1f} %", f"{faltan_pz}" if faltan_pz else "—"])
+                 f"{req_pz}", pct_pz_disp, falt_pz_disp])
     colors.append(["#f4f6f7", "#fdfefe", "#eafaf1", "#eaf2f8", "#fdfefe", cdp, cdp])
     if faltan_pz:
         cortos.append(f"Malla: {realpct_pz:.0f}% (faltan {faltan_pz})")
@@ -281,13 +280,20 @@ def pagina_comparativo(pdf, modelo):
             color="#922b21" if cortos else "#1e8449", transform=ax.transAxes)
 
     nota = (f"CÓMO LEERLO:  el PRESUPUESTO surte la BASE + {bp}% de desperdicio = lo SUMINISTRADO\n"
-            f"   (ej. Merlot Moret: base 95 + {bp}% ≈ 98 cajas).\n"
+            f"   (en esta hoja, Moret: base {ej[1]} + {bp}% ≈ {ej[2]} cajas).\n"
             "REQUERIDO REAL = cajas que de verdad se ocupan (despiece con reuso máximo de sobrantes).\n"
             f"% REAL NECESARIO = desperdicio que en realidad se necesita sobre la base (base → requerido).\n"
-            f"   Si es mayor al {bp}% presupuestado, hay que pedir ese % (ej. Merlot Moret ≈ 5%, no {bp}%).\n"
-            "FALTAN = cajas que hay que reponer (rojo) para que alcance.")
+            f"   Si es mayor al {bp}% presupuestado, hay que pedir ese % "
+            f"(aquí Moret se ocupan {ej[3]} → ≈{ej[4]:.0f}%).\n"
+            "FALTAN = cajas que reponer (rojo); 'sobra N' = el suministrado excede lo requerido.")
     ax.text(0.02, 0.225, nota, fontsize=8.5, color="#444", transform=ax.transAxes, va="top",
             bbox=dict(boxstyle="round", facecolor="#fef9e7", edgecolor="#b7950b"))
+    alcance = ("ALCANCE: cubre piso (Moret/Royal), zoclo, regadera, escalera, Urbania y malla. "
+               "NO incluye adhesivo/mortero, boquilla, niveladores ni impermeabilizante (cotizar aparte).\n"
+               "IMPORTANTE: pedir TODO el material del MISMO LOTE/TONO para evitar diferencias de color "
+               "entre cajas y entre lotes de obra.")
+    ax.text(0.02, 0.085, alcance, fontsize=8.0, color="#7b3f00", transform=ax.transAxes, va="top",
+            bbox=dict(boxstyle="round", facecolor="#fdf2e9", edgecolor="#ca6f1e"))
     fig.text(0.5, 0.03, f"{PIE}        Generadores — % de desperdicio real — {modelo}        {FECHA}",
              ha="center", fontsize=8, color="#555")
     pdf.savefig(fig); plt.close(fig)

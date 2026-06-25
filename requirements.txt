@@ -1,0 +1,11 @@
+# Dependencias del pipeline de despiece "Viñas Norte".
+# Instalar:  pip install -r requirements.txt
+shapely>=2.0
+matplotlib>=3.6
+ezdxf>=1.1
+openpyxl>=3.1
+
+# Externo (NO es pip): LibreDWG 0.13.x para dwgread/dxf2dwg. El build espera los
+# binarios en /tmp/libredwg-0.13.3/programs/ (o ajusta DWGREAD/DXF2DWG en
+# generar_modelo.py / exportar_dwg.py). Si no están, build.py usa los
+# piezas_<modelo>.json ya extraídos y avisa.

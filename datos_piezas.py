@@ -667,9 +667,33 @@ def cargar_anotado(modelo="Cabernet"):
         anotadas.append(e)
 
     # Correcciones puntuales en la frontera (por ubicación)
+    # Cada corrección manual (por coordenada) debe ubicar EXACTAMENTE una pieza.
+    # Si no encuentra ninguna dentro de tolerancia, o varias, se registra para que
+    # validar.py lo marque (antes fallaba en silencio: la corrección no aplicaba o
+    # caía en la pieza equivocada y nadie se enteraba).
+    cargar_anotado.correcciones_ambiguas = []
+
+    def _match(r, tipo, tol=0.25):
+        if not anotadas:
+            cargar_anotado.correcciones_ambiguas.append(f"{tipo} ({r['x']:.2f},{r['y']:.2f}): no hay piezas")
+            return None
+        d2 = [(p["x"] - r["x"])**2 + (p["y"] - r["y"])**2 for p in anotadas]
+        orden = sorted(range(len(d2)), key=lambda k: d2[k])
+        i0 = orden[0]
+        if d2[i0] > tol:                                   # nada cerca -> no aplicó
+            cargar_anotado.correcciones_ambiguas.append(
+                f"{tipo} ({r['x']:.2f},{r['y']:.2f}): sin match (más cercana a {d2[i0]**0.5:.2f} m)")
+            return None
+        # ambiguo SÓLO si hay un empate real (dos piezas casi a la misma distancia,
+        # < 6 cm): ahí el punto no identifica de forma única a cuál corregir.
+        if len(orden) > 1 and (d2[orden[1]]**0.5 - d2[i0]**0.5) < 0.06:
+            cargar_anotado.correcciones_ambiguas.append(
+                f"{tipo} ({r['x']:.2f},{r['y']:.2f}): empate entre 2 piezas (mover el punto)")
+        return anotadas[i0]
+
     for r in cfg.get("reclasificar", []):
-        cerca = min(anotadas, key=lambda p: (p["x"] - r["x"])**2 + (p["y"] - r["y"])**2)
-        if (cerca["x"] - r["x"])**2 + (cerca["y"] - r["y"])**2 > 0.25:
+        cerca = _match(r, "reclasificar")
+        if cerca is None:
             continue
         cerca["material"] = r["material"]
         _retipo(cerca)
@@ -681,8 +705,8 @@ def cargar_anotado(modelo="Cabernet"):
     # Redimensionar una pieza mal dibujada (tirita de 3 cm que en realidad es casi
     # entera): sobreescribe la geometría de la pieza más cercana al punto dado.
     for r in cfg.get("redimensionar", []):
-        cerca = min(anotadas, key=lambda p: (p["x"] - r["x"])**2 + (p["y"] - r["y"])**2)
-        if (cerca["x"] - r["x"])**2 + (cerca["y"] - r["y"])**2 > 0.25:
+        cerca = _match(r, "redimensionar")
+        if cerca is None:
             continue
         cerca["x0"], cerca["y0"] = round(r["x0"], 4), round(r["y0"], 4)
         cerca["wx"], cerca["hy"] = round(r["wx"], 4), round(r["hy"], 4)
@@ -747,9 +771,13 @@ def cargar_anotado(modelo="Cabernet"):
         if not anotadas:
             break
         cerca = min(anotadas, key=lambda p: (p["x"] - ex)**2 + (p["y"] - ey)**2)
-        if (cerca["x"] - ex)**2 + (cerca["y"] - ey)**2 <= 0.09:   # dentro de 0.30 m
+        d2 = (cerca["x"] - ex)**2 + (cerca["y"] - ey)**2
+        if d2 <= 0.09:   # dentro de 0.30 m
             anotadas.remove(cerca)
             excluidas += 1
+        else:
+            cargar_anotado.correcciones_ambiguas.append(
+                f"eliminar ({ex:.2f},{ey:.2f}): sin match (más cercana a {d2**0.5:.2f} m)")
 
     # Cerrar los HUECOS del despiece original: cualquier zona dentro de la casa
     # (rodeada de piso y/o muros) que quedó sin pieza porque la polilínea no se

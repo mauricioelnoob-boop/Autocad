@@ -156,7 +156,6 @@ MODELOS = {
         ],
         # Fantasmas (polilínea mal cerrada): se eliminan.
         "eliminar": [
-            (326.05, -125.36),   # fragmento suelto en orilla
             (330.06, -123.61),   # baldosa que el DWG dibujó ENCIMA del muro (PA-M-008):
                                  # se quita y la reponen los 2 rectángulos limpios de piezas_extra
         ],
@@ -238,9 +237,6 @@ MODELOS = {
         ],
         # Fantasmas / donde va muro: se eliminan.
         "eliminar": [
-            (272.75, -70.78),   # PB: va muro
-            (273.36, -70.78),   # PB: va muro
-            (272.75, -60.64),   # PB: no debe existir
             (286.75, -64.68),   # PA-M-026: ahí va muro (casi no debe existir)
         ],
         # Baño de planta baja (claves 5/5/2/4 = Urbania/Malla/concreto): el

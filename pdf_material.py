@@ -337,18 +337,24 @@ def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
                 # las amplias, las 3 líneas. La fuente escala con el lado corto.
                 smin = min(w, l)
                 fs = max(2.6, min(5.0, smin * 26))
+                dim = f"{round(w*100):.0f}×{round(l*100):.0f}"   # ancho×largo en cm
                 if smin < 0.09:
                     txt = f"{o}°"
                 elif smin < 0.20:
-                    txt = f"{o}° {etq.split()[0]}"
+                    txt = f"{o}°\n{dim}"
                 else:
-                    txt = f"{o}°\n{etq.split()[0]}\n({src})"
+                    txt = f"{o}°  {etq.split()[0]}\n{dim} cm\n({src})"
                 ax.text(x + w / 2, y + l / 2, txt, ha="center", va="center",
                         fontsize=fs, rotation=0 if w >= l else 90)
             for (fx, fy, fw, fl, *_z) in b.libres:
                 if fw > 0.05 and fl > 0.05:
                     ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#eeeeee",
                                  edgecolor="#cfcfcf", hatch="//", lw=0.3))
+                    if fw > 0.13 and fl > 0.13:      # sobrante con su medida
+                        ax.text(fx + fw / 2, fy + fl / 2,
+                                f"sobra\n{round(fw*100):.0f}×{round(fl*100):.0f}",
+                                ha="center", va="center", fontsize=3.0, color="#999",
+                                rotation=0 if fw >= fl else 90)
             ax.set_xlim(-0.02, aB + 0.02); ax.set_ylim(-0.02, lB + 0.02)
             ax.set_aspect("equal"); ax.set_title(f"Tabla #{c['id']}", fontsize=6.5)
             ax.set_xticks([]); ax.set_yticks([])
@@ -363,10 +369,15 @@ def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
                      f"{len(ch)} tablas se abren para recortes; {len(multi)} aprovechan el sobrante "
                      f"para 2+ piezas (ahorro de {len(multi)} tablas).",
                      ha="center", fontsize=8.5, color="#444")
-            fig.text(0.5, 0.925,
+            fig.text(0.5, 0.928,
                      "El número = orden de corte · '(tabla)' = corte de tabla nueva · "
                      "'(sobra)' = sale del sobrante de la pieza anterior.",
                      ha="center", fontsize=8.5, color="#444")
+            fig.text(0.5, 0.911,
+                     "El código de cada recorte (p.ej. PB-M-122) es su POSICIÓN en el PLANO de la pág. 1; "
+                     "las medidas son ancho×largo en cm. "
+                     "H#/P# = escalera, R# = regadera (ver sus páginas).",
+                     ha="center", fontsize=8.0, color="#666")
             primero = False
         fig.tight_layout(rect=[0, 0.0, 1, 0.90])
         guardar(fig)
@@ -667,9 +678,10 @@ def hacer_pdf(todas, material, path, modelo=""):
                  fontsize=12, fontweight="bold", color="#c0392b")
         # nota guía
         axr.text(0.06, 0.30,
-                 "En las páginas siguientes se detalla cada pieza que se corta, qué recortes salen, a dónde\n"
-                 "van y qué sobra (amarillo = reutilizable · rojo = desperdicio). El plan de corte indica el\n"
-                 "ORDEN y de qué sobrante sale cada pieza. Royal Walnut sólo en recámaras (planta alta).",
+                 "En las páginas siguientes se detalla cada pieza que se corta y a dónde va. El PLAN DE CORTE\n"
+                 "usa un color por orden (1°/2°/3°…) y gris rayado para el sobrante de cada tabla; las TABLAS\n"
+                 "DE SOBRANTE finales separan amarillo = reutilizable (≥10 cm) de rojo = desperdicio (<10 cm).\n"
+                 "Royal Walnut sólo en recámaras (planta alta).",
                  fontsize=10.5, va="top", color="#2c3e50")
         guardar(fig)
 

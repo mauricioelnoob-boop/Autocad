@@ -18,20 +18,9 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.worksheet.datavalidation import DataValidation
 
-# Existencia inicial (cajas/piezas) con que arranca cada modelo. Se puede editar
-# en la propia hoja conforme llega o se ajusta el material recibido.
-RECIBIDO = {
- 'Cabernet':  {'Moret': 117, 'Royal': 41, 'Urbania': 8, 'Malla': 28},
- 'Merlot':    {'Moret': 98,  'Royal': 37, 'Urbania': 8, 'Malla': 17},
- 'Chardonnay':{'Moret': 127, 'Royal': 32, 'Urbania': 8, 'Malla': 28},
-}
-
-# Lotes suministrados: (lote, manzana, modelo). Agregar aquí cada lote nuevo.
-LOTES = [
-    (34, 14, "Cabernet"),
-    (9,   7, "Merlot"),
-    (10,  7, "Merlot"),
-]
+# Existencia inicial recibida = lo SUMINISTRADO del presupuesto (fuente única).
+# Se puede editar en la propia hoja conforme llega o se ajusta el material.
+from datos_cliente import SUMINISTRADO as RECIBIDO, LOTES
 
 MAT = [("Piso Moret Arena",  "caja 1.42 m² (2 pz)",  "Moret"),
        ("Piso Royal Walnut", "caja 1.20 m² (5 pz)",  "Royal"),
