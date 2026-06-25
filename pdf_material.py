@@ -28,7 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v3.2"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v4.0"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
@@ -103,18 +103,27 @@ def hacer_pdf(todas, material, path, modelo=""):
             fs = min(max(1.8, min(p["wx"], p["hy"]) * 14), 4.5)
             ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
                     fontsize=fs, rotation=0 if p["wx"] >= p["hy"] else 90)
+        # zoclo (verde) del DWG, sólo como referencia del perímetro
+        try:
+            import pdf_generadores as _PG
+            _z, _m, _e, _claves = _PG._datos_dwg(modelo)
+            for a, b in _z:
+                ax.plot([a[0], b[0]], [a[1], b[1]], color="#1e8449", lw=1.8, zorder=5)
+        except Exception:
+            _z = []
         ax.set_xlim(minx - 0.3, maxx + 0.3); ax.set_ylim(miny - 0.3, maxy + 0.3)
         ax.set_aspect("equal"); ax.axis("off")
         col_rec = ESTILO[(material, False)]["face"]
         col_com = ESTILO[(material, True)]["face"]
         ax.set_title(f"PLANO {modelo.upper()} — PISO {material.upper()}\n"
-                     f"(coloreado = {material}; gris claro = el otro piso, sólo contexto)",
+                     f"(coloreado = {material}; gris claro = el otro piso; verde = zoclo)",
                      fontsize=12)
         ax.legend(handles=[
             Patch(facecolor=col_com, edgecolor="#333", label=f"{material} completa"),
             Patch(facecolor=col_rec, edgecolor="#333", label=f"{material} recorte"),
             Patch(facecolor="#f4f6f6", edgecolor="#d5d8dc", label="otro piso (contexto)"),
-        ], loc="upper center", ncol=3, fontsize=9, bbox_to_anchor=(0.5, -0.02))
+            Patch(facecolor="#1e8449", label="zoclo"),
+        ], loc="upper center", ncol=4, fontsize=9, bbox_to_anchor=(0.5, -0.02))
         fig.tight_layout()
         guardar(fig)
 
@@ -322,6 +331,31 @@ def hacer_pdf(todas, material, path, modelo=""):
                 cell.set_facecolor("#f1948a"); cell.set_text_props(weight="bold")
 
         guardar(fig)
+
+        # ---------- Página: GENERADORES DE ACABADOS (todos los materiales) ----------
+        try:
+            import generadores as _G
+            fig = plt.figure(figsize=(11.7, 8.3))
+            axg = fig.add_subplot(111); axg.axis("off")
+            axg.set_title(f"NÚMEROS GENERADORES — ACABADOS · {modelo.upper()}",
+                          fontsize=14, fontweight="bold")
+            axg.text(0.02, 0.90, "CONCEPTO", fontsize=9.5, fontweight="bold", transform=axg.transAxes)
+            axg.text(0.42, 0.90, "CANTIDAD", fontsize=9.5, fontweight="bold", transform=axg.transAxes)
+            axg.text(0.80, 0.90, "SUMINISTRO", fontsize=9.5, fontweight="bold", transform=axg.transAxes)
+            axg.axhline(0.885, xmin=0.02, xmax=0.98, color="#333", lw=1.0)
+            yy = 0.84
+            for _cc, _dd, _ss in _G.reporte(modelo):
+                axg.text(0.02, yy, _cc, fontsize=9.5, fontweight="bold", transform=axg.transAxes)
+                axg.text(0.42, yy, _dd, fontsize=9.5, transform=axg.transAxes)
+                axg.text(0.80, yy, _ss, fontsize=9.5, color="#1b4f72", transform=axg.transAxes)
+                axg.axhline(yy - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
+                yy -= 0.085
+            axg.text(0.02, 0.10, "Zoclo alto 0.15 m, largo 1.20 m (ml del generador). Urbania White 0.30×0.45 (lavandería). "
+                     "Malla Lyndhurst 0.30×0.60 (charola). Muro de regadera = Moret vertical, alto P.B. 2.75 / P.A. 2.90 m.",
+                     fontsize=8, color="#444", transform=axg.transAxes, va="top")
+            guardar(fig)
+        except Exception:
+            pass
 
     return total_pzas, cajas, area_reut, area_desp
 

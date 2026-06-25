@@ -44,7 +44,25 @@ LAYERS = {
     "CORTE-TILE": 7, "CORTE-RECORTE": 3, "CORTE-SOBRANTE": 2,
     "CORTE-DESPERDICIO": 1, "CORTE-TEXTO": 5,
     "SOBRANTES-MAPA": 6, "SOBRANTES-RECORTE": 2, "SOBRANTES-TEXTO": 6,
+    "ZOCLO": 3, "URBANIA-LAVANDERIA": 5, "REGADERA-MALLA-MURO": 1,
 }
+
+
+def dibujar_acabados(msp, modelo):
+    """Dibuja zoclo (perímetro) y marca las zonas de Urbania (lavandería) y las
+    regaderas (Malla en charola + muro Moret), cada una en su propio layer."""
+    try:
+        import pdf_generadores as PG
+        zoclo, muros, escal, claves = PG._datos_dwg(modelo)
+    except Exception:
+        return
+    for a, b in zoclo:
+        msp.add_line(a, b, dxfattribs={"layer": "ZOCLO"})
+    for c in claves:
+        if c[0] == "5":
+            _txt(msp, "URBANIA", c[1], c[2], 0.12, "URBANIA-LAVANDERIA")
+        elif c[0] == "2":
+            _txt(msp, "REGADERA", c[1], c[2], 0.12, "REGADERA-MALLA-MURO")
 
 
 def _rect(msp, x, y, w, h, layer):
@@ -130,6 +148,9 @@ def exportar(modelo):
         _rect(msp, x0, y0, w, h, CAPA[p["material"]])
         th = min(max(0.03, min(w, h) * 0.30), 0.09)
         _txt(msp, p["id"], p["x"], p["y"], th, "ETIQUETAS")
+
+    # --- Acabados: zoclo + zonas de Urbania / regaderas ---
+    dibujar_acabados(msp, modelo)
 
     # --- Mapa de sobrantes (sobre el plano, saliendo hacia afuera) ---
     dibujar_mapa_sobrantes(msp, piezas)
