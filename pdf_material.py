@@ -452,45 +452,62 @@ def hacer_pdf(todas, material, path, modelo=""):
             fs = min(max(1.8, min(p["wx"], p["hy"]) * 14), 4.5)
             ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
                     fontsize=fs, rotation=0 if p["wx"] >= p["hy"] else 90)
-        # zoclo del DWG. Se clasifica por zona para que cada documento muestre
-        # SÓLO el zoclo de su material: el de las recámaras es Royal (morado) y el
-        # del resto de la casa es Moret (verde). En Moret no se dibuja el zoclo de
-        # la escalera (la escalera no lleva zoclo de piso).
+        # ZOCLO: se dibuja por DENTRO, sobre el perímetro del piso de cada material
+        # (pegado al muro, no flotando afuera). El zoclo de las recámaras es Royal
+        # (morado); el del resto de la casa es Moret (verde). En Moret no se dibuja
+        # el zoclo sobre la escalera (la escalera no lleva zoclo de piso).
+        from shapely.geometry import Polygon as _Poly, box as _box
+        from shapely.ops import unary_union as _uni2
         _esc_zona = None
         if material == "Moret":
             try:
                 import json as _json, os as _os
-                from shapely.geometry import Polygon as _Poly, Point as _Pt
-                from shapely.ops import unary_union as _uni
                 _ep = f"escalon_{modelo.lower()}.json"
                 if _os.path.exists(_ep):
-                    _esc_zona = _uni([_Poly(q).buffer(0.05) for q in _json.load(open(_ep))])
+                    _esc_zona = _uni2([_Poly(q).buffer(0.05)
+                                       for q in _json.load(open(_ep))])
             except Exception:
                 _esc_zona = None
-        # zona Royal (recámaras): unión de las baldosas Royal, expandida hasta el muro
-        from shapely.geometry import box as _box, Point as _Pt2
-        from shapely.ops import unary_union as _uni2
-        _royal = [p for p in todas if p["material"] == "Royal Walnut"]
-        _royal_zona = None
-        if _royal:
-            _royal_zona = _uni2([_box(p["x0"], p["y0"], p["x0"] + p["wx"],
-                                      p["y0"] + p["hy"]) for p in _royal]).buffer(0.25)
         zcol = "#1e8449" if material == "Moret" else "#7d3c98"
+
+        def _plot_linea(geom):
+            if geom.is_empty:
+                return
+            gt = geom.geom_type
+            if gt == "LineString":
+                xs, ys = geom.xy
+                ax.plot(xs, ys, color=zcol, lw=2.0, zorder=5,
+                        solid_capstyle="round")
+            elif gt in ("MultiLineString", "GeometryCollection"):
+                for g in geom.geoms:
+                    _plot_linea(g)
+
         try:
-            import pdf_generadores as _PG
-            _z, _m, _e, _claves = _PG._datos_dwg(modelo)
-            for a, b in _z:
-                mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
-                if _esc_zona is not None and _esc_zona.contains(_Pt2(mx, my)):
-                    continue
-                en_royal = _royal_zona is not None and _royal_zona.contains(_Pt2(mx, my))
-                if material == "Moret" and en_royal:
-                    continue          # zoclo de recámara: es Royal, no va en Moret
-                if material == "Royal Walnut" and not en_royal:
-                    continue          # sólo el zoclo de las recámaras
-                ax.plot([a[0], b[0]], [a[1], b[1]], color=zcol, lw=1.8, zorder=5)
+            # superficie de piso del material, unida por cuarto
+            _floor = _uni2([_box(p["x0"], p["y0"], p["x0"] + p["wx"],
+                                 p["y0"] + p["hy"]) for p in focal])
+            if not _floor.is_empty:
+                # closing pequeño (1.2 cm): fusiona la junta entre tablas SIN cruzar
+                # los muros (~10 cm). Luego se reconstruye cada cuarto descartando
+                # islas chicas y huecos diminutos, pero conservando los huecos reales
+                # (p.ej. una recámara dentro de la zona Moret sí lleva zoclo alrededor).
+                _closed = _floor.buffer(0.012).buffer(-0.012)
+                _geoms = list(_closed.geoms) if _closed.geom_type.startswith("Multi") else [_closed]
+                _rooms = []
+                for g in _geoms:
+                    if g.area < 0.30:
+                        continue
+                    _holes = [r.coords for r in g.interiors if _Poly(r).area > 0.50]
+                    _rooms.append(_Poly(g.exterior.coords, _holes))
+                _solid = _uni2(_rooms) if _rooms else None
+                if _solid is not None and not _solid.is_empty:
+                    # zoclo recorrido ~3 cm hacia adentro para que quede sobre el piso
+                    linea = _solid.buffer(-0.03).boundary
+                    if _esc_zona is not None:              # quitar el de la escalera
+                        linea = linea.difference(_esc_zona.buffer(0.03))
+                    _plot_linea(linea)
         except Exception:
-            _z = []
+            pass
         ax.set_xlim(minx - 0.3, maxx + 0.3); ax.set_ylim(miny - 0.3, maxy + 0.3)
         ax.set_aspect("equal"); ax.axis("off")
         col_rec = ESTILO[(material, False)]["face"]
