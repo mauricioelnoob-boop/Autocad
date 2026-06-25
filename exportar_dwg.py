@@ -221,7 +221,7 @@ def exportar(modelo):
             _contorno_notch(msp, p, CAPA[p["material"]])
         else:
             _rect(msp, x0, y0, w, h, CAPA[p["material"]])
-        th = min(max(0.03, min(w, h) * 0.30), 0.09)
+        th = min(max(0.022, min(w, h) * 0.22), 0.055)
         _txt(msp, p["id"], p["x"], p["y"], th, "ETIQUETAS")
 
     # --- Acabados: zoclo + zonas de Urbania / regaderas ---
