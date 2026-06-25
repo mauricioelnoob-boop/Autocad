@@ -721,8 +721,9 @@ def hacer_pdf(todas, material, path, modelo=""):
             for ax in axes[len(grupo):]:
                 ax.axis("off")
             fig.suptitle(f"{material} — recortes: qué cortar, a dónde va y qué sobra\n"
-                         f"(verde = recorte que se usa · amarillo = sobrante reutilizable · "
-                         f"rojo = desperdicio)   pág. {ini//POR_PAGINA + 1} de {npag}", fontsize=11)
+                         f"(cada color = un recorte a cortar de esta pieza · amarillo = sobrante "
+                         f"reutilizable · rojo = desperdicio)   pág. {ini//POR_PAGINA + 1} de {npag}",
+                         fontsize=11)
             fig.tight_layout(rect=[0, 0.04, 1, 0.95])
             guardar(fig)
 
