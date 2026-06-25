@@ -146,6 +146,79 @@ def pagina_resumen(pdf, modelo):
     pdf.savefig(fig); plt.close(fig)
 
 
+# ---------------------------------------------------------------- Comparativo
+# Suministrado (presupuesto) — datos del cliente. Cabernet/Merlot en cajas;
+# Chardonnay venía en m² (Moret 180.75, Royal 38.27, Urbania 10.12, Malla 5 m²).
+PRESUP = {
+    "Cabernet":   {"Moret": 117, "Royal": 41, "Urbania": 8, "Malla_pz": 28},
+    "Merlot":     {"Moret": 98,  "Royal": 37, "Urbania": 8, "Malla_pz": 17},
+    "Chardonnay": {"Moret": 127, "Royal": 32, "Urbania": 8, "Malla_pz": 28},
+}
+
+
+def _fila_comp(req_m2, caja_m2, sumin_cajas):
+    req_cajas = math.ceil(req_m2 / caja_m2)
+    sumin_m2 = sumin_cajas * caja_m2
+    holg = (sumin_m2 - req_m2) / req_m2 * 100 if req_m2 > 0 else 0.0
+    return req_m2, req_cajas, sumin_cajas, sumin_m2, holg
+
+
+def pagina_comparativo(pdf, modelo):
+    d = resumen_datos(modelo); P = PRESUP[modelo]
+    rows = []  # material, req m2, req cajas, sumin cajas, sumin m2, holgura %
+    rows.append(("PISO Moret Arena", *_fila_comp(d["moret"]["total"], G.MORET_CAJA, P["Moret"])))
+    rows.append(("PISO Royal Walnut", *_fila_comp(d["royal"]["total"], G.ROYAL_CAJA, P["Royal"])))
+    rows.append(("Urbania White", *_fila_comp(d["urbania"]["total"], G.URB_CAJA, P["Urbania"])))
+
+    fig = plt.figure(figsize=(11.7, 8.3))
+    ax = fig.add_subplot(111); ax.axis("off")
+    ax.set_title(f"GENERADORES vs PRESUPUESTO (suministrado) · {modelo.upper()}",
+                 fontsize=15, fontweight="bold", y=0.97)
+
+    cols = ["MATERIAL", "REQUERIDO\n(m² neto)", "REQUERIDO\n(cajas)",
+            "SUMINISTRADO\n(presup., cajas)", "SUMINISTRADO\n(m²)", "HOLGURA\n(% presup.)"]
+    cell = []
+    colors = []
+    for (mat, rm2, rc, sc, sm2, h) in rows:
+        cell.append([mat, f"{rm2:.2f}", f"{rc}", f"{sc}", f"{sm2:.2f}", f"{h:+.1f} %"])
+        cg = "#d5f5e3" if h >= 0 else "#fadbd8"
+        colors.append(["#f4f6f7", "#fdfefe", "#fdfefe", "#eaf2f8", "#eaf2f8", cg])
+    # Malla por piezas
+    req_pz = d["malla"]["pzas"]; sum_pz = P["Malla_pz"]
+    hp = (sum_pz - req_pz) / req_pz * 100 if req_pz else 0
+    cell.append(["Malla Lyndhurst", f"{req_pz} pz", "—", f"{sum_pz} pz", "—", f"{hp:+.1f} %"])
+    colors.append(["#f4f6f7", "#fdfefe", "#fdfefe", "#eaf2f8", "#eaf2f8",
+                   "#d5f5e3" if hp >= 0 else "#fadbd8"])
+
+    t = ax.table(cellText=cell, colLabels=cols, cellColours=colors,
+                 cellLoc="center", loc="center", bbox=[0.02, 0.35, 0.96, 0.5])
+    t.auto_set_font_size(False); t.set_fontsize(9.5); t.scale(1, 2.2)
+    for (rr, cc), c in t.get_celld().items():
+        if rr == 0:
+            c.set_facecolor("#1b4f72"); c.set_text_props(color="white", weight="bold")
+        if cc == 0 and rr > 0:
+            c.set_text_props(weight="bold")
+
+    nota = ("REQUERIDO = m² netos del despiece (sin desperdicio): Moret = piso + zoclo +\n"
+            "regadera + escalera;  Royal = piso + zoclo.\n"
+            "SUMINISTRADO = lo que trae el presupuesto del cliente.\n"
+            "HOLGURA % = cuánto cubre el presupuesto por encima de lo neto\n"
+            "(verde = alcanza con holgura;  rojo = queda corto).\n"
+            "Cajas: Moret 1.4232 m² (2 pz) · Royal 1.20 m² (5 pz) · Urbania 1.36 m² (10 pz).")
+    ax.text(0.02, 0.24, nota, fontsize=9, color="#444", transform=ax.transAxes, va="top",
+            bbox=dict(boxstyle="round", facecolor="#fef9e7", edgecolor="#b7950b"))
+    fig.text(0.5, 0.03, f"{PIE}        Generadores vs Presupuesto — {modelo}        {FECHA}",
+             ha="center", fontsize=8, color="#555")
+    pdf.savefig(fig); plt.close(fig)
+
+
+def comparativo(salida="Generadores-Resumen_Comparativo.pdf"):
+    with PdfPages(salida) as pdf:
+        for m in ("Cabernet", "Merlot", "Chardonnay"):
+            pagina_comparativo(pdf, m)
+    print("->", salida)
+
+
 def main(modelo):
     out_u = f"{modelo}_Urbania-White_Despiece.pdf"
     with PdfPages(out_u) as pdf:
