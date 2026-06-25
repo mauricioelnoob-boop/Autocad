@@ -142,31 +142,38 @@ def pagina_plano(pdf, modelo):
 
 
 def pagina_regaderas(pdf, modelo):
-    """Alzado tipo de muro de regadera con despiece Moret (vertical)."""
+    """Alzado tipo del muro de fondo de la regadera: piso Moret ACOSTADO
+    (1.194 horizontal × 0.596 alto), con el nicho. Base: CORTE REC1 P.B. (fondo
+    1.35 m); varía por baño."""
     g = G.GEN[modelo]
-    aw, al = G.MORET[1], G.MORET[0]   # 0.596 x 1.194
-    fig, axes = plt.subplots(1, len(g["regaderas"]), figsize=(4.2 * len(g["regaderas"]), 6.5))
+    tw, th = G.MORET[0], G.MORET[1]   # acostada: 1.194 ancho x 0.596 alto
+    FONDO = 1.35                       # ancho del muro de fondo (del CORTE)
+    fig, axes = plt.subplots(1, len(g["regaderas"]), figsize=(3.6 * len(g["regaderas"]), 7.0))
     if len(g["regaderas"]) == 1:
         axes = [axes]
     for k, (ax, (planta, h)) in enumerate(zip(axes, g["regaderas"]), 1):
-        W = G.REG_PERIM  # desarrollo de las 3 caras (ml)
-        # despiece vertical: columnas de 0.596, filas de 1.194 desde el piso
-        x = 0.0
-        while x < W - 1e-6:
-            w = min(aw, W - x)
-            y = 0.0
-            while y < h - 1e-6:
-                hh = min(al, h - y)
+        # despiece acostado: filas de 0.596 (alto), piezas de 1.194 (ancho)
+        y = 0.0
+        while y < h - 1e-6:
+            hh = min(th, h - y)
+            x = 0.0
+            while x < FONDO - 1e-6:
+                w = min(tw, FONDO - x)
                 ax.add_patch(Rectangle((x, y), w, hh, facecolor="#f5b66b",
                              edgecolor="#7e5109", lw=0.6))
-                y += al
-            x += aw
-        ax.set_xlim(-0.1, W + 0.1); ax.set_ylim(-0.1, h + 0.2)
+                x += tw
+            y += th
+        # nicho (recargado hacia regadera): banda ~0.40 m a ~1.00 m del piso
+        ax.add_patch(Rectangle((0.10, 1.00), FONDO - 0.20, 0.40, fill=False,
+                     edgecolor="#c0392b", lw=1.6, hatch="xx"))
+        ax.text(FONDO / 2, 1.20, "NICHO", ha="center", va="center", fontsize=7, color="#c0392b")
+        ax.set_xlim(-0.1, FONDO + 0.1); ax.set_ylim(-0.1, h + 0.2)
         ax.set_aspect("equal")
-        ax.set_title(f"Regadera {k} ({planta})\nmuro {h:.2f} m × {W:.2f} ml = {h*W:.2f} m²",
-                     fontsize=10)
-        ax.set_xlabel("desarrollo 3 caras (m)"); ax.set_yticks([0, 1, 2, round(h, 2)])
-    fig.suptitle(f"ALZADO TIPO — MURO DE REGADERA (piso Moret vertical) · {modelo.upper()}",
+        wm2 = G.REG_PERIM * h
+        ax.set_title(f"Regadera {k} ({planta})\nmuro fondo {FONDO:.2f}×{h:.2f} m  ·  3 caras={wm2:.2f} m²",
+                     fontsize=9)
+        ax.set_xlabel("fondo (m) — piezas acostadas")
+    fig.suptitle(f"ALZADO TIPO — MURO DE REGADERA (piso Moret ACOSTADO) · {modelo.upper()}",
                  fontsize=13, fontweight="bold")
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     guardar(pdf, fig, modelo)

@@ -40,7 +40,7 @@ GEN={
  'Chardonnay':{'zoclo_m':93.00,'zoclo_r':30.61,'urbania_m2':10.0,
                'regaderas':[('P.B.',2.75),('P.A.',2.90),('P.A.',2.90)]},
 }
-REG_PERIM=4.20   # ml de muro enchapado por regadera (3 caras: ancho 1.20 + fondo 1.50 x2)
+REG_PERIM=3.90   # ml de muro enchapado por regadera (3 caras: ancho 1.20 + fondo 1.35 x2; varía por baño)
 
 def area_piso(modelo):
     ps=cargar_anotado(modelo)

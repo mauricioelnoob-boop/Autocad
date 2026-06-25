@@ -224,6 +224,58 @@ def rellenar_huecos(anotadas):
     return buenos
 
 
+def recortar_escalon(anotadas, escalon_path):
+    """Recorta (guillotina) las piezas de piso cuyo bbox invade una zona de
+    escalera de planta alta (vacío). Si el traslape es grande y no se limpia con
+    un corte recto, la pieza se quita. Respeta los tablones angostos de Royal."""
+    try:
+        from shapely.geometry import box, Polygon
+        from shapely.ops import unary_union
+    except Exception:
+        return anotadas
+    try:
+        zonas = unary_union([Polygon(p).buffer(0) for p in json.load(open(escalon_path))])
+    except Exception:
+        return anotadas
+    if zonas.is_empty:
+        return anotadas
+
+    def rect(p):
+        return box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+
+    salida = []
+    for p in anotadas:
+        r = rect(p)
+        if r.area <= 0:
+            salida.append(p); continue
+        inter = r.intersection(zonas)
+        if inter.area < 0.04 * r.area:
+            salida.append(p); continue            # apenas roza: se deja
+        # guillotina: el rectángulo más grande que NO pisa la escalera
+        ix0, iy0, ix1, iy1 = inter.bounds
+        rx0, ry0, rx1, ry1 = p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"]
+        cands = []
+        if iy0 > ry0 + 0.02: cands.append((rx0, ry0, rx1, iy0))
+        if iy1 < ry1 - 0.02: cands.append((rx0, iy1, rx1, ry1))
+        if ix0 > rx0 + 0.02: cands.append((rx0, ry0, ix0, ry1))
+        if ix1 < rx1 - 0.02: cands.append((ix1, ry0, rx1, ry1))
+        best = None
+        for (a, b, c, d) in cands:
+            cand = box(a, b, c, d)
+            if cand.intersection(zonas).area < 0.04 * cand.area and cand.area > 0.012:
+                if best is None or cand.area > best[0]:
+                    best = (cand.area, a, b, c, d)
+        if best is None:
+            continue                              # toda la pieza está en la escalera -> quitar
+        _, a, b, c, d = best
+        p["x0"], p["y0"] = round(a, 4), round(b, 4)
+        p["wx"], p["hy"] = round(c - a, 4), round(d - b, 4)
+        p["x"], p["y"] = round((a + c) / 2, 3), round((b + d) / 2, 3)
+        _retipo(p)
+        salida.append(p)
+    return salida
+
+
 def completar_tope_royal(anotadas, regiones=None, excluir=None):
     """Termina cada tablón de recámara HASTA el muro de arriba. Detecta cada
     recámara como un grupo conexo de tablones de Royal Walnut (componentes
@@ -477,6 +529,12 @@ def cargar_anotado(modelo="Cabernet"):
     anotadas, cargar_anotado.recortadas = recortar(
         anotadas, muros_path, cfg.get("muros_ignorar", []),
         cfg.get("recortar_muros", True))
+
+    # Recorte por ESCALERA / ESCALÓN de PLANTA ALTA (vacío): el bbox de algunas
+    # piezas pisa la escalera (el corte original era diagonal). Se recortan/quitan.
+    escalon_path = f"escalon_{modelo.lower()}.json"
+    if os.path.exists(escalon_path):
+        anotadas = recortar_escalon(anotadas, escalon_path)
 
     # Zonas que NO se despiezan (escalera, boiler, hueco de cancelería): se
     # quitan al final para que tampoco sobrevivan piezas rellenadas en ese hueco.
