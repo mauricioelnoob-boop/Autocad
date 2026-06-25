@@ -155,6 +155,57 @@ def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
         y_top = y_top - filas * cellh - 2.0
 
 
+def dibujar_despiece_extra(msp, modelo, x0, y0):
+    """Agrega al DXF el DESPIECE de la ESCALERA (peraltes P#, huellas H#) y del
+    ZOCLO (catálogo de corte), a la derecha del plano, como baldosas con sus
+    recortes acomodados. Sólo aplica al Moret (acabados de escalera y zoclo)."""
+    try:
+        import despiece_extra as DE
+        from optimizador_recortes import ajustar, empaquetar, PISOS
+    except Exception:
+        return
+    aT, lT = PISOS["Moret"]                       # 0.596 x 1.194
+    cols, gx, gy = 6, aT + 0.30, lT + 0.55
+
+    def _baldosa(cx, cy, etq, piezas, libres):
+        _rect(msp, cx, cy - lT, aT, lT, "CORTE-TILE")
+        for (px, py, pw, pl, pid, rot) in piezas:
+            _rect(msp, cx + px, cy - lT + py, pw, pl, "CORTE-RECORTE")
+            _txt(msp, pid, cx + px + pw / 2, cy - lT + py + pl / 2, 0.045, "CORTE-TEXTO")
+        for (fx, fy, fw, fl) in libres:
+            if fw > 0.03 and fl > 0.03:
+                _rect(msp, cx + fx, cy - lT + fy, fw, fl, "CORTE-SOBRANTE")
+        _txt(msp, etq, cx + aT / 2, cy + 0.07, 0.06, "CORTE-TEXTO")
+
+    # ---- ESCALERA ----
+    res = DE.escalera_resumen(modelo)
+    recortes = [p for p in res["piezas"] if not p["completa"]]
+    enteras = [p for p in res["piezas"] if p["completa"]]
+    entradas = [(*ajustar(p["ancho"], p["largo"], aT, lT), p["id"]) for p in recortes]
+    baldosas = empaquetar(entradas, "Moret", 0.0, False)
+    _txt(msp, f"DESPIECE ESCALERA (ancho 1.15, peralte 0.175, huella 0.27) - {res['n_escalones']} escalones",
+         x0, y0 + 0.5, 0.16, "CORTE-TEXTO")
+    n = 0
+    for b in baldosas:
+        cx = x0 + (n % cols) * gx; cy = y0 - (n // cols) * gy
+        _baldosa(cx, cy, f"B{n+1}", b.piezas, b.libres); n += 1
+    for p in enteras:
+        cx = x0 + (n % cols) * gx; cy = y0 - (n // cols) * gy
+        _rect(msp, cx, cy - lT, aT, lT, "CORTE-TILE")
+        _txt(msp, p["id"], cx + aT / 2, cy - lT / 2, 0.06, "CORTE-TEXTO")
+        _txt(msp, f"B{n+1}", cx + aT / 2, cy + 0.07, 0.06, "CORTE-TEXTO"); n += 1
+    filas_esc = (n + cols - 1) // cols
+
+    # ---- ZOCLO Moret (catálogo: 4 tiras de 0.149 por baldosa) ----
+    yz = y0 - filas_esc * gy - 0.8
+    _txt(msp, "DESPIECE ZOCLO MORET (4 tiras de 0.149 x 1.194 por baldosa)",
+         x0, yz + 0.5, 0.16, "CORTE-TEXTO")
+    _rect(msp, x0, yz - lT, aT, lT, "CORTE-TILE")
+    for i in range(4):
+        _rect(msp, x0 + i * 0.149, yz - lT, 0.149, lT, "CORTE-RECORTE")
+        _txt(msp, f"Z{i+1}", x0 + i * 0.149 + 0.07, yz - lT / 2, 0.05, "CORTE-TEXTO")
+
+
 def exportar(modelo):
     piezas = cargar_anotado(modelo)
     doc = ezdxf.new("R2010", setup=True)
@@ -182,7 +233,12 @@ def exportar(modelo):
     # --- Plan de corte (debajo del plano) ---
     minx = min(p["x0"] for p in piezas)
     miny = min(p["y0"] for p in piezas)
+    maxx = max(p["x0"] + p["wx"] for p in piezas)
+    maxy = max(p["y0"] + p["hy"] for p in piezas)
     dibujar_plan_corte(msp, piezas, minx, miny)
+
+    # --- Despiece de ESCALERA y ZOCLO (a la derecha del plano) ---
+    dibujar_despiece_extra(msp, modelo, maxx + 3.0, maxy)
 
     dxf = f"{modelo}_editable.dxf"
     dwg = f"{modelo}_editable.dwg"

@@ -61,8 +61,10 @@ MODELOS = {
             # bolsa der. de PA-M-009: ancho hasta la cara de la jamba (x504.35) para
             # NO pisar el muro/jamba (detalle del usuario):
             _recorte("Moret", 503.946, -86.555, 0.404, 0.685),
-            # recortito Royal que faltaba ARRIBA de PA-R-177 (orilla derecha recámara)
-            _recorte("Royal Walnut", 507.742, -91.022, 0.072, 0.600),
+            # tira Royal de la orilla derecha (arriba de PA-R-177): una sola pieza
+            # que llega hasta el tope de la columna Royal (incluye el recortito de
+            # arriba que el usuario marcó como parte de la misma pieza).
+            _recorte("Royal Walnut", 507.742, -91.022, 0.072, 1.112),
         ],
         # Tiritas de 3 cm que en realidad son piezas casi enteras de la 1a columna,
         # PB-M-150 hasta la esquina, y unir PA-M-003+009 (la línea no es muro) hasta PA-M-005:
@@ -120,8 +122,11 @@ MODELOS = {
         # polilínea entra a la región Royal y el pipeline lo descartó. Se repone como
         # dos rectángulos que trazan la L (img.2, cuadro cian).
         "piezas_extra": [
-            _recorte("Moret", 329.847, -123.624, 0.596, 0.608),   # L superior
-            _recorte("Moret", 329.847, -124.210, 0.364, 0.586),   # L inferior-izq
+            # PA-M-008 (baño con el muro): se repone como 2 rectángulos LIMPIOS,
+            # uno bajo el muro y otro sobre el muro (no una "L" con entrante raro).
+            _recorte("Moret", 329.847, -124.210, 0.430, 0.406),   # bajo el muro
+            _recorte("Moret", 329.847, -123.624, 0.596, 0.608),   # sobre el muro
+            _recorte("Moret", 330.445, -123.624, 0.112, 0.608),   # tira angosta sobre el muro
             _recorte("Moret", 323.635, -128.774, 0.433, 0.354),   # recorte chico debajo de PB-M-095 (esquina)
         ],
         "reclasificar": [
@@ -147,8 +152,9 @@ MODELOS = {
         ],
         # Fantasmas (polilínea mal cerrada): se eliminan.
         "eliminar": [
-            (330.04, -123.82),   # tira de 3.7 cm
             (326.05, -125.36),   # fragmento suelto en orilla
+            (330.06, -123.61),   # baldosa que el DWG dibujó ENCIMA del muro (PA-M-008):
+                                 # se quita y la reponen los 2 rectángulos limpios de piezas_extra
         ],
         # PA-M-043 salió como tira de 3 cm porque una LINTERNILLA (tragaluz) se
         # tomó como muro; en realidad es casi pieza completa.

@@ -79,15 +79,15 @@ def pagina_tabla(pdf, modelo):
     ax = fig.add_subplot(111); ax.axis("off")
     ax.set_title(f"NÚMEROS GENERADORES — ACABADOS · {modelo.upper()}",
                  fontsize=15, fontweight="bold")
-    ax.text(0.02, 0.90, "CONCEPTO", fontsize=10, fontweight="bold", transform=ax.transAxes)
-    ax.text(0.42, 0.90, "CANTIDAD", fontsize=10, fontweight="bold", transform=ax.transAxes)
-    ax.text(0.80, 0.90, "SUMINISTRO", fontsize=10, fontweight="bold", transform=ax.transAxes)
+    ax.text(0.02, 0.90, "CONCEPTO", fontsize=8.5, fontweight="bold", transform=ax.transAxes)
+    ax.text(0.40, 0.90, "CANTIDAD", fontsize=8.5, fontweight="bold", transform=ax.transAxes)
+    ax.text(0.82, 0.90, "SUMINISTRO", fontsize=8.5, fontweight="bold", transform=ax.transAxes)
     ax.axhline(0.885, xmin=0.02, xmax=0.98, color="#333", lw=1.0)
     y = 0.84
     for concepto, detalle, cajas in G.reporte(modelo):
-        ax.text(0.02, y, concepto, fontsize=10, fontweight="bold", transform=ax.transAxes)
-        ax.text(0.42, y, detalle, fontsize=10, transform=ax.transAxes)
-        ax.text(0.80, y, cajas, fontsize=10, color="#1b4f72", transform=ax.transAxes)
+        ax.text(0.02, y, concepto, fontsize=8, fontweight="bold", transform=ax.transAxes)
+        ax.text(0.40, y, detalle, fontsize=8, transform=ax.transAxes)
+        ax.text(0.82, y, cajas, fontsize=8, color="#1b4f72", transform=ax.transAxes)
         ax.axhline(y - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
         y -= 0.085
     nota = ("Zoclo: Moret se corta a 0.149 m (4 tiras por baldosa, sale exacto); Royal 0.15 m por tabla. Largo 1.20 m; ml del generador del cliente.\n"

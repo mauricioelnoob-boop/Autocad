@@ -660,15 +660,15 @@ def hacer_pdf(todas, material, path, modelo=""):
             axg = fig.add_subplot(111); axg.axis("off")
             axg.set_title(f"NÚMEROS GENERADORES — ACABADOS · {modelo.upper()}",
                           fontsize=14, fontweight="bold")
-            axg.text(0.02, 0.90, "CONCEPTO", fontsize=9.5, fontweight="bold", transform=axg.transAxes)
-            axg.text(0.42, 0.90, "CANTIDAD", fontsize=9.5, fontweight="bold", transform=axg.transAxes)
-            axg.text(0.80, 0.90, "SUMINISTRO", fontsize=9.5, fontweight="bold", transform=axg.transAxes)
+            axg.text(0.02, 0.90, "CONCEPTO", fontsize=8, fontweight="bold", transform=axg.transAxes)
+            axg.text(0.40, 0.90, "CANTIDAD", fontsize=8, fontweight="bold", transform=axg.transAxes)
+            axg.text(0.82, 0.90, "SUMINISTRO", fontsize=8, fontweight="bold", transform=axg.transAxes)
             axg.axhline(0.885, xmin=0.02, xmax=0.98, color="#333", lw=1.0)
             yy = 0.84
             for _cc, _dd, _ss in _G.reporte(modelo):
-                axg.text(0.02, yy, _cc, fontsize=9.5, fontweight="bold", transform=axg.transAxes)
-                axg.text(0.42, yy, _dd, fontsize=9.5, transform=axg.transAxes)
-                axg.text(0.80, yy, _ss, fontsize=9.5, color="#1b4f72", transform=axg.transAxes)
+                axg.text(0.02, yy, _cc, fontsize=7.5, fontweight="bold", transform=axg.transAxes)
+                axg.text(0.40, yy, _dd, fontsize=7.5, transform=axg.transAxes)
+                axg.text(0.82, yy, _ss, fontsize=7.5, color="#1b4f72", transform=axg.transAxes)
                 axg.axhline(yy - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
                 yy -= 0.085
             axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.149 m (4 por baldosa, sale exacto); Royal 0.15 m por tabla. "
@@ -684,8 +684,8 @@ def hacer_pdf(todas, material, path, modelo=""):
 
 def main(modelo="Cabernet"):
     todas = cargar_anotado(modelo)
-    salidas = {"Moret": f"{modelo}_Despiece-Piso_Moret-Arena_{VERSION}.pdf",
-               "Royal Walnut": f"{modelo}_Despiece-Piso_Royal-Walnut_{VERSION}.pdf"}
+    salidas = {"Moret": f"{modelo}_Despiece-Piso_Moret-Arena.pdf",
+               "Royal Walnut": f"{modelo}_Despiece-Piso_Royal-Walnut.pdf"}
     for material, path in salidas.items():
         pzas, cajas, reut, desp = hacer_pdf(todas, material, path, modelo)
         print(f"{modelo} · {material}: {pzas} piezas / {cajas} cajas  ·  reutilizable "
