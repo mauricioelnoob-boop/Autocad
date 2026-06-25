@@ -176,10 +176,11 @@ def pagina_regaderas(pdf, modelo):
                      edgecolor="#2e86c1", lw=1.6, zorder=5))
         ax.text(FONDO / 2, vy + VH / 2, f"VENTANA\n{FONDO:.2f}×{VH:.2f} m",
                 ha="center", va="center", fontsize=7, color="#1b4f72", zorder=6)
-        # nicho recesado (0.09 m de profundidad)
-        nx, ny = FONDO / 2 - NA / 2, vy - 0.45 - NH
+        # nicho recesado (0.09 m de profundidad), RECARGADO a la izquierda
+        # (lado del monomando, donde va la pieza completa)
+        nx, ny = 0.10, vy - 0.45 - NH
         ax.add_patch(Rectangle((nx, ny), NA, NH, fill=False, edgecolor="#c0392b", lw=1.8))
-        ax.text(FONDO / 2, ny + NH / 2, f"NICHO\nprof. {NP:.2f} m", ha="center",
+        ax.text(nx + NA / 2, ny + NH / 2, f"NICHO\nprof. {NP:.2f} m", ha="center",
                 va="center", fontsize=6.5, color="#c0392b")
         ax.set_xlim(-0.1, FONDO + 0.1); ax.set_ylim(-0.1, h + 0.2)
         ax.set_aspect("equal")

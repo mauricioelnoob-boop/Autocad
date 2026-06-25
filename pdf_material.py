@@ -28,7 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v4.7"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v4.8"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 
@@ -156,13 +156,14 @@ def pagina_muro_regadera(pdf, guardar, modelo):
                      edgecolor="#2e86c1", lw=1.6, zorder=5))
         ax.text(FONDO / 2, vy + VH / 2, f"VENTANA\n{FONDO:.2f} × {VH:.2f} m\n(al plafón)",
                 ha="center", va="center", fontsize=7, color="#1b4f72", zorder=6)
-        # nicho (recesado 0.09 m): se marca con doble contorno
-        nx, ny = FONDO / 2 - NA / 2, vy - 0.45 - NH
+        # nicho (recesado 0.09 m): RECARGADO a la izquierda (lado del monomando,
+        # donde va la pieza completa). Se marca con doble contorno.
+        nx, ny = 0.10, vy - 0.45 - NH
         ax.add_patch(Rectangle((nx, ny), NA, NH, fill=False, edgecolor="#c0392b",
                      lw=1.8, zorder=6))
         ax.add_patch(Rectangle((nx + 0.03, ny + 0.03), NA - 0.06, NH - 0.06, fill=False,
                      edgecolor="#c0392b", lw=0.8, ls="--", zorder=6))
-        ax.text(FONDO / 2, ny + NH / 2, f"NICHO\n{NA:.2f}×{NH:.2f} m\nprof. {NP:.2f} m",
+        ax.text(nx + NA / 2, ny + NH / 2, f"NICHO\n{NA:.2f}×{NH:.2f} m\nprof. {NP:.2f} m",
                 ha="center", va="center", fontsize=6.5, color="#c0392b", zorder=7)
         ax.set_xlim(-0.1, FONDO + 0.1); ax.set_ylim(-0.1, h + 0.2); ax.set_aspect("equal")
         ax.set_xticks([0, FONDO]); ax.set_yticks([0, 1, 2, round(h, 2)])
