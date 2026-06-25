@@ -210,23 +210,27 @@ def pagina_comparativo(pdf, modelo):
     ax.set_title(f"GENERADORES (con DESPERDICIO REAL) vs PRESUPUESTO · {modelo.upper()}",
                  fontsize=14.5, fontweight="bold", y=0.97)
 
-    cols = ["MATERIAL", "NETO\n(m²)", "DESPERDICIO\n(m²)", "REQUERIDO\n(c/desp, m²)",
-            "REQUERIDO\n(cajas)", "SUMINISTRADO\n(cajas)", "DIFERENCIA\n(cajas)"]
-    spec = [("PISO Moret Arena", "Moret", P["Moret"]),
-            ("PISO Royal Walnut", "Royal Walnut", P["Royal"]),
-            ("Urbania White", "Urbania", P["Urbania"])]
+    cols = ["MATERIAL", "NETO\n(m²)", "DESPERDICIO\n(m²)", "REQUERIDO\n(m²)",
+            "SUMINISTRADO\n(m²)", "DIFERENCIA\n(m²)", "DIF.\n(cajas)"]
+    spec = [("PISO Moret Arena", "Moret", P["Moret"], G.MORET_CAJA),
+            ("PISO Royal Walnut", "Royal Walnut", P["Royal"], G.ROYAL_CAJA),
+            ("Urbania White", "Urbania", P["Urbania"], G.URB_CAJA)]
     cell, colors = [], []
-    for (etq, key, sumin) in spec:
-        r = R[key]; dif = sumin - r["cajas"]
+    for (etq, key, sumin, cm2) in spec:
+        r = R[key]
+        sumin_m2 = sumin * cm2
+        dif_m2 = sumin_m2 - r["comprado"]
+        dif_c = sumin - r["cajas"]
         cell.append([etq, f"{r['neto']:.2f}", f"{r['desp']:.2f}", f"{r['comprado']:.2f}",
-                     f"{r['cajas']}", f"{sumin}", f"{dif:+d}"])
-        cd = "#d5f5e3" if dif >= 0 else "#f5b7b1"
-        colors.append(["#f4f6f7", "#fdfefe", "#fdf2e9", "#fdfefe", "#eaf2f8", "#eaf2f8", cd])
-    # Malla
+                     f"{sumin_m2:.2f}", f"{dif_m2:+.2f}", f"{dif_c:+d}"])
+        cd = "#d5f5e3" if dif_m2 >= 0 else "#f5b7b1"
+        colors.append(["#f4f6f7", "#fdfefe", "#fdf2e9", "#fdfefe", "#eaf2f8", cd, cd])
+    # Malla (en piezas)
     req_pz = R["Malla_pz"]; sum_pz = P["Malla_pz"]; difp = sum_pz - req_pz
-    cell.append(["Malla Lyndhurst", f"{req_pz} pz", "—", "—", "—", f"{sum_pz} pz", f"{difp:+d}"])
-    colors.append(["#f4f6f7", "#fdfefe", "#fdf2e9", "#fdfefe", "#eaf2f8", "#eaf2f8",
-                   "#d5f5e3" if difp >= 0 else "#f5b7b1"])
+    cdp = "#d5f5e3" if difp >= 0 else "#f5b7b1"
+    cell.append(["Malla Lyndhurst (pz)", f"{req_pz} pz", "—", f"{req_pz} pz",
+                 f"{sum_pz} pz", "—", f"{difp:+d}"])
+    colors.append(["#f4f6f7", "#fdfefe", "#fdf2e9", "#fdfefe", "#eaf2f8", "#fdfefe", cdp])
 
     t = ax.table(cellText=cell, colLabels=cols, cellColours=colors,
                  cellLoc="center", loc="center", bbox=[0.0, 0.34, 1.0, 0.5])
@@ -243,10 +247,11 @@ def pagina_comparativo(pdf, modelo):
     ax.text(0.5, 0.27, estado, ha="center", fontsize=11, fontweight="bold",
             color="#922b21" if falta else "#1e8449", transform=ax.transAxes)
 
-    nota = ("REQUERIDO con DESPERDICIO REAL = baldosas que de verdad se ocupan, con el CORTE real del despiece\n"
-            "(piso + regadera + escalera + zoclo) y redondeo a caja entera.  DESPERDICIO = comprado − neto.\n"
-            "DIFERENCIA = SUMINISTRADO − REQUERIDO (verde = alcanza; rojo = faltan cajas).\n"
-            "Cajas: Moret 1.4232 m² (2 pz) · Royal 1.20 m² (5 pz) · Urbania 1.36 m² (10 pz).")
+    nota = ("NETO = m² instalados (piso + zoclo + regadera + escalera).  REQUERIDO = m² a COMPRAR con el corte\n"
+            "real (todos los recortes empacados reusando sobrantes) y redondeo a caja entera.\n"
+            "DESPERDICIO (m²) = REQUERIDO − NETO (sobrante no aprovechado + merma + redondeo de cajas).\n"
+            "DIFERENCIA = SUMINISTRADO − REQUERIDO, en m² y en cajas (verde = alcanza; rojo = falta).\n"
+            "Cajas: Moret 1.4232 m²/caja (2 pz) · Royal 1.20 (5 pz) · Urbania 1.36 (10 pz).")
     ax.text(0.02, 0.20, nota, fontsize=8.5, color="#444", transform=ax.transAxes, va="top",
             bbox=dict(boxstyle="round", facecolor="#fef9e7", edgecolor="#b7950b"))
     fig.text(0.5, 0.03, f"{PIE}        Generadores (desperdicio real) vs Presupuesto — {modelo}        {FECHA}",
