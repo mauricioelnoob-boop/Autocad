@@ -138,7 +138,7 @@ def hacer_pdf(piezas, planta_nombre, materiales, path):
                         ax.text(x + w / 2, y + l / 2, f"{pid}\n{w:.2f}x{l:.2f}{loc}",
                                 ha="center", va="center",
                                 fontsize=6 if w >= 0.25 else 4.6, rotation=0 if w >= l else 90)
-                    for (fx, fy, fw, fl) in b.libres:
+                    for (fx, fy, fw, fl, *_z) in b.libres:
                         if fw <= 0.005 or fl <= 0.005:
                             continue
                         if es_reutilizable(fw, fl):
@@ -184,7 +184,7 @@ def main():
             baldosas, mapa, dims = empacar_material(pzs, material)
             area_reut = area_desp = 0.0
             for b in baldosas:
-                for (fx, fy, fw, fl) in b.libres:
+                for (fx, fy, fw, fl, *_z) in b.libres:
                     if fw <= 0.005 or fl <= 0.005:
                         continue
                     if es_reutilizable(fw, fl):

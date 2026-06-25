@@ -175,7 +175,7 @@ def pagina_despiece_escalera(pdf, guardar, modelo):
     recortes = [p for p in res["piezas"] if not p["completa"]]
     enteras = [p for p in res["piezas"] if p["completa"]]
     entradas = [(*ajustar(p["ancho"], p["largo"], aT, lT), p["id"]) for p in recortes]
-    baldosas = empaquetar(entradas, "Moret", 0.0, False)
+    baldosas = empaquetar(entradas, "Moret", 0.0, True)
 
     def color_for(pid):
         return "#aed6f1" if pid.startswith("P") else "#f5b66b" if pid.startswith("H") else "#c39bd3"
@@ -194,7 +194,7 @@ def pagina_despiece_escalera(pdf, guardar, modelo):
                          edgecolor="#333", lw=0.5))
             ax.text(x + w / 2, y + l / 2, pid, ha="center", va="center",
                     fontsize=5.5, rotation=90 if l > w else 0)
-        for (fx, fy, fw, fl) in b.libres:
+        for (fx, fy, fw, fl, *_z) in b.libres:
             if fw > 0.02 and fl > 0.02:
                 ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#efefef",
                              edgecolor="#cfcfcf", lw=0.3))
@@ -299,7 +299,60 @@ def empacar(piezas, material):
     ancho, largo = PISOS[material]
     recortes = [p for p in piezas if p["material"] == material and not p["completa"]]
     entradas = [(*ajustar(p["ancho"], p["largo"], ancho, largo), p["id"]) for p in recortes]
-    return empaquetar(entradas, material, 0.0, False), mapa, (ancho, largo)
+    return empaquetar(entradas, material, 0.0, True), mapa, (ancho, largo)
+
+
+def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
+    """PLAN DE CORTE — ORDEN Y REUSO: marca el ORDEN en que se corta cada baldosa
+    y de qué SOBRANTE sale cada pieza (la cadena de reuso). Dibuja las tablas que
+    aprovechan sobrante (2+ piezas) con el orden 1°, 2°, 3° y su origen."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle, Patch
+    from optimizador_recortes import cadena_de_corte, PISOS
+    aB, lB = PISOS[material]
+    ch = cadena_de_corte(baldosas)
+    multi = [c for c in ch if len(c["cortes"]) >= 2]
+    solo = len(ch) - len(multi)
+    if not ch:
+        return
+    PALo = ["#aed6f1", "#f5b66b", "#a9dfbf", "#f9e79f", "#d7bde2", "#f5b7b1"]
+    por_pag = 18
+    primero = True
+    for ini in range(0, max(1, len(multi)), por_pag):
+        grupo = multi[ini:ini + por_pag]
+        fig, axes = plt.subplots(3, 6, figsize=(13.5, 8.0))
+        axes = axes.ravel()
+        for ax, c in zip(axes, grupo):
+            b = next(b for b in baldosas if b.id == c["id"])
+            ax.add_patch(Rectangle((0, 0), aB, lB, fill=False, edgecolor="#333", lw=1.4))
+            cortes = sorted(c["cortes"], key=lambda k: k["orden"])
+            ordmap = {ct["orden"]: i + 1 for i, ct in enumerate(cortes)}
+            for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+                ax.add_patch(Rectangle((x, y), w, l, facecolor=PALo[(ordmap.get(orden, 1) - 1) % len(PALo)],
+                             edgecolor="#333", lw=0.5))
+                src = "tabla" if origen == "TABLA" else "sobra"
+                ax.text(x + w / 2, y + l / 2, f"{ordmap.get(orden,1)}°\n{etq.split()[0]}\n({src})",
+                        ha="center", va="center", fontsize=4.3, rotation=0 if w >= l else 90)
+            for (fx, fy, fw, fl, *_z) in b.libres:
+                if fw > 0.05 and fl > 0.05:
+                    ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#eeeeee",
+                                 edgecolor="#cfcfcf", hatch="//", lw=0.3))
+            ax.set_xlim(-0.02, aB + 0.02); ax.set_ylim(-0.02, lB + 0.02)
+            ax.set_aspect("equal"); ax.set_title(f"Tabla #{c['id']}", fontsize=6.5)
+            ax.set_xticks([]); ax.set_yticks([])
+        for ax in axes[len(grupo):]:
+            ax.axis("off")
+        if primero:
+            fig.suptitle(f"PLAN DE CORTE — ORDEN Y REUSO DE SOBRANTES · {modelo.upper()} · {material.upper()}\n"
+                         f"{len(ch)} tablas se abren para recortes; {len(multi)} APROVECHAN el sobrante para 2+ piezas "
+                         f"(ahorro de {len(multi)} tablas).  El número = orden de corte; '(sobra)' = sale del sobrante de la pieza anterior.",
+                         fontsize=10.5, fontweight="bold")
+            primero = False
+        else:
+            fig.suptitle(f"PLAN DE CORTE — ORDEN Y REUSO (cont.) · {modelo.upper()} · {material.upper()}",
+                         fontsize=10.5, fontweight="bold")
+        fig.tight_layout(rect=[0, 0.0, 1, 0.92])
+        guardar(fig)
 
 
 def hacer_pdf(todas, material, path, modelo=""):
@@ -337,7 +390,7 @@ def hacer_pdf(todas, material, path, modelo=""):
     baldosas_all = baldosas + extra_baldosas
     area_reut = area_desp = 0.0
     for b in baldosas_all:
-        for (fx, fy, fw, fl) in b.libres:
+        for (fx, fy, fw, fl, *_z) in b.libres:
             if fw <= 0.005 or fl <= 0.005:
                 continue
             if es_reutilizable(fw, fl):
@@ -533,7 +586,7 @@ def hacer_pdf(todas, material, path, modelo=""):
                     ax.text(x + w / 2, y + l / 2, f"{pid}\n{w:.2f}x{l:.2f}{loc}",
                             ha="center", va="center",
                             fontsize=6 if w >= 0.25 else 4.6, rotation=0 if w >= l else 90)
-                for (fx, fy, fw, fl) in b.libres:
+                for (fx, fy, fw, fl, *_z) in b.libres:
                     if fw <= 0.005 or fl <= 0.005:
                         continue
                     if es_reutilizable(fw, fl):
@@ -578,12 +631,18 @@ def hacer_pdf(todas, material, path, modelo=""):
             except Exception:
                 pass
 
+        # ---------- Página: PLAN DE CORTE (orden + reuso de sobrantes) ----------
+        try:
+            pagina_plan_corte(pdf, guardar, modelo, material, baldosas_all)
+        except Exception:
+            pass
+
         # ---------- Página FINAL: todos los sobrantes sumados ----------
         from collections import Counter
         reut = Counter()      # (w,l) -> cantidad
         desp = Counter()
         for b in baldosas_all:
-            for (fx, fy, fw, fl) in b.libres:
+            for (fx, fy, fw, fl, *_z) in b.libres:
                 if fw <= 0.005 or fl <= 0.005:
                     continue
                 clave = (round(min(fw, fl), 2), round(max(fw, fl), 2))

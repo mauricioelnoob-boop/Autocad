@@ -69,7 +69,12 @@ def ajustar(pw, pl, ancho, largo):
 # --------------------------------------------------------------------------
 class Baldosa:
     """Una baldosa completa que se va recortando. Guarda piezas colocadas y
-    los rectángulos libres (sobrantes) disponibles para más recortes."""
+    los rectángulos libres (sobrantes) disponibles para más recortes.
+
+    SEGUIMIENTO DE REUSO: cada rectángulo libre recuerda de QUÉ pieza salió
+    (`origen`); así cada pieza colocada sabe si se cortó de la tabla nueva o del
+    SOBRANTE de otra pieza. `self.meta[i]` = (origen, orden_corte) para piezas[i].
+    """
 
     _contador = 0
 
@@ -79,30 +84,24 @@ class Baldosa:
         self.material = material
         self.ancho = ancho
         self.largo = largo
-        # piezas: lista de (x, y, w, l, etiqueta)
-        self.piezas = []
-        # rectángulos libres: lista de (x, y, w, l)
-        self.libres = [(0.0, 0.0, ancho, largo)]
+        self.piezas = []          # (x, y, w, l, etiqueta, rot)
+        self.meta = []            # (origen, orden) paralelo a piezas
+        # rectángulos libres: (x, y, w, l, origen)   origen = etiqueta o "TABLA"
+        self.libres = [(0.0, 0.0, ancho, largo, "TABLA")]
 
     def _buscar(self, pw, pl, kerf, rotar):
-        """Devuelve (indice_libre, w_usado, l_usado, rotada) del mejor hueco, o None."""
         mejor = None
-        for i, (fx, fy, fw, fl) in enumerate(self.libres):
+        for i, (fx, fy, fw, fl, org) in enumerate(self.libres):
             for (w, l, rot) in ((pw, pl, False), (pl, pw, True)) if rotar else ((pw, pl, False),):
-                need_w = w + (kerf if w + kerf <= fw + EPS else 0)
-                need_l = l + (kerf if l + kerf <= fl + EPS else 0)
                 if w <= fw + EPS and l <= fl + EPS:
-                    sobra = fw * fl - w * l       # área desperdiciada -> minimizar
+                    sobra = fw * fl - w * l
                     if mejor is None or sobra < mejor[0]:
                         mejor = (sobra, i, w, l, rot)
-        if mejor is None:
-            return None
-        return mejor[1], mejor[2], mejor[3], mejor[4]
+        return None if mejor is None else (mejor[1], mejor[2], mejor[3], mejor[4])
 
     def evaluar(self, pw, pl, kerf, rotar):
-        """Calidad del mejor hueco (área sobrante); None si no cabe."""
         mejor = None
-        for (fx, fy, fw, fl) in self.libres:
+        for (fx, fy, fw, fl, org) in self.libres:
             for (w, l, rot) in ((pw, pl, False), (pl, pw, True)) if rotar else ((pw, pl, False),):
                 if w <= fw + EPS and l <= fl + EPS:
                     sobra = fw * fl - w * l
@@ -110,27 +109,19 @@ class Baldosa:
                         mejor = sobra
         return mejor
 
-    def colocar(self, pw, pl, etiqueta, kerf, rotar):
+    def colocar(self, pw, pl, etiqueta, kerf, rotar, orden=0):
         r = self._buscar(pw, pl, kerf, rotar)
         if r is None:
             return False
         i, w, l, rot = r
-        fx, fy, fw, fl = self.libres.pop(i)
+        fx, fy, fw, fl, origen = self.libres.pop(i)
         self.piezas.append((fx, fy, w, l, etiqueta, rot))
+        self.meta.append((origen, orden))
 
-        # Corte guillotina: elegimos la división que deja el rectángulo libre
-        # más grande posible (mejor para seguir reusando).
-        cw = w + kerf if w + kerf <= fw + EPS else w   # ancho consumido con sierra
+        cw = w + kerf if w + kerf <= fw + EPS else w
         cl = l + kerf if l + kerf <= fl + EPS else l
-        # Opción A (corte vertical): derecha de ancho completo + arriba angosto
-        a1 = (fw - cw) * fl
-        a2 = cw * (fl - cl)
-        areaA = max(a1, a2)
-        # Opción B (corte horizontal): arriba de ancho completo + derecha bajo
-        b1 = fw * (fl - cl)
-        b2 = (fw - cw) * cl
-        areaB = max(b1, b2)
-
+        a1 = (fw - cw) * fl; a2 = cw * (fl - cl); areaA = max(a1, a2)
+        b1 = fw * (fl - cl); b2 = (fw - cw) * cl; areaB = max(b1, b2)
         nuevos = []
         if areaA >= areaB:
             if fw - cw > EPS:
@@ -142,10 +133,9 @@ class Baldosa:
                 nuevos.append((fx, fy + cl, fw, fl - cl))
             if fw - cw > EPS:
                 nuevos.append((fx + cw, fy, fw - cw, cl))
-        # Sólo guardamos sobrantes con tamaño útil (> 1 cm en ambos lados)
         for n in nuevos:
             if n[2] > 0.01 and n[3] > 0.01:
-                self.libres.append(n)
+                self.libres.append((n[0], n[1], n[2], n[3], etiqueta))  # sobrante DE esta pieza
         return True
 
     def area_usada(self):
@@ -155,36 +145,55 @@ class Baldosa:
         return self.ancho * self.largo
 
     def sobrantes_utiles(self):
-        return [(w, l) for (_, _, w, l) in self.libres if w > 0.05 and l > 0.05]
+        return [(w, l) for (_, _, w, l, _) in self.libres if w > 0.05 and l > 0.05]
 
 
 def empaquetar(recortes, material, kerf, rotar):
     """recortes: lista de (ancho, largo, etiqueta). Devuelve lista de Baldosa.
 
-    Best-Fit-Decreasing: las piezas grandes primero y cada una se coloca en la
-    baldosa donde deja MENOS sobrante, para maximizar el reuso de recortes
-    (que el sobrante de una sirva para otra pieza) y reducir baldosas nuevas.
+    Best-Fit-Decreasing: las piezas grandes primero; cada una se coloca en la
+    baldosa donde deja MENOS sobrante (reusando el SOBRANTE de cortes anteriores)
+    antes de abrir tabla nueva. Cada pieza queda con su ORDEN de corte y de qué
+    sobrante salió (Baldosa.meta), para imprimir la cadena de reuso.
     """
     ancho, largo = PISOS[material]
     piezas = sorted(recortes, key=lambda p: p[0] * p[1], reverse=True)
     baldosas = []
+    orden = 0
     for (pw, pl, etiqueta) in piezas:
-        # Buscar la baldosa abierta donde mejor encaja (menor sobrante)
-        mejor_b = None
-        mejor_score = None
+        orden += 1
+        mejor_b, mejor_score = None, None
         for b in baldosas:
             s = b.evaluar(pw, pl, kerf, rotar)
             if s is not None and (mejor_score is None or s < mejor_score):
-                mejor_score = s
-                mejor_b = b
+                mejor_score, mejor_b = s, b
         if mejor_b is not None:
-            mejor_b.colocar(pw, pl, etiqueta, kerf, rotar)
+            mejor_b.colocar(pw, pl, etiqueta, kerf, rotar, orden)
         else:
             b = Baldosa(material, ancho, largo)
-            if not b.colocar(pw, pl, etiqueta, kerf, rotar):
-                b.piezas.append((0, 0, pw, pl, etiqueta + " (NO CABE)", False))
+            if not b.colocar(pw, pl, etiqueta, kerf, rotar, orden):
+                b.piezas.append((0, 0, pw, pl, etiqueta + " (NO CABE)", False)); b.meta.append(("TABLA", orden))
             baldosas.append(b)
     return baldosas
+
+
+def cadena_de_corte(baldosas):
+    """Para cada baldosa, la secuencia ORDENADA de cortes y de qué sobrante sale
+    cada pieza. Devuelve lista de dicts: {id, material, cortes:[{orden, etiqueta,
+    w, l, rot, origen}], sobrante_reusable_m2, merma_m2}."""
+    out = []
+    for b in baldosas:
+        cortes = []
+        for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+            cortes.append({"orden": orden, "etiqueta": etq, "w": round(w, 4),
+                           "l": round(l, 4), "rot": rot, "origen": origen})
+        cortes.sort(key=lambda c: c["orden"])
+        reut = sum(w * l for (_, _, w, l, _) in b.libres if w >= 0.10 and l >= 0.10)
+        merma = sum(w * l for (_, _, w, l, _) in b.libres
+                    if (w > 0.005 and l > 0.005) and (w < 0.10 or l < 0.10))
+        out.append({"id": b.id, "material": b.material, "cortes": cortes,
+                    "sobrante_reusable_m2": round(reut, 4), "merma_m2": round(merma, 4)})
+    return out
 
 
 # --------------------------------------------------------------------------
@@ -436,7 +445,7 @@ def dibujar(baldosas, path, materiales=None):
                                            edgecolor="black", lw=0.6, alpha=0.9))
                     ax.text(x + w / 2, y + l / 2, f"{w:.2f}x{l:.2f}",
                             ha="center", va="center", fontsize=5.5)
-                for (fx, fy, fw, fl) in b.libres:
+                for (fx, fy, fw, fl, *_z) in b.libres:
                     if fw > 0.05 and fl > 0.05:
                         ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#fdfefe",
                                                edgecolor="#cccccc", hatch="////", lw=0.4))

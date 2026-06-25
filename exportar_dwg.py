@@ -146,7 +146,7 @@ def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
             for (x, y, w, l, pid, rot) in b.piezas:
                 _rect(msp, ox + x, oy + y, w, l, "CORTE-RECORTE")
                 _txt(msp, pid, ox + x + w / 2, oy + y + l / 2, min(0.035, w / 4.5), "CORTE-TEXTO")
-            for (fx, fy, fw, fl) in b.libres:
+            for (fx, fy, fw, fl, *_z) in b.libres:
                 if fw <= 0.005 or fl <= 0.005:
                     continue
                 capa = "CORTE-SOBRANTE" if es_reutilizable(fw, fl) else "CORTE-DESPERDICIO"
@@ -172,7 +172,7 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
         for (px, py, pw, pl, pid, rot) in piezas:
             _rect(msp, cx + px, cy - lT + py, pw, pl, "CORTE-RECORTE")
             _txt(msp, pid, cx + px + pw / 2, cy - lT + py + pl / 2, 0.045, "CORTE-TEXTO")
-        for (fx, fy, fw, fl) in libres:
+        for (fx, fy, fw, fl, *_z) in libres:
             if fw > 0.03 and fl > 0.03:
                 _rect(msp, cx + fx, cy - lT + fy, fw, fl, "CORTE-SOBRANTE")
         _txt(msp, etq, cx + aT / 2, cy + 0.07, 0.06, "CORTE-TEXTO")
@@ -182,7 +182,7 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
     recortes = [p for p in res["piezas"] if not p["completa"]]
     enteras = [p for p in res["piezas"] if p["completa"]]
     entradas = [(*ajustar(p["ancho"], p["largo"], aT, lT), p["id"]) for p in recortes]
-    baldosas = empaquetar(entradas, "Moret", 0.0, False)
+    baldosas = empaquetar(entradas, "Moret", 0.0, True)
     _txt(msp, f"DESPIECE ESCALERA (ancho 1.15, peralte 0.175, huella 0.27) - {res['n_escalones']} escalones",
          x0, y0 + 0.5, 0.16, "CORTE-TEXTO")
     n = 0

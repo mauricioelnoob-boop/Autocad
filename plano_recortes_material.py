@@ -65,7 +65,7 @@ def hacer_pdf(piezas, material, path):
     # Totales de sobrante/desperdicio
     area_reut = area_desp = 0.0
     for b in baldosas:
-        for (fx, fy, fw, fl) in b.libres:
+        for (fx, fy, fw, fl, *_z) in b.libres:
             if fw <= 0.005 or fl <= 0.005:
                 continue
             if es_reutilizable(fw, fl):
@@ -94,7 +94,7 @@ def hacer_pdf(piezas, material, path):
                     ax.text(x + w / 2, y + l / 2, txt, ha="center", va="center",
                             fontsize=6.5 if w >= 0.25 else 5, rotation=ang)
                 # Sobrantes / desperdicio
-                for (fx, fy, fw, fl) in b.libres:
+                for (fx, fy, fw, fl, *_z) in b.libres:
                     if fw <= 0.005 or fl <= 0.005:
                         continue
                     if es_reutilizable(fw, fl):

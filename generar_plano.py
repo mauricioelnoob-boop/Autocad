@@ -52,7 +52,7 @@ def resumen_material(baldosas, material):
     for b in baldosas:
         if b.material != material:
             continue
-        for (fx, fy, fw, fl) in b.libres:
+        for (fx, fy, fw, fl, *_z) in b.libres:
             if fw <= 0.005 or fl <= 0.005:
                 continue
             a = fw * fl
@@ -149,7 +149,7 @@ def hacer_dxf(baldosas, materiales, path):
                       min(0.05, w / 4), "PIEZA_TXT")
 
             # Sobrantes / desperdicio
-            for (fx, fy, fw, fl) in b.libres:
+            for (fx, fy, fw, fl, *_z) in b.libres:
                 if fw <= 0.005 or fl <= 0.005:
                     continue
                 if es_reutilizable(fw, fl):
@@ -226,7 +226,7 @@ def hacer_pdf(baldosas, materiales, path):
                                            edgecolor="black", lw=0.4))
                     ax.text(ox + x + w / 2, oy + y + l / 2, f"{w:.2f}x{l:.2f}",
                             ha="center", va="center", fontsize=3.5)
-                for (fx, fy, fw, fl) in b.libres:
+                for (fx, fy, fw, fl, *_z) in b.libres:
                     if fw <= 0.005 or fl <= 0.005:
                         continue
                     if es_reutilizable(fw, fl):

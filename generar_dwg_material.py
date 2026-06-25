@@ -135,7 +135,7 @@ def construir_dxf(todas, material, path):
             etq = pid + (f" -> ({dest['x']:.1f},{dest['y']:.1f})" if dest else "")
             texto(msp, etq, ox + x + w / 2, oy + y + l / 2, min(0.05, w / 3.5),
                   "RECORTE-TEXTO", rot=0 if w >= l else 90)
-        for (fx, fy, fw, fl) in b.libres:
+        for (fx, fy, fw, fl, *_z) in b.libres:
             if fw <= 0.005 or fl <= 0.005:
                 continue
             if es_reutilizable(fw, fl):
