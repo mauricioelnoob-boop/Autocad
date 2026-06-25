@@ -28,7 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v4.5"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v4.6"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 
@@ -44,6 +44,126 @@ def _tapar_notch(ax, p, face="#ffffff", edge="#333", lw=0.4):
                                     edgecolor=edge, lw=lw, zorder=6))
 PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
        "#f1948a", "#73c6b6", "#f8c471", "#aab7b8", "#a3e4d7", "#d7bde2"]
+
+
+def pagina_zoclo(pdf, guardar, modelo, material):
+    """Catálogo de corte del ZOCLO: cómo sale el zoclo de cada baldosa/tabla.
+    Moret 0.596 m de alto -> 4 tiras de 0.149 m (0.149x4 = 0.596 EXACTO, sin que
+    sobre el pedacito de ~0.146 m que deja cortar a 0.15). Royal 0.20 m de alto
+    -> 1 tira de 0.15 m por tabla (sobra 0.05 m)."""
+    import math
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle, Patch
+    import generadores as G
+    g = G.GEN[modelo]
+    if material == "Moret":
+        ml = g["zoclo_m"]; alto_t, largo_t = 0.596, 1.194
+        alto_z, por_tabla = 0.149, 4; pzcaja = G.MORET_PZCAJA
+        comprob = "0.149 m × 4 = 0.596 m  (EXACTO: aprovechas toda la baldosa)"
+        antes = ("Cortando a 0.15 m sólo salen 3 zoclos completos y queda un "
+                 "pedazo corto de ~0.146 m que se desperdicia.")
+    else:
+        ml = g["zoclo_r"]; alto_t, largo_t = 0.20, 1.20
+        alto_z, por_tabla = 0.15, 1; pzcaja = G.ROYAL_PZCAJA
+        comprob = "1 zoclo de 0.15 m por tabla (la tabla Royal mide 0.20 m de alto)"
+        antes = "De cada tabla Royal (0.20 m) sale 1 zoclo de 0.15 m; sobran 0.05 m."
+    tiras = math.ceil(ml / largo_t)
+    tablas = math.ceil(tiras / por_tabla)
+    cajas = math.ceil(tablas / pzcaja)
+
+    fig = plt.figure(figsize=(11.7, 8.3))
+    fig.suptitle(f"ZOCLO {material.upper()} — CATÁLOGO DE CORTE · {modelo.upper()}",
+                 fontsize=15, fontweight="bold", y=0.96)
+
+    # --- dibujo de UNA baldosa con sus cortes de zoclo ---
+    ax = fig.add_axes([0.06, 0.30, 0.52, 0.55]); ax.set_aspect("equal"); ax.axis("off")
+    ax.add_patch(Rectangle((0, 0), largo_t, alto_t, facecolor="#fdf2e3" if material == "Moret"
+                           else "#eef3f8", edgecolor="#333", lw=1.4))
+    cols = ["#f5b66b", "#f8c471", "#f5b041", "#eb984e"]
+    for i in range(por_tabla):
+        y = i * alto_z
+        ax.add_patch(Rectangle((0, y), largo_t, alto_z,
+                     facecolor=cols[i % len(cols)], edgecolor="#7e5109", lw=0.8))
+        ax.text(largo_t / 2, y + alto_z / 2, f"ZOCLO {i+1}  ({alto_z:.3f} × {largo_t:.3f} m)",
+                ha="center", va="center", fontsize=8, color="#5b3a08")
+    sobra = alto_t - por_tabla * alto_z
+    if sobra > 0.003:
+        ax.add_patch(Rectangle((0, por_tabla * alto_z), largo_t, sobra,
+                     facecolor="#f1948a", edgecolor="#922b21", lw=0.6, hatch=".."))
+        ax.text(largo_t / 2, por_tabla * alto_z + sobra / 2, f"sobra {sobra:.3f} m",
+                ha="center", va="center", fontsize=7, color="#922b21")
+    ax.set_xlim(-0.05, largo_t + 0.05); ax.set_ylim(-0.05, alto_t + 0.05)
+    ax.set_title(f"De 1 baldosa {material} ({alto_t:.3f} × {largo_t:.3f} m)\n"
+                 f"salen {por_tabla} zoclo(s) de {alto_z:.3f} m de alto", fontsize=10)
+
+    # --- panel de cantidades ---
+    axt = fig.add_axes([0.62, 0.28, 0.34, 0.58]); axt.axis("off")
+    filas = [
+        ("Metros lineales de zoclo (generador)", f"{ml:.2f} ml"),
+        (f"Largo útil por tira", f"{largo_t:.3f} m"),
+        ("Tiras de zoclo necesarias", f"{tiras} tiras"),
+        (f"Zoclos por baldosa (corte a {alto_z:.3f} m)", f"{por_tabla}"),
+        ("Baldosas a destinar a zoclo", f"{tablas} pzas"),
+        (f"Cajas ({pzcaja} pz/caja)", f"{cajas} cajas"),
+    ]
+    y = 0.92
+    for a, b in filas:
+        axt.text(0.0, y, a, fontsize=10, transform=axt.transAxes)
+        axt.text(1.0, y, b, fontsize=10, fontweight="bold", ha="right",
+                 color="#1b4f72", transform=axt.transAxes)
+        axt.axhline(y - 0.035, color="#e5e5e5", lw=0.5, xmin=0, xmax=1)
+        y -= 0.12
+
+    nota = (f"PROPUESTA DE CORTE:  {comprob}.\n{antes}\n"
+            "El zoclo se obtiene de la misma baldosa del piso (mismo tono y lote).")
+    fig.text(0.5, 0.13, nota, ha="center", va="top", fontsize=9.5, color="#444",
+             bbox=dict(boxstyle="round", facecolor="#eafaf1", edgecolor="#27ae60"))
+    guardar(fig)
+
+
+def pagina_muro_regadera(pdf, guardar, modelo):
+    """Despiece del PISO EN MURO DE REGADERA (Moret acostado), con la VENTANA del
+    muro de fondo descontada. Base: los cortes que mandó el cliente (fondo 1.35 m,
+    piezas acostadas 1.194 × 0.596). Alto = NPT − losa (P.B. 2.75 / P.A. 2.90 m)."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
+    import generadores as G
+    g = G.GEN[modelo]
+    tw, th = G.MORET[0], G.MORET[1]      # acostada: 1.194 ancho × 0.596 alto
+    FONDO = 1.35
+    VW, VH, VY = 0.60, 0.90, 1.00         # ventana ~0.60×0.90 a 1.00 m del piso
+    regs = g["regaderas"]
+    fig, axes = plt.subplots(1, len(regs), figsize=(min(11.7, 3.7 * len(regs) + 0.5), 7.6))
+    if len(regs) == 1:
+        axes = [axes]
+    for k, (ax, (planta, h)) in enumerate(zip(axes, regs), 1):
+        y = 0.0
+        while y < h - 1e-6:
+            hh = min(th, h - y); x = 0.0
+            while x < FONDO - 1e-6:
+                w = min(tw, FONDO - x)
+                ax.add_patch(Rectangle((x, y), w, hh, facecolor="#f5b66b",
+                             edgecolor="#7e5109", lw=0.5))
+                x += tw
+            y += th
+        # ventana (hueco: no se enchapa) — se descuenta del material
+        ax.add_patch(Rectangle((FONDO / 2 - VW / 2, VY), VW, VH, facecolor="#d6eaf8",
+                     edgecolor="#2e86c1", lw=1.6, zorder=5))
+        ax.text(FONDO / 2, VY + VH / 2, "VENTANA\n0.60×0.90", ha="center", va="center",
+                fontsize=7, color="#1b4f72", zorder=6)
+        ax.set_xlim(-0.1, FONDO + 0.1); ax.set_ylim(-0.1, h + 0.2); ax.set_aspect("equal")
+        ax.set_xticks([0, FONDO]); ax.set_yticks([0, 1, 2, round(h, 2)])
+        ax.tick_params(labelsize=7)
+        m2 = max(0.0, G.REG_PERIM * h - G.VENTANA_M2)
+        ax.set_title(f"Regadera {k} ({planta})\nmuro fondo {FONDO:.2f} × {h:.2f} m\n"
+                     f"3 caras − ventana = {m2:.2f} m²", fontsize=9)
+        ax.set_xlabel("fondo (m) — piezas acostadas", fontsize=8)
+    fig.suptitle(f"PISO EN MURO DE REGADERA (Moret acostado) · {modelo.upper()}\n"
+                 "piezas 1.194 × 0.596 m · se descuenta la ventana · alto = NPT − losa",
+                 fontsize=12, fontweight="bold")
+    fig.tight_layout(rect=[0, 0.02, 1, 0.92])
+    guardar(fig)
+
 
 
 def es_reutilizable(w, l):
@@ -370,6 +490,19 @@ def hacer_pdf(todas, material, path, modelo=""):
             guardar(fig)
         except Exception:
             pass
+
+        # ---------- Página: ZOCLO (catálogo de corte de este material) ----------
+        try:
+            pagina_zoclo(pdf, guardar, modelo, material)
+        except Exception:
+            pass
+
+        # ---------- Página: PISO EN MURO DE REGADERA (sólo en el PDF de Moret) ----------
+        if material == "Moret":
+            try:
+                pagina_muro_regadera(pdf, guardar, modelo)
+            except Exception:
+                pass
 
     return total_pzas, cajas, area_reut, area_desp
 
