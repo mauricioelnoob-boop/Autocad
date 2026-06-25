@@ -452,9 +452,10 @@ def hacer_pdf(todas, material, path, modelo=""):
             fs = min(max(1.8, min(p["wx"], p["hy"]) * 14), 4.5)
             ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
                     fontsize=fs, rotation=0 if p["wx"] >= p["hy"] else 90)
-        # zoclo (verde) del DWG, sólo como referencia del perímetro.
-        # En el plano de Moret NO se dibuja el zoclo que cae sobre la escalera
-        # (la escalera no lleva zoclo de piso).
+        # zoclo del DWG. Se clasifica por zona para que cada documento muestre
+        # SÓLO el zoclo de su material: el de las recámaras es Royal (morado) y el
+        # del resto de la casa es Moret (verde). En Moret no se dibuja el zoclo de
+        # la escalera (la escalera no lleva zoclo de piso).
         _esc_zona = None
         if material == "Moret":
             try:
@@ -466,30 +467,43 @@ def hacer_pdf(todas, material, path, modelo=""):
                     _esc_zona = _uni([_Poly(q).buffer(0.05) for q in _json.load(open(_ep))])
             except Exception:
                 _esc_zona = None
+        # zona Royal (recámaras): unión de las baldosas Royal, expandida hasta el muro
+        from shapely.geometry import box as _box, Point as _Pt2
+        from shapely.ops import unary_union as _uni2
+        _royal = [p for p in todas if p["material"] == "Royal Walnut"]
+        _royal_zona = None
+        if _royal:
+            _royal_zona = _uni2([_box(p["x0"], p["y0"], p["x0"] + p["wx"],
+                                      p["y0"] + p["hy"]) for p in _royal]).buffer(0.25)
+        zcol = "#1e8449" if material == "Moret" else "#7d3c98"
         try:
             import pdf_generadores as _PG
             _z, _m, _e, _claves = _PG._datos_dwg(modelo)
             for a, b in _z:
-                if _esc_zona is not None:
-                    from shapely.geometry import Point as _Pt2
-                    mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
-                    if _esc_zona.contains(_Pt2(mx, my)):
-                        continue
-                ax.plot([a[0], b[0]], [a[1], b[1]], color="#1e8449", lw=1.8, zorder=5)
+                mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+                if _esc_zona is not None and _esc_zona.contains(_Pt2(mx, my)):
+                    continue
+                en_royal = _royal_zona is not None and _royal_zona.contains(_Pt2(mx, my))
+                if material == "Moret" and en_royal:
+                    continue          # zoclo de recámara: es Royal, no va en Moret
+                if material == "Royal Walnut" and not en_royal:
+                    continue          # sólo el zoclo de las recámaras
+                ax.plot([a[0], b[0]], [a[1], b[1]], color=zcol, lw=1.8, zorder=5)
         except Exception:
             _z = []
         ax.set_xlim(minx - 0.3, maxx + 0.3); ax.set_ylim(miny - 0.3, maxy + 0.3)
         ax.set_aspect("equal"); ax.axis("off")
         col_rec = ESTILO[(material, False)]["face"]
         col_com = ESTILO[(material, True)]["face"]
+        _zlab = "verde = zoclo" if material == "Moret" else "morado = zoclo recámaras"
         ax.set_title(f"PLANO {modelo.upper()} — PISO {material.upper()}\n"
-                     f"(coloreado = {material}; gris claro = el otro piso; verde = zoclo)",
+                     f"(coloreado = {material}; gris claro = el otro piso; {_zlab})",
                      fontsize=12)
         ax.legend(handles=[
             Patch(facecolor=col_com, edgecolor="#333", label=f"{material} completa"),
             Patch(facecolor=col_rec, edgecolor="#333", label=f"{material} recorte"),
             Patch(facecolor="#f4f6f6", edgecolor="#d5d8dc", label="otro piso (contexto)"),
-            Patch(facecolor="#1e8449", label="zoclo"),
+            Patch(facecolor=zcol, label=f"zoclo {material}"),
         ], loc="upper center", ncol=4, fontsize=9, bbox_to_anchor=(0.5, -0.02))
         fig.tight_layout()
         guardar(fig)
