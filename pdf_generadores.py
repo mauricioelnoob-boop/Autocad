@@ -93,7 +93,7 @@ def pagina_tabla(pdf, modelo):
     nota = ("Zoclo: alto 0.15 m, largo 1.20 m (en esquinas se ajusta); metros lineales del generador del cliente.\n"
             "Urbania White 0.30×0.45 m horizontal (lavandería) — 10 pzas/caja, 1.36 m²/caja.\n"
             "Malla Lyndhurst 0.30×0.60 m en charola de regadera (~1.5 m²/charola).\n"
-            "Azulejo de muro de regadera = piso Moret colocado vertical; alto = NPT − losa (P.B. 2.75 m, P.A. 2.90 m), 3 caras.")
+            "Piso en muro de regadera = piso Moret colocado acostado; alto = NPT − losa (P.B. 2.75 m, P.A. 2.90 m), 3 caras, menos la ventana.")
     ax.text(0.02, 0.10, nota, fontsize=8.5, color="#444", transform=ax.transAxes, va="top")
     guardar(pdf, fig, modelo)
 

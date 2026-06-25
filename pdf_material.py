@@ -28,7 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v4.1"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v4.2"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",

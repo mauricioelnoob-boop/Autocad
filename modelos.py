@@ -69,7 +69,7 @@ MODELOS = {
             {"x": 506.117, "y": -87.084, "x0": 506.010, "y0": -87.428, "wx": 0.634, "hy": 0.688},  # recorte esquina escalera = UNA sola pieza hasta el borde de piso (x506.644)
             {"x": 490.12, "y": -92.05, "x0": 489.539, "y0": -92.572, "wx": 0.600, "hy": 1.050},  # izq. de PB-M-159
             {"x": 497.47, "y": -91.94, "x0": 497.365, "y0": -92.530, "wx": 0.214, "hy": 1.068},  # PB-M-150 a la esquina
-            {"x": 504.20, "y": -85.68, "x0": 503.946, "y0": -85.860, "wx": 0.580, "hy": 0.800},  # unir PA-M-009+003 y dar continuidad a PA-M-005
+            {"x": 504.20, "y": -85.68, "x0": 503.946, "y0": -85.860, "wx": 0.518, "hy": 0.800},  # unir PA-M-009+003 (sin encimar a PA-M-004)
         ],
         "eliminar": [
             (504.20, -85.28),    # PA-M-003: se absorbe en la pieza unida (009)

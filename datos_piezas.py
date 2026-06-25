@@ -276,6 +276,142 @@ def recortar_escalon(anotadas, escalon_path):
     return salida
 
 
+def _leer_dwg_capas(cfg, frags):
+    """Devuelve [(tipo, pts)] de las entidades de las capas que contienen alguno
+    de los fragmentos `frags`. tipo='poly' (cerrar) o 'line'."""
+    import os
+    path = cfg.get("json", "")
+    if not path or not os.path.exists(path):
+        return []
+    doc = json.loads(open(path, "rb").read().decode("utf-8", "replace"))
+    objs = doc["OBJECTS"]; capas = {}
+    for o in objs:
+        if o.get("object") == "LAYER":
+            h = o.get("handle")
+            if isinstance(h, list):
+                capas[h[-1]] = o.get("name")
+    def capa(o):
+        l = o.get("layer")
+        return capas.get(l[-1], "?") if isinstance(l, list) else "?"
+    out = []
+    for o in objs:
+        ln = capa(o)
+        if not any(f in ln for f in frags):
+            continue
+        e = o.get("entity")
+        if e == "LWPOLYLINE":
+            pts = [(p[0], p[1]) for p in o.get("points", [])]
+            if len(pts) >= 2:
+                out.append(("poly", pts))
+        elif e == "LINE":
+            s = o.get("start"); en = o.get("end")
+            if s and en:
+                out.append(("line", [(s[0], s[1]), (en[0], en[1])]))
+    return out
+
+
+def _decompose(geom, minside=0.045, minarea=0.013):
+    """Descompone un polígono ortogonal (con posibles HUECOS = jambas) en
+    rectángulos (x0,y0,x1,y1). Usa una rejilla por las coordenadas de todos los
+    bordes (exterior e interiores) y prueba el centro de cada celda; luego fusiona."""
+    from shapely.geometry import Point
+    polys = [geom] if geom.geom_type == "Polygon" else list(getattr(geom, "geoms", []))
+    out = []
+    for g in polys:
+        if g.is_empty or g.area < minarea:
+            continue
+        xset, yset = set(), set()
+        for ring in [g.exterior] + list(g.interiors):
+            for c in ring.coords:
+                xset.add(round(c[0], 3)); yset.add(round(c[1], 3))
+        xs, ys = sorted(xset), sorted(yset)
+        cells = []
+        for xa, xb in zip(xs, xs[1:]):
+            if xb - xa < 0.012:
+                continue
+            for ya, yb in zip(ys, ys[1:]):
+                if yb - ya < 0.012:
+                    continue
+                if g.contains(Point((xa + xb) / 2, (ya + yb) / 2)):
+                    cells.append([xa, ya, xb, yb])
+        # fusión vertical por columna
+        col = {}
+        for xa, ya, xb, yb in cells:
+            col.setdefault((xa, xb), []).append((ya, yb))
+        merged = []
+        for (xa, xb), yl in col.items():
+            yl.sort()
+            cur = None
+            for ya, yb in yl:
+                if cur and abs(cur[1] - ya) < 0.01:
+                    cur = (cur[0], yb)
+                else:
+                    if cur:
+                        merged.append([xa, cur[0], xb, cur[1]])
+                    cur = (ya, yb)
+            if cur:
+                merged.append([xa, cur[0], xb, cur[1]])
+        # fusión horizontal (misma y, x contiguos)
+        merged.sort(key=lambda r: (round(r[1], 3), round(r[3], 3), r[0]))
+        for r in merged:
+            if out and abs(out[-1][1] - r[1]) < 0.01 and abs(out[-1][3] - r[3]) < 0.01 \
+               and abs(out[-1][2] - r[0]) < 0.01:
+                out[-1][2] = r[2]
+            else:
+                out.append(r)
+    return [r for r in out if (r[2] - r[0]) >= minside and (r[3] - r[1]) >= minside
+            and (r[2] - r[0]) * (r[3] - r[1]) >= minarea]
+
+
+def recortar_muros_interiores(anotadas, cfg):
+    """Recorta el piso para que RESPETE los muros interiores (tablaroca, muros
+    bajos, cancelería) y la cara de muro marcada por el ZOCLO. Cada pieza cuyo
+    bbox invade un muro/jamba se vuelve a partir en rectángulos que rodean el muro
+    (el despiece original a veces dibujaba la pieza entera encima del muro)."""
+    try:
+        from shapely.geometry import box, Polygon, Point, LineString
+        from shapely.ops import unary_union
+    except Exception:
+        return anotadas
+    import math
+
+    def rect(p):
+        return box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+
+    obst = []
+    # muros interiores dibujados (tablaroca / jambas, muros bajos, cancelería).
+    # Son los que el zoclo rodea y sobre los que el despiece a veces dibujó la
+    # pieza entera. Se descartan los polígonos grandes (cuartos), sólo bandas.
+    for tipo, pts in _leer_dwg_capas(cfg, ("TABLAROCA", "A-MUROS BAJOS", "A-CANCELERIA")):
+        try:
+            pg = Polygon(pts).buffer(0)
+            if pg.area > 0.001 and pg.area < 2.5:
+                obst.append(pg)
+        except Exception:
+            pass
+    if not obst:
+        return anotadas
+    muros = unary_union(obst)
+
+    salida = []
+    for p in anotadas:
+        r = rect(p)
+        if r.area <= 0 or r.intersection(muros).area < 0.012:
+            salida.append(p); continue
+        libre = r.difference(muros)
+        if libre.is_empty or libre.area < 0.012:
+            continue                                   # toda la pieza es muro -> quitar
+        for (x0, y0, x1, y1) in _decompose(libre):
+            q = dict(p)
+            q["x0"], q["y0"] = round(x0, 4), round(y0, 4)
+            q["wx"], q["hy"] = round(x1 - x0, 4), round(y1 - y0, 4)
+            q["x"], q["y"] = round((x0 + x1) / 2, 3), round((y0 + y1) / 2, 3)
+            q.pop("id", None)
+            _retipo(q)
+            salida.append(q)
+    return salida
+
+
 def completar_tope_royal(anotadas, regiones=None, excluir=None):
     """Termina cada tablón de recámara HASTA el muro de arriba. Detecta cada
     recámara como un grupo conexo de tablones de Royal Walnut (componentes
@@ -577,11 +713,52 @@ def cargar_anotado(modelo="Cabernet"):
     # que se encima >40% de su área.
     anotadas = _quitar_solapes(anotadas)
 
+    # AL FINAL (después de rellenos y de-solape): respetar MUROS INTERIORES
+    # (tablaroca / muros bajos / cancelería) y la cara de muro del ZOCLO. Parte las
+    # piezas que el despiece dibujó encima de un muro para que el piso lo RODEE.
+    anotadas = recortar_muros_interiores(anotadas, cfg)
+    anotadas = _quitar_solapes(anotadas)
+    anotadas = _resolver_solapes(anotadas)                              # partición limpia
+    anotadas = [p for p in anotadas if min(p["wx"], p["hy"]) >= 0.05]   # sin esquirlas
+
     # IDs y pieza de corte, por (planta, material)
     asignar_ids_corte(anotadas)
 
     cargar_anotado.excluidas = excluidas
     return anotadas
+
+
+def _resolver_solapes(piezas):
+    """Deja el piso como PARTICIÓN limpia: ninguna pieza se encima con otra. Se
+    procesan de mayor a menor área; a cada una se le resta lo ya colocado y el
+    resto se vuelve a partir en rectángulos. Conserva 'extra'/material."""
+    try:
+        from shapely.geometry import box
+        from shapely.ops import unary_union
+    except Exception:
+        return piezas
+    orden = sorted(piezas, key=lambda p: -(p["wx"] * p["hy"]))
+    colocado = None
+    salida = []
+    for p in orden:
+        r = box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+        if r.area <= 0:
+            continue
+        libre = r if colocado is None else r.difference(colocado)
+        if libre.is_empty or libre.area < 0.012:
+            continue
+        if libre.area > 0.999 * r.area:                 # sin traslape: se deja igual
+            salida.append(p)
+        else:
+            for (x0, y0, x1, y1) in _decompose(libre):
+                q = dict(p)
+                q["x0"], q["y0"] = round(x0, 4), round(y0, 4)
+                q["wx"], q["hy"] = round(x1 - x0, 4), round(y1 - y0, 4)
+                q["x"], q["y"] = round((x0 + x1) / 2, 3), round((y0 + y1) / 2, 3)
+                q.pop("id", None); _retipo(q)
+                salida.append(q)
+        colocado = libre if colocado is None else unary_union([colocado, libre])
+    return salida
 
 
 def _quitar_solapes(piezas):

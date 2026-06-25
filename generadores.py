@@ -4,7 +4,7 @@
 generadores.py — Números generadores por material y prototipo.
 
 Cubre: Piso Moret, Piso Royal, Zoclo Moret, Zoclo Royal, Urbania White
-(lavandería), Malla Lyndhurst (charola/regadera) y Azulejo de muro de
+(lavandería), Malla Lyndhurst (charola/regadera) y piso en muro de
 regadera (Moret vertical).
 
 Zoclo: metros lineales tomados del Excel del cliente; alto SIEMPRE 0.15 m,
@@ -41,6 +41,7 @@ GEN={
                'regaderas':[('P.B.',2.75),('P.A.',2.90),('P.A.',2.90)]},
 }
 REG_PERIM=3.90   # ml de muro enchapado por regadera (3 caras: ancho 1.20 + fondo 1.35 x2; varía por baño)
+VENTANA_M2=0.54  # descuento por la ventana del muro de fondo (≈0.60 x 0.90 m)
 
 def area_piso(modelo):
     ps=cargar_anotado(modelo)
@@ -67,10 +68,11 @@ def reporte(modelo):
     R.append(('URBANIA WHITE lavandería (0.30x0.45)', f'{g["urbania_m2"]:.2f} m2 -> {up} pzas', f'{math.ceil(g["urbania_m2"]*1.1/URB_CAJA)} cajas (+10%, 10 pz/caja)'))
     nch=len(g['regaderas']); mm2=nch*MALLA_M2_CHAROLA; mp=math.ceil(mm2/MALLA_M2)
     R.append(('MALLA LYNDHURST charolas (0.30x0.60)', f'{nch} charolas x 1.5 m2 = {mm2:.2f} m2 -> {mp} pzas', f'{mp} pzas (+desperdicio)'))
-    # muro de regadera (Moret vertical)
-    wm2=sum(REG_PERIM*h for _,h in g['regaderas'])
+    # piso en muro de regadera (Moret colocado vertical), descontando la ventana
+    bruto=sum(REG_PERIM*h for _,h in g['regaderas'])
+    wm2=max(0.0, bruto - nch*VENTANA_M2)
     wp=math.ceil(wm2/M_M2)
-    R.append(('AZULEJO MURO REGADERA (Moret)', f'{nch} reg x {REG_PERIM} ml x alto -> {wm2:.2f} m2 -> {wp} pzas', f'{math.ceil(wm2*1.1/MORET_CAJA)} cajas (+10%)'))
+    R.append(('PISO EN MURO DE REGADERA (Moret)', f'{nch} reg x {REG_PERIM} ml x alto - ventana = {wm2:.2f} m2 -> {wp} pzas', f'{math.ceil(wm2*1.1/MORET_CAJA)} cajas (+10%)'))
     return R
 
 if __name__=='__main__':
