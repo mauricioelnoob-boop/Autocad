@@ -90,10 +90,10 @@ def pagina_tabla(pdf, modelo):
         ax.text(0.80, y, cajas, fontsize=10, color="#1b4f72", transform=ax.transAxes)
         ax.axhline(y - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
         y -= 0.085
-    nota = ("Zoclo: alto 0.15 m, largo 1.20 m (en esquinas se ajusta); metros lineales del generador del cliente.\n"
+    nota = ("Zoclo: Moret se corta a 0.149 m (4 tiras por baldosa, sale exacto); Royal 0.15 m por tabla. Largo 1.20 m; ml del generador del cliente.\n"
             "Urbania White 0.30×0.45 m horizontal (lavandería) — 10 pzas/caja, 1.36 m²/caja.\n"
             "Malla Lyndhurst 0.30×0.60 m en charola de regadera (~1.5 m²/charola).\n"
-            "Piso en muro de regadera = piso Moret colocado acostado; alto = NPT − losa (P.B. 2.75 m, P.A. 2.90 m), 3 caras, menos la ventana.")
+            "Piso en muro de regadera = piso Moret acostado; fondo 1.50 m, alto = NPT − losa (P.B. 2.75 m, P.A. 2.90 m), 3 caras, menos la ventana (1.50×0.90 al plafón).")
     ax.text(0.02, 0.10, nota, fontsize=8.5, color="#444", transform=ax.transAxes, va="top")
     guardar(pdf, fig, modelo)
 
@@ -147,19 +147,23 @@ def pagina_plano(pdf, modelo):
 
 def pagina_regaderas(pdf, modelo):
     """Alzado tipo del muro de fondo de la regadera: piso Moret ACOSTADO
-    (1.194 horizontal × 0.596 alto), con el nicho. Base: CORTE REC1 P.B. (fondo
-    1.35 m); varía por baño."""
+    (1.194 ancho × 0.596 alto). Muro de fondo 1.50 m de ancho; ventana pegada al
+    plafón del ancho del fondo (1.50 m) × 0.90 m de alto (descontada); nicho de
+    0.09 m de profundidad. Alto = NPT − losa; varía por baño."""
     g = G.GEN[modelo]
     tw, th = G.MORET[0], G.MORET[1]   # acostada: 1.194 ancho x 0.596 alto
-    FONDO = 1.35                       # ancho del muro de fondo (del CORTE)
-    fig, axes = plt.subplots(1, len(g["regaderas"]), figsize=(3.6 * len(g["regaderas"]), 7.0))
+    FONDO = G.REG_FONDO                # 1.50 m
+    VH = G.VENTANA_ALTO                # ventana 0.90 m, del ancho del fondo, al plafón
+    NA, NH, NP = G.NICHO_ANCHO, G.NICHO_ALTO, G.NICHO_PROF
+    fig, axes = plt.subplots(1, len(g["regaderas"]), figsize=(3.7 * len(g["regaderas"]), 7.2))
     if len(g["regaderas"]) == 1:
         axes = [axes]
     for k, (ax, (planta, h)) in enumerate(zip(axes, g["regaderas"]), 1):
-        # despiece acostado: filas de 0.596 (alto), piezas de 1.194 (ancho)
+        vy = h - VH                   # la ventana llega al plafón
+        # despiece acostado SÓLO bajo la ventana
         y = 0.0
-        while y < h - 1e-6:
-            hh = min(th, h - y)
+        while y < vy - 1e-6:
+            hh = min(th, vy - y)
             x = 0.0
             while x < FONDO - 1e-6:
                 w = min(tw, FONDO - x)
@@ -167,15 +171,21 @@ def pagina_regaderas(pdf, modelo):
                              edgecolor="#7e5109", lw=0.6))
                 x += tw
             y += th
-        # nicho (recargado hacia regadera): banda ~0.40 m a ~1.00 m del piso
-        ax.add_patch(Rectangle((0.10, 1.00), FONDO - 0.20, 0.40, fill=False,
-                     edgecolor="#c0392b", lw=1.6, hatch="xx"))
-        ax.text(FONDO / 2, 1.20, "NICHO", ha="center", va="center", fontsize=7, color="#c0392b")
+        # ventana (no se enchapa), pegada al plafón y del ancho del fondo
+        ax.add_patch(Rectangle((0, vy), FONDO, VH, facecolor="#d6eaf8",
+                     edgecolor="#2e86c1", lw=1.6, zorder=5))
+        ax.text(FONDO / 2, vy + VH / 2, f"VENTANA\n{FONDO:.2f}×{VH:.2f} m",
+                ha="center", va="center", fontsize=7, color="#1b4f72", zorder=6)
+        # nicho recesado (0.09 m de profundidad)
+        nx, ny = FONDO / 2 - NA / 2, vy - 0.45 - NH
+        ax.add_patch(Rectangle((nx, ny), NA, NH, fill=False, edgecolor="#c0392b", lw=1.8))
+        ax.text(FONDO / 2, ny + NH / 2, f"NICHO\nprof. {NP:.2f} m", ha="center",
+                va="center", fontsize=6.5, color="#c0392b")
         ax.set_xlim(-0.1, FONDO + 0.1); ax.set_ylim(-0.1, h + 0.2)
         ax.set_aspect("equal")
-        wm2 = G.REG_PERIM * h
-        ax.set_title(f"Regadera {k} ({planta})\nmuro fondo {FONDO:.2f}×{h:.2f} m  ·  3 caras={wm2:.2f} m²",
-                     fontsize=9)
+        wm2 = max(0.0, G.REG_PERIM * h - G.VENTANA_M2)
+        ax.set_title(f"Regadera {k} ({planta})\nmuro de fondo {FONDO:.2f}×{h:.2f} m  ·  "
+                     f"3 caras − ventana = {wm2:.2f} m²", fontsize=9)
         ax.set_xlabel("fondo (m) — piezas acostadas")
     fig.suptitle(f"ALZADO TIPO — MURO DE REGADERA (piso Moret ACOSTADO) · {modelo.upper()}",
                  fontsize=13, fontweight="bold")

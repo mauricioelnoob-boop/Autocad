@@ -28,7 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v4.6"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v4.7"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 
@@ -122,46 +122,60 @@ def pagina_zoclo(pdf, guardar, modelo, material):
 
 
 def pagina_muro_regadera(pdf, guardar, modelo):
-    """Despiece del PISO EN MURO DE REGADERA (Moret acostado), con la VENTANA del
-    muro de fondo descontada. Base: los cortes que mandó el cliente (fondo 1.35 m,
-    piezas acostadas 1.194 × 0.596). Alto = NPT − losa (P.B. 2.75 / P.A. 2.90 m)."""
+    """Despiece del PISO EN MURO DE REGADERA (Moret acostado). Muro de fondo
+    1.50 m de ancho × alto (NPT − losa: P.B. 2.75 / P.A. 2.90 m). La VENTANA va
+    pegada al plafón, del mismo ancho del fondo (1.50 m) × 0.90 m de alto, y se
+    descuenta. El NICHO (0.09 m de profundidad) se marca sobre el muro. Piezas
+    acostadas 1.194 × 0.596 m."""
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
     import generadores as G
     g = G.GEN[modelo]
     tw, th = G.MORET[0], G.MORET[1]      # acostada: 1.194 ancho × 0.596 alto
-    FONDO = 1.35
-    VW, VH, VY = 0.60, 0.90, 1.00         # ventana ~0.60×0.90 a 1.00 m del piso
+    FONDO = G.REG_FONDO                   # 1.50 m
+    VH = G.VENTANA_ALTO                   # ventana 0.90 m de alto, del ancho del fondo
+    NA, NH, NP = G.NICHO_ANCHO, G.NICHO_ALTO, G.NICHO_PROF
     regs = g["regaderas"]
-    fig, axes = plt.subplots(1, len(regs), figsize=(min(11.7, 3.7 * len(regs) + 0.5), 7.6))
+    fig, axes = plt.subplots(1, len(regs), figsize=(min(11.7, 3.7 * len(regs) + 0.5), 7.8))
     if len(regs) == 1:
         axes = [axes]
     for k, (ax, (planta, h)) in enumerate(zip(axes, regs), 1):
+        vy = h - VH                       # la ventana arranca a (alto − 0.90) y llega al plafón
+        # enchape Moret SÓLO bajo la ventana (la ventana no se enchapa)
         y = 0.0
-        while y < h - 1e-6:
-            hh = min(th, h - y); x = 0.0
+        while y < vy - 1e-6:
+            hh = min(th, vy - y); x = 0.0
             while x < FONDO - 1e-6:
                 w = min(tw, FONDO - x)
                 ax.add_patch(Rectangle((x, y), w, hh, facecolor="#f5b66b",
                              edgecolor="#7e5109", lw=0.5))
                 x += tw
             y += th
-        # ventana (hueco: no se enchapa) — se descuenta del material
-        ax.add_patch(Rectangle((FONDO / 2 - VW / 2, VY), VW, VH, facecolor="#d6eaf8",
+        # ventana (hueco: no se enchapa) — pegada al plafón, del ancho del fondo
+        ax.add_patch(Rectangle((0, vy), FONDO, VH, facecolor="#d6eaf8",
                      edgecolor="#2e86c1", lw=1.6, zorder=5))
-        ax.text(FONDO / 2, VY + VH / 2, "VENTANA\n0.60×0.90", ha="center", va="center",
-                fontsize=7, color="#1b4f72", zorder=6)
+        ax.text(FONDO / 2, vy + VH / 2, f"VENTANA\n{FONDO:.2f} × {VH:.2f} m\n(al plafón)",
+                ha="center", va="center", fontsize=7, color="#1b4f72", zorder=6)
+        # nicho (recesado 0.09 m): se marca con doble contorno
+        nx, ny = FONDO / 2 - NA / 2, vy - 0.45 - NH
+        ax.add_patch(Rectangle((nx, ny), NA, NH, fill=False, edgecolor="#c0392b",
+                     lw=1.8, zorder=6))
+        ax.add_patch(Rectangle((nx + 0.03, ny + 0.03), NA - 0.06, NH - 0.06, fill=False,
+                     edgecolor="#c0392b", lw=0.8, ls="--", zorder=6))
+        ax.text(FONDO / 2, ny + NH / 2, f"NICHO\n{NA:.2f}×{NH:.2f} m\nprof. {NP:.2f} m",
+                ha="center", va="center", fontsize=6.5, color="#c0392b", zorder=7)
         ax.set_xlim(-0.1, FONDO + 0.1); ax.set_ylim(-0.1, h + 0.2); ax.set_aspect("equal")
         ax.set_xticks([0, FONDO]); ax.set_yticks([0, 1, 2, round(h, 2)])
         ax.tick_params(labelsize=7)
         m2 = max(0.0, G.REG_PERIM * h - G.VENTANA_M2)
-        ax.set_title(f"Regadera {k} ({planta})\nmuro fondo {FONDO:.2f} × {h:.2f} m\n"
+        ax.set_title(f"Regadera {k} ({planta})\nmuro de fondo {FONDO:.2f} × {h:.2f} m\n"
                      f"3 caras − ventana = {m2:.2f} m²", fontsize=9)
         ax.set_xlabel("fondo (m) — piezas acostadas", fontsize=8)
     fig.suptitle(f"PISO EN MURO DE REGADERA (Moret acostado) · {modelo.upper()}\n"
-                 "piezas 1.194 × 0.596 m · se descuenta la ventana · alto = NPT − losa",
-                 fontsize=12, fontweight="bold")
-    fig.tight_layout(rect=[0, 0.02, 1, 0.92])
+                 "piezas 1.194 × 0.596 m · ventana al plafón (1.50 × 0.90 m) descontada · "
+                 "nicho 0.09 m de profundidad · alto = NPT − losa",
+                 fontsize=11.5, fontweight="bold")
+    fig.tight_layout(rect=[0, 0.02, 1, 0.90])
     guardar(fig)
 
 
@@ -235,11 +249,29 @@ def hacer_pdf(todas, material, path, modelo=""):
             fs = min(max(1.8, min(p["wx"], p["hy"]) * 14), 4.5)
             ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
                     fontsize=fs, rotation=0 if p["wx"] >= p["hy"] else 90)
-        # zoclo (verde) del DWG, sólo como referencia del perímetro
+        # zoclo (verde) del DWG, sólo como referencia del perímetro.
+        # En el plano de Moret NO se dibuja el zoclo que cae sobre la escalera
+        # (la escalera no lleva zoclo de piso).
+        _esc_zona = None
+        if material == "Moret":
+            try:
+                import json as _json, os as _os
+                from shapely.geometry import Polygon as _Poly, Point as _Pt
+                from shapely.ops import unary_union as _uni
+                _ep = f"escalon_{modelo.lower()}.json"
+                if _os.path.exists(_ep):
+                    _esc_zona = _uni([_Poly(q).buffer(0.05) for q in _json.load(open(_ep))])
+            except Exception:
+                _esc_zona = None
         try:
             import pdf_generadores as _PG
             _z, _m, _e, _claves = _PG._datos_dwg(modelo)
             for a, b in _z:
+                if _esc_zona is not None:
+                    from shapely.geometry import Point as _Pt2
+                    mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+                    if _esc_zona.contains(_Pt2(mx, my)):
+                        continue
                 ax.plot([a[0], b[0]], [a[1], b[1]], color="#1e8449", lw=1.8, zorder=5)
         except Exception:
             _z = []
@@ -393,6 +425,19 @@ def hacer_pdf(todas, material, path, modelo=""):
             fig.tight_layout(rect=[0, 0.04, 1, 0.95])
             guardar(fig)
 
+        # ---------- Página: ZOCLO (catálogo de corte) — antes de las tablas ----------
+        try:
+            pagina_zoclo(pdf, guardar, modelo, material)
+        except Exception:
+            pass
+
+        # ---------- Página: PISO EN MURO DE REGADERA (sólo Moret) — antes de las tablas ----------
+        if material == "Moret":
+            try:
+                pagina_muro_regadera(pdf, guardar, modelo)
+            except Exception:
+                pass
+
         # ---------- Página FINAL: todos los sobrantes sumados ----------
         from collections import Counter
         reut = Counter()      # (w,l) -> cantidad
@@ -484,25 +529,13 @@ def hacer_pdf(todas, material, path, modelo=""):
                 axg.text(0.80, yy, _ss, fontsize=9.5, color="#1b4f72", transform=axg.transAxes)
                 axg.axhline(yy - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
                 yy -= 0.085
-            axg.text(0.02, 0.10, "Zoclo alto 0.15 m, largo 1.20 m (ml del generador). Urbania White 0.30×0.45 (lavandería). "
-                     "Malla Lyndhurst 0.30×0.60 (charola). Muro de regadera = Moret vertical, alto P.B. 2.75 / P.A. 2.90 m.",
+            axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.149 m (4 por baldosa, sale exacto); Royal 0.15 m por tabla. "
+                     "Urbania White 0.30×0.45 (lavandería). Malla Lyndhurst 0.30×0.60 (charola). "
+                     "Muro de regadera = Moret acostado, fondo 1.50 m, ventana al plafón descontada, alto P.B. 2.75 / P.A. 2.90 m.",
                      fontsize=8, color="#444", transform=axg.transAxes, va="top")
             guardar(fig)
         except Exception:
             pass
-
-        # ---------- Página: ZOCLO (catálogo de corte de este material) ----------
-        try:
-            pagina_zoclo(pdf, guardar, modelo, material)
-        except Exception:
-            pass
-
-        # ---------- Página: PISO EN MURO DE REGADERA (sólo en el PDF de Moret) ----------
-        if material == "Moret":
-            try:
-                pagina_muro_regadera(pdf, guardar, modelo)
-            except Exception:
-                pass
 
     return total_pzas, cajas, area_reut, area_desp
 

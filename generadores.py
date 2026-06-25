@@ -40,8 +40,13 @@ GEN={
  'Chardonnay':{'zoclo_m':93.00,'zoclo_r':30.61,'urbania_m2':10.0,
                'regaderas':[('P.B.',2.75),('P.A.',2.90),('P.A.',2.90)]},
 }
-REG_PERIM=3.90   # ml de muro enchapado por regadera (3 caras: ancho 1.20 + fondo 1.35 x2; varía por baño)
-VENTANA_M2=0.54  # descuento por la ventana del muro de fondo (≈0.60 x 0.90 m)
+REG_PERIM=3.90    # ml de muro enchapado por regadera (3 caras: fondo 1.50 + 2 lados 1.20)
+REG_FONDO=1.50    # ancho del muro de fondo de la regadera (m)
+VENTANA_ALTO=0.90 # alto de la ventana (pegada al plafon, del ancho del fondo)
+VENTANA_M2=REG_FONDO*VENTANA_ALTO  # ventana = ancho del fondo (1.50) x 0.90 = 1.35 m2
+NICHO_PROF=0.09   # profundidad del nicho (m)
+NICHO_ANCHO=0.90  # ancho del nicho (m)
+NICHO_ALTO=0.30   # alto del nicho (m)
 
 def area_piso(modelo):
     ps=cargar_anotado(modelo)
