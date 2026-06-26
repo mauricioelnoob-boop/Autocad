@@ -132,6 +132,13 @@ MODELOS = {
             _recorte("Moret", 329.847, -123.624, 0.596, 0.608),   # sobre el muro
             _recorte("Moret", 330.445, -123.624, 0.112, 0.608),   # tira angosta sobre el muro
             _recorte("Moret", 323.635, -128.774, 0.433, 0.354),   # recorte chico debajo de PB-M-095 (esquina)
+            # --- correcciones del usuario (detalle "mitad Royal a la puerta") ---
+            # PA-R-099: le falta el recortito Royal a su DERECHA; topa el Moret a
+            # media puerta (umbral de 0.09 m hacia el pasillo Moret M-007/M-010).
+            _recorte("Royal Walnut", 328.907, -124.829, 0.090, 1.200),
+            # PA-R-157: le falta el recortito Royal a su IZQUIERDA; topa el Moret
+            # (M-042) en el umbral de 0.066 m. Ambas piezas quedan intactas.
+            _recorte("Royal Walnut", 330.211, -129.954, 0.066, 1.200),
         ],
         "reclasificar": [
             # Tiras de orilla de recámaras que salieron Moret -> son Royal Walnut.
@@ -197,6 +204,13 @@ MODELOS = {
             _recorte("Moret", 279.075, -66.142, 0.600, 0.316),
             _recorte("Moret", 279.678, -66.142, 0.600, 0.316),
             _recorte("Moret", 280.279, -66.142, 0.302, 0.316),
+            # --- corrección del usuario ---
+            # Arribita de PA-M-032 falta un recorrido chiquito: tira corta hasta
+            # el muro de arriba (recorte angosto del pasillo). El pipeline la
+            # recorta al muro como notch (queda ~0.11 m de tira visible).
+            # NOTA: "arriba de PB-M-111/112" ya queda enlosado en el build actual
+            # (el umbral del baño P.B. está cubierto), por eso no se agrega ahí.
+            _recorte("Moret", 286.578, -64.734, 0.350, 0.300),
         ],
         "redimensionar": [
             {"x": 288.32, "y": -60.97, "x0": 287.88, "y0": -61.215, "wx": 0.692, "hy": 0.483},  # PA-M-001 se extiende hasta la mitad
