@@ -1,0 +1,407 @@
+﻿codigo,planta,material,lado_corto_m,lado_largo_m,tipo,x_plano,y_plano
+PA-M-001,PA,Moret,0.045,1.11,recorte,507.792,-84.325
+PA-M-002,PA,Moret,0.6,1.194,completa,503.044,-84.899
+PA-M-003,PA,Moret,0.527,0.598,recorte,503.645,-85.233
+PA-M-004,PA,Moret,0.436,0.518,recorte,504.205,-85.278
+PA-M-005,PA,Moret,0.089,0.9,recorte,502.61,-85.51
+PA-M-006,PA,Moret,0.598,1.194,completa,504.765,-85.657
+PA-M-007,PA,Moret,0.598,1.194,completa,505.365,-85.657
+PA-M-008,PA,Moret,0.598,1.194,completa,505.965,-85.657
+PA-M-009,PA,Moret,0.348,1.194,recorte,506.44,-85.657
+PA-M-010,PA,Moret,0.518,1.062,recorte,504.205,-86.029
+PA-M-011,PA,Moret,0.6,1.194,completa,503.044,-86.095
+PA-M-012,PA,Moret,0.598,1.194,completa,503.645,-86.095
+PA-M-013,PA,Moret,0.304,0.54,recorte,504.794,-86.408
+PA-M-014,PA,Moret,0.304,0.598,recorte,505.365,-86.408
+PA-M-015,PA,Moret,0.304,0.598,recorte,505.965,-86.408
+PA-M-016,PA,Moret,0.304,0.348,recorte,506.44,-86.408
+PA-M-017,PA,Moret,0.078,0.688,recorte,504.163,-87.084
+PA-M-018,PA,Moret,0.6,0.688,recorte,504.504,-87.084
+PA-M-019,PA,Moret,0.6,0.688,recorte,505.106,-87.084
+PA-M-020,PA,Moret,0.6,0.688,recorte,505.708,-87.084
+PA-M-021,PA,Moret,0.498,1.15,recorte,500.023,-87.315
+PA-M-022,PA,Moret,0.6,1.15,recorte,500.574,-87.315
+PA-M-023,PA,Moret,0.6,1.194,completa,503.044,-87.291
+PA-M-024,PA,Moret,0.598,1.194,completa,503.645,-87.291
+PA-M-025,PA,Moret,0.078,1.194,recorte,504.163,-88.027
+PA-M-026,PA,Moret,0.6,1.194,completa,504.504,-88.027
+PA-M-027,PA,Moret,0.6,1.194,completa,505.106,-88.027
+PA-M-028,PA,Moret,0.6,1.194,completa,505.708,-88.027
+PA-M-029,PA,Moret,0.6,1.194,completa,506.31,-88.027
+PA-M-030,PA,Moret,0.6,0.684,recorte,506.912,-88.282
+PA-M-031,PA,Moret,0.6,0.684,recorte,507.514,-88.282
+PA-M-032,PA,Moret,0.498,1.15,recorte,500.023,-88.465
+PA-M-033,PA,Moret,0.6,1.15,recorte,500.574,-88.465
+PA-M-034,PA,Moret,0.6,1.15,recorte,503.044,-88.465
+PA-M-035,PA,Moret,0.6,1.15,recorte,503.646,-88.465
+PA-M-036,PA,Moret,0.078,1.104,recorte,504.163,-89.178
+PA-M-037,PA,Moret,0.6,1.104,recorte,504.504,-89.178
+PA-M-038,PA,Moret,0.6,1.194,completa,505.106,-89.223
+PA-M-039,PA,Moret,0.6,1.194,completa,505.708,-89.223
+PA-M-040,PA,Moret,0.6,1.194,completa,506.31,-89.223
+PA-M-041,PA,Moret,0.6,1.104,recorte,506.912,-89.178
+PA-M-042,PA,Moret,0.6,1.104,recorte,507.514,-89.178
+PA-M-043,PA,Moret,0.6,1.194,completa,503.044,-89.639
+PA-M-044,PA,Moret,0.598,1.194,completa,503.645,-89.639
+PA-M-045,PA,Moret,0.089,0.9,recorte,504.079,-90.36
+PA-M-046,PA,Moret,0.039,1.111,recorte,507.762,-90.466
+PA-M-047,PA,Moret,0.6,1.194,completa,503.044,-90.835
+PA-M-048,PA,Moret,0.598,1.194,completa,503.645,-90.835
+PA-M-049,PA,Moret,0.6,1.096,recorte,503.044,-91.982
+PA-M-050,PA,Moret,0.598,1.096,recorte,503.645,-91.982
+PA-M-051,PA,Moret,0.072,1.107,recorte,507.778,-92.777
+PA-R-001,PA,Royal Walnut,0.2,0.417,recorte,500.052,-82.299
+PA-R-002,PA,Royal Walnut,0.2,0.417,recorte,500.454,-82.299
+PA-R-003,PA,Royal Walnut,0.2,0.416,recorte,500.856,-82.299
+PA-R-004,PA,Royal Walnut,0.2,0.416,recorte,501.258,-82.299
+PA-R-005,PA,Royal Walnut,0.2,0.416,recorte,501.66,-82.3
+PA-R-006,PA,Royal Walnut,0.2,0.415,recorte,502.062,-82.3
+PA-R-007,PA,Royal Walnut,0.177,1.017,recorte,499.863,-82.599
+PA-R-008,PA,Royal Walnut,0.2,1.017,recorte,500.253,-82.599
+PA-R-009,PA,Royal Walnut,0.2,1.017,recorte,500.655,-82.599
+PA-R-010,PA,Royal Walnut,0.2,1.017,recorte,501.057,-82.6
+PA-R-011,PA,Royal Walnut,0.2,1.016,recorte,501.459,-82.6
+PA-R-012,PA,Royal Walnut,0.2,1.016,recorte,501.861,-82.6
+PA-R-013,PA,Royal Walnut,0.2,1.016,recorte,502.263,-82.6
+PA-R-014,PA,Royal Walnut,0.2,1.078,recorte,502.844,-82.63
+PA-R-015,PA,Royal Walnut,0.2,1.078,recorte,503.246,-82.63
+PA-R-016,PA,Royal Walnut,0.2,1.078,recorte,503.648,-82.63
+PA-R-017,PA,Royal Walnut,0.2,1.078,recorte,504.05,-82.63
+PA-R-018,PA,Royal Walnut,0.2,1.078,recorte,504.452,-82.63
+PA-R-019,PA,Royal Walnut,0.2,1.078,recorte,504.854,-82.63
+PA-R-020,PA,Royal Walnut,0.2,1.078,recorte,505.256,-82.63
+PA-R-021,PA,Royal Walnut,0.2,1.078,recorte,505.658,-82.63
+PA-R-022,PA,Royal Walnut,0.2,1.078,recorte,506.06,-82.63
+PA-R-023,PA,Royal Walnut,0.2,1.078,recorte,506.462,-82.63
+PA-R-024,PA,Royal Walnut,0.2,1.078,recorte,506.864,-82.63
+PA-R-025,PA,Royal Walnut,0.2,1.078,recorte,507.266,-82.63
+PA-R-026,PA,Royal Walnut,0.2,1.078,recorte,507.668,-82.63
+PA-R-027,PA,Royal Walnut,0.2,1.2,completa,500.052,-83.108
+PA-R-028,PA,Royal Walnut,0.2,1.2,completa,500.454,-83.108
+PA-R-029,PA,Royal Walnut,0.2,1.2,completa,500.856,-83.108
+PA-R-030,PA,Royal Walnut,0.2,1.2,completa,501.258,-83.108
+PA-R-031,PA,Royal Walnut,0.2,1.2,completa,501.66,-83.108
+PA-R-032,PA,Royal Walnut,0.2,1.2,completa,502.062,-83.108
+PA-R-033,PA,Royal Walnut,0.2,1.2,completa,502.464,-83.109
+PA-R-034,PA,Royal Walnut,0.2,1.2,completa,503.045,-83.169
+PA-R-035,PA,Royal Walnut,0.2,1.2,completa,503.447,-83.169
+PA-R-036,PA,Royal Walnut,0.2,1.2,completa,503.849,-83.169
+PA-R-037,PA,Royal Walnut,0.2,1.2,completa,504.251,-83.169
+PA-R-038,PA,Royal Walnut,0.2,1.2,completa,504.653,-83.169
+PA-R-039,PA,Royal Walnut,0.2,1.2,completa,505.055,-83.169
+PA-R-040,PA,Royal Walnut,0.2,1.2,completa,505.457,-83.169
+PA-R-041,PA,Royal Walnut,0.2,1.2,completa,505.859,-83.169
+PA-R-042,PA,Royal Walnut,0.2,1.2,completa,506.261,-83.169
+PA-R-043,PA,Royal Walnut,0.2,1.2,completa,506.663,-83.169
+PA-R-044,PA,Royal Walnut,0.2,1.2,completa,507.065,-83.169
+PA-R-045,PA,Royal Walnut,0.2,1.2,completa,507.467,-83.169
+PA-R-046,PA,Royal Walnut,0.045,1.2,recorte,507.792,-83.169
+PA-R-047,PA,Royal Walnut,0.177,1.2,recorte,499.863,-83.709
+PA-R-048,PA,Royal Walnut,0.2,1.2,completa,500.253,-83.709
+PA-R-049,PA,Royal Walnut,0.2,1.2,completa,500.655,-83.709
+PA-R-050,PA,Royal Walnut,0.2,1.2,completa,501.057,-83.709
+PA-R-051,PA,Royal Walnut,0.2,1.2,completa,501.459,-83.709
+PA-R-052,PA,Royal Walnut,0.2,1.2,completa,501.861,-83.709
+PA-R-053,PA,Royal Walnut,0.2,1.2,completa,502.263,-83.709
+PA-R-054,PA,Royal Walnut,0.2,1.2,completa,502.844,-83.77
+PA-R-055,PA,Royal Walnut,0.2,1.2,completa,503.246,-83.77
+PA-R-056,PA,Royal Walnut,0.2,1.2,completa,503.648,-83.77
+PA-R-057,PA,Royal Walnut,0.2,1.2,completa,504.05,-83.77
+PA-R-058,PA,Royal Walnut,0.2,1.2,completa,504.452,-83.77
+PA-R-059,PA,Royal Walnut,0.2,1.2,completa,504.854,-83.77
+PA-R-060,PA,Royal Walnut,0.2,1.2,completa,505.256,-83.77
+PA-R-061,PA,Royal Walnut,0.2,1.2,completa,505.658,-83.77
+PA-R-062,PA,Royal Walnut,0.2,1.2,completa,506.06,-83.77
+PA-R-063,PA,Royal Walnut,0.2,1.2,completa,506.462,-83.77
+PA-R-064,PA,Royal Walnut,0.2,1.2,completa,506.864,-83.77
+PA-R-065,PA,Royal Walnut,0.2,1.2,completa,507.266,-83.77
+PA-R-066,PA,Royal Walnut,0.2,1.2,completa,507.668,-83.77
+PA-R-067,PA,Royal Walnut,0.2,1.2,completa,500.052,-84.309
+PA-R-068,PA,Royal Walnut,0.2,1.2,completa,500.454,-84.309
+PA-R-069,PA,Royal Walnut,0.2,1.2,completa,500.856,-84.309
+PA-R-070,PA,Royal Walnut,0.2,1.2,completa,501.258,-84.309
+PA-R-071,PA,Royal Walnut,0.2,1.2,completa,501.66,-84.309
+PA-R-072,PA,Royal Walnut,0.2,1.2,completa,502.062,-84.309
+PA-R-073,PA,Royal Walnut,0.2,1.2,completa,502.464,-84.31
+PA-R-074,PA,Royal Walnut,0.2,1.11,recorte,503.849,-84.325
+PA-R-075,PA,Royal Walnut,0.2,1.11,recorte,504.251,-84.325
+PA-R-076,PA,Royal Walnut,0.2,1.11,recorte,504.653,-84.325
+PA-R-077,PA,Royal Walnut,0.2,1.11,recorte,505.055,-84.325
+PA-R-078,PA,Royal Walnut,0.2,1.11,recorte,505.457,-84.325
+PA-R-079,PA,Royal Walnut,0.2,1.11,recorte,505.859,-84.325
+PA-R-080,PA,Royal Walnut,0.2,1.11,recorte,506.261,-84.325
+PA-R-081,PA,Royal Walnut,0.2,1.11,recorte,506.663,-84.325
+PA-R-082,PA,Royal Walnut,0.2,1.11,recorte,507.065,-84.325
+PA-R-083,PA,Royal Walnut,0.2,1.11,recorte,507.467,-84.325
+PA-R-084,PA,Royal Walnut,0.2,1.2,completa,503.045,-84.37
+PA-R-085,PA,Royal Walnut,0.2,1.2,completa,503.447,-84.37
+PA-R-086,PA,Royal Walnut,0.2,0.51,recorte,504.05,-84.626
+PA-R-087,PA,Royal Walnut,0.2,0.51,recorte,504.452,-84.626
+PA-R-088,PA,Royal Walnut,0.2,0.51,recorte,504.854,-84.626
+PA-R-089,PA,Royal Walnut,0.2,0.51,recorte,505.256,-84.626
+PA-R-090,PA,Royal Walnut,0.2,0.51,recorte,505.658,-84.626
+PA-R-091,PA,Royal Walnut,0.2,0.51,recorte,506.06,-84.626
+PA-R-092,PA,Royal Walnut,0.2,0.51,recorte,506.462,-84.626
+PA-R-093,PA,Royal Walnut,0.2,0.51,recorte,506.864,-84.626
+PA-R-094,PA,Royal Walnut,0.2,0.51,recorte,507.266,-84.626
+PA-R-095,PA,Royal Walnut,0.2,0.51,recorte,507.668,-84.626
+PA-R-096,PA,Royal Walnut,0.2,0.6,recorte,502.844,-84.671
+PA-R-097,PA,Royal Walnut,0.2,0.6,recorte,503.246,-84.671
+PA-R-098,PA,Royal Walnut,0.2,0.6,recorte,503.648,-84.671
+PA-R-099,PA,Royal Walnut,0.177,1.2,recorte,499.863,-84.91
+PA-R-100,PA,Royal Walnut,0.2,1.2,completa,500.253,-84.91
+PA-R-101,PA,Royal Walnut,0.2,1.2,completa,500.655,-84.91
+PA-R-102,PA,Royal Walnut,0.2,1.2,completa,501.057,-84.91
+PA-R-103,PA,Royal Walnut,0.2,1.2,completa,501.459,-84.91
+PA-R-104,PA,Royal Walnut,0.2,1.2,completa,501.861,-84.91
+PA-R-105,PA,Royal Walnut,0.2,1.2,completa,502.263,-84.91
+PA-R-106,PA,Royal Walnut,0.2,1.2,completa,500.052,-85.51
+PA-R-107,PA,Royal Walnut,0.2,1.2,completa,500.454,-85.51
+PA-R-108,PA,Royal Walnut,0.2,1.2,completa,500.856,-85.51
+PA-R-109,PA,Royal Walnut,0.2,1.2,completa,501.258,-85.51
+PA-R-110,PA,Royal Walnut,0.2,1.2,completa,501.66,-85.51
+PA-R-111,PA,Royal Walnut,0.2,1.2,completa,502.062,-85.51
+PA-R-112,PA,Royal Walnut,0.2,1.2,completa,502.464,-85.511
+PA-R-113,PA,Royal Walnut,0.177,1.05,recorte,499.863,-86.036
+PA-R-114,PA,Royal Walnut,0.2,1.05,recorte,500.253,-86.036
+PA-R-115,PA,Royal Walnut,0.2,1.05,recorte,500.655,-86.036
+PA-R-116,PA,Royal Walnut,0.2,1.05,recorte,501.057,-86.036
+PA-R-117,PA,Royal Walnut,0.2,1.05,recorte,501.459,-86.036
+PA-R-118,PA,Royal Walnut,0.2,1.05,recorte,501.861,-86.036
+PA-R-119,PA,Royal Walnut,0.2,1.05,recorte,502.263,-86.036
+PA-R-120,PA,Royal Walnut,0.2,0.449,recorte,500.052,-86.336
+PA-R-121,PA,Royal Walnut,0.2,0.449,recorte,500.454,-86.336
+PA-R-122,PA,Royal Walnut,0.2,0.449,recorte,500.856,-86.336
+PA-R-123,PA,Royal Walnut,0.2,0.449,recorte,501.258,-86.336
+PA-R-124,PA,Royal Walnut,0.2,0.449,recorte,501.66,-86.336
+PA-R-125,PA,Royal Walnut,0.2,0.449,recorte,502.062,-86.336
+PA-R-126,PA,Royal Walnut,0.2,0.449,recorte,502.464,-86.336
+PA-R-127,PA,Royal Walnut,0.214,0.688,recorte,506.117,-87.084
+PA-R-128,PA,Royal Walnut,0.27,1.15,recorte,501.009,-87.315
+PA-R-129,PA,Royal Walnut,0.27,1.15,recorte,501.279,-87.315
+PA-R-130,PA,Royal Walnut,0.27,1.15,recorte,501.549,-87.315
+PA-R-131,PA,Royal Walnut,0.27,1.15,recorte,501.819,-87.315
+PA-R-132,PA,Royal Walnut,0.27,1.15,recorte,502.089,-87.315
+PA-R-133,PA,Royal Walnut,0.27,1.15,recorte,502.359,-87.315
+PA-R-134,PA,Royal Walnut,0.25,1.15,recorte,502.619,-87.315
+PA-R-135,PA,Royal Walnut,0.27,1.15,recorte,501.009,-88.465
+PA-R-136,PA,Royal Walnut,0.27,1.15,recorte,501.279,-88.465
+PA-R-137,PA,Royal Walnut,0.27,1.15,recorte,501.549,-88.465
+PA-R-138,PA,Royal Walnut,0.27,1.15,recorte,501.819,-88.465
+PA-R-139,PA,Royal Walnut,0.27,1.15,recorte,502.089,-88.465
+PA-R-140,PA,Royal Walnut,0.27,1.15,recorte,502.359,-88.465
+PA-R-141,PA,Royal Walnut,0.25,1.15,recorte,502.619,-88.465
+PA-R-142,PA,Royal Walnut,0.2,0.599,recorte,505.229,-90.121
+PA-R-143,PA,Royal Walnut,0.2,0.599,recorte,505.631,-90.121
+PA-R-144,PA,Royal Walnut,0.2,0.599,recorte,506.033,-90.121
+PA-R-145,PA,Royal Walnut,0.2,0.51,recorte,504.425,-90.166
+PA-R-146,PA,Royal Walnut,0.2,0.51,recorte,504.827,-90.166
+PA-R-147,PA,Royal Walnut,0.2,0.51,recorte,506.435,-90.166
+PA-R-148,PA,Royal Walnut,0.2,0.51,recorte,506.837,-90.166
+PA-R-149,PA,Royal Walnut,0.2,0.51,recorte,507.239,-90.166
+PA-R-150,PA,Royal Walnut,0.2,0.51,recorte,507.641,-90.166
+PA-R-151,PA,Royal Walnut,0.2,1.2,completa,505.43,-90.421
+PA-R-152,PA,Royal Walnut,0.2,1.2,completa,505.832,-90.421
+PA-R-153,PA,Royal Walnut,0.2,1.111,recorte,504.224,-90.466
+PA-R-154,PA,Royal Walnut,0.2,1.111,recorte,504.626,-90.466
+PA-R-155,PA,Royal Walnut,0.2,1.111,recorte,505.028,-90.466
+PA-R-156,PA,Royal Walnut,0.2,1.111,recorte,506.234,-90.466
+PA-R-157,PA,Royal Walnut,0.2,1.111,recorte,506.636,-90.466
+PA-R-158,PA,Royal Walnut,0.2,1.111,recorte,507.038,-90.466
+PA-R-159,PA,Royal Walnut,0.2,1.111,recorte,507.44,-90.466
+PA-R-160,PA,Royal Walnut,0.2,1.2,completa,504.425,-91.022
+PA-R-161,PA,Royal Walnut,0.2,1.2,completa,504.827,-91.022
+PA-R-162,PA,Royal Walnut,0.2,1.2,completa,505.229,-91.022
+PA-R-163,PA,Royal Walnut,0.2,1.2,completa,505.631,-91.022
+PA-R-164,PA,Royal Walnut,0.2,1.2,completa,506.033,-91.022
+PA-R-165,PA,Royal Walnut,0.2,1.2,completa,506.435,-91.022
+PA-R-166,PA,Royal Walnut,0.2,1.2,completa,506.837,-91.022
+PA-R-167,PA,Royal Walnut,0.2,1.2,completa,507.239,-91.022
+PA-R-168,PA,Royal Walnut,0.2,1.2,completa,507.641,-91.022
+PA-R-169,PA,Royal Walnut,0.2,1.2,completa,504.224,-91.622
+PA-R-170,PA,Royal Walnut,0.2,1.2,completa,504.626,-91.622
+PA-R-171,PA,Royal Walnut,0.2,1.2,completa,505.028,-91.622
+PA-R-172,PA,Royal Walnut,0.2,1.2,completa,505.43,-91.622
+PA-R-173,PA,Royal Walnut,0.2,1.2,completa,505.832,-91.622
+PA-R-174,PA,Royal Walnut,0.2,1.2,completa,506.234,-91.622
+PA-R-175,PA,Royal Walnut,0.2,1.2,completa,506.636,-91.622
+PA-R-176,PA,Royal Walnut,0.2,1.2,completa,507.038,-91.622
+PA-R-177,PA,Royal Walnut,0.2,1.2,completa,507.44,-91.622
+PA-R-178,PA,Royal Walnut,0.072,1.2,recorte,507.778,-91.622
+PA-R-179,PA,Royal Walnut,0.2,1.2,completa,504.425,-92.223
+PA-R-180,PA,Royal Walnut,0.2,1.2,completa,504.827,-92.223
+PA-R-181,PA,Royal Walnut,0.2,1.2,completa,505.229,-92.223
+PA-R-182,PA,Royal Walnut,0.2,1.2,completa,505.631,-92.223
+PA-R-183,PA,Royal Walnut,0.2,1.2,completa,506.033,-92.223
+PA-R-184,PA,Royal Walnut,0.2,1.2,completa,506.435,-92.223
+PA-R-185,PA,Royal Walnut,0.2,1.2,completa,506.837,-92.223
+PA-R-186,PA,Royal Walnut,0.2,1.2,completa,507.239,-92.223
+PA-R-187,PA,Royal Walnut,0.2,1.2,completa,507.641,-92.223
+PA-R-188,PA,Royal Walnut,0.2,1.107,recorte,504.224,-92.777
+PA-R-189,PA,Royal Walnut,0.2,1.107,recorte,504.626,-92.777
+PA-R-190,PA,Royal Walnut,0.2,1.107,recorte,505.028,-92.777
+PA-R-191,PA,Royal Walnut,0.2,1.107,recorte,505.43,-92.777
+PA-R-192,PA,Royal Walnut,0.2,1.107,recorte,505.832,-92.777
+PA-R-193,PA,Royal Walnut,0.2,1.107,recorte,506.234,-92.777
+PA-R-194,PA,Royal Walnut,0.2,1.107,recorte,506.636,-92.777
+PA-R-195,PA,Royal Walnut,0.2,1.107,recorte,507.038,-92.777
+PA-R-196,PA,Royal Walnut,0.2,1.107,recorte,507.44,-92.777
+PA-R-197,PA,Royal Walnut,0.2,0.507,recorte,504.425,-93.077
+PA-R-198,PA,Royal Walnut,0.2,0.507,recorte,504.827,-93.077
+PA-R-199,PA,Royal Walnut,0.2,0.507,recorte,505.229,-93.077
+PA-R-200,PA,Royal Walnut,0.2,0.507,recorte,505.631,-93.077
+PA-R-201,PA,Royal Walnut,0.2,0.507,recorte,506.033,-93.077
+PA-R-202,PA,Royal Walnut,0.2,0.507,recorte,506.435,-93.077
+PA-R-203,PA,Royal Walnut,0.2,0.507,recorte,506.837,-93.077
+PA-R-204,PA,Royal Walnut,0.2,0.507,recorte,507.239,-93.077
+PA-R-205,PA,Royal Walnut,0.2,0.507,recorte,507.641,-93.077
+PB-M-001,PB,Moret,0.6,1.194,completa,489.839,-81.407
+PB-M-002,PB,Moret,0.6,1.194,completa,490.441,-81.407
+PB-M-003,PB,Moret,0.6,1.194,completa,491.043,-81.407
+PB-M-004,PB,Moret,0.6,1.194,completa,491.645,-81.407
+PB-M-005,PB,Moret,0.6,1.194,completa,492.247,-81.407
+PB-M-006,PB,Moret,0.6,1.194,completa,492.849,-81.407
+PB-M-007,PB,Moret,0.6,1.194,completa,493.451,-81.407
+PB-M-008,PB,Moret,0.6,1.194,completa,494.053,-81.407
+PB-M-009,PB,Moret,0.6,1.194,completa,494.655,-81.407
+PB-M-010,PB,Moret,0.6,1.194,completa,495.257,-81.407
+PB-M-011,PB,Moret,0.6,1.194,completa,495.859,-81.407
+PB-M-012,PB,Moret,0.6,1.194,completa,496.461,-81.407
+PB-M-013,PB,Moret,0.6,1.194,completa,497.063,-81.407
+PB-M-014,PB,Moret,0.394,1.194,recorte,497.562,-81.407
+PB-M-015,PB,Moret,0.6,1.074,recorte,493.451,-82.543
+PB-M-016,PB,Moret,0.6,1.074,recorte,497.063,-82.543
+PB-M-017,PB,Moret,0.394,1.074,recorte,497.562,-82.543
+PB-M-018,PB,Moret,0.6,1.114,recorte,489.839,-82.563
+PB-M-019,PB,Moret,0.6,1.114,recorte,490.441,-82.563
+PB-M-020,PB,Moret,0.6,1.114,recorte,491.043,-82.563
+PB-M-021,PB,Moret,0.6,1.114,recorte,491.645,-82.563
+PB-M-022,PB,Moret,0.6,1.114,recorte,492.247,-82.563
+PB-M-023,PB,Moret,0.6,1.114,recorte,492.849,-82.563
+PB-M-024,PB,Moret,0.6,1.114,recorte,494.053,-82.563
+PB-M-025,PB,Moret,0.6,1.114,recorte,494.655,-82.563
+PB-M-026,PB,Moret,0.6,1.114,recorte,495.257,-82.563
+PB-M-027,PB,Moret,0.6,1.114,recorte,495.859,-82.563
+PB-M-028,PB,Moret,0.6,1.114,recorte,496.461,-82.563
+PB-M-029,PB,Moret,0.6,1.146,recorte,489.839,-83.773
+PB-M-030,PB,Moret,0.6,1.146,recorte,490.441,-83.773
+PB-M-031,PB,Moret,0.6,1.146,recorte,491.043,-83.773
+PB-M-032,PB,Moret,0.6,1.146,recorte,491.645,-83.773
+PB-M-033,PB,Moret,0.6,1.146,recorte,492.247,-83.773
+PB-M-034,PB,Moret,0.6,1.146,recorte,492.849,-83.773
+PB-M-035,PB,Moret,0.6,1.086,recorte,493.451,-83.803
+PB-M-036,PB,Moret,0.6,1.146,recorte,494.053,-83.773
+PB-M-037,PB,Moret,0.6,1.146,recorte,494.655,-83.773
+PB-M-038,PB,Moret,0.6,1.146,recorte,495.257,-83.773
+PB-M-039,PB,Moret,0.6,1.146,recorte,495.859,-83.773
+PB-M-040,PB,Moret,0.6,1.146,recorte,496.461,-83.773
+PB-M-041,PB,Moret,0.6,1.086,recorte,497.063,-83.803
+PB-M-042,PB,Moret,0.6,1.194,completa,489.839,-84.945
+PB-M-043,PB,Moret,0.6,1.194,completa,490.441,-84.945
+PB-M-044,PB,Moret,0.6,1.194,completa,491.043,-84.945
+PB-M-045,PB,Moret,0.6,1.194,completa,491.645,-84.945
+PB-M-046,PB,Moret,0.6,1.194,completa,492.247,-84.945
+PB-M-047,PB,Moret,0.6,1.194,completa,492.849,-84.945
+PB-M-048,PB,Moret,0.6,1.194,completa,493.451,-84.945
+PB-M-049,PB,Moret,0.6,1.194,completa,494.053,-84.945
+PB-M-050,PB,Moret,0.6,1.194,completa,494.655,-84.945
+PB-M-051,PB,Moret,0.6,1.194,completa,495.257,-84.945
+PB-M-052,PB,Moret,0.6,1.194,completa,495.859,-84.945
+PB-M-053,PB,Moret,0.6,1.194,completa,496.461,-84.945
+PB-M-054,PB,Moret,0.6,1.194,completa,497.063,-84.945
+PB-M-055,PB,Moret,0.6,1.194,completa,490.441,-86.141
+PB-M-056,PB,Moret,0.6,1.194,completa,491.043,-86.141
+PB-M-057,PB,Moret,0.6,1.194,completa,491.645,-86.141
+PB-M-058,PB,Moret,0.6,1.194,completa,492.247,-86.141
+PB-M-059,PB,Moret,0.6,1.194,completa,492.849,-86.141
+PB-M-060,PB,Moret,0.6,1.194,completa,493.451,-86.141
+PB-M-061,PB,Moret,0.6,1.194,completa,494.053,-86.141
+PB-M-062,PB,Moret,0.6,1.194,completa,494.655,-86.141
+PB-M-063,PB,Moret,0.6,1.194,completa,495.257,-86.141
+PB-M-064,PB,Moret,0.6,1.194,completa,495.859,-86.141
+PB-M-065,PB,Moret,0.6,1.194,completa,496.461,-86.141
+PB-M-066,PB,Moret,0.6,1.194,completa,497.063,-86.141
+PB-M-067,PB,Moret,0.6,1.192,completa,489.839,-87.336
+PB-M-068,PB,Moret,0.6,1.194,completa,489.841,-87.336
+PB-M-069,PB,Moret,0.6,1.192,completa,490.441,-87.336
+PB-M-070,PB,Moret,0.6,1.192,completa,491.043,-87.336
+PB-M-071,PB,Moret,0.6,1.192,completa,491.645,-87.336
+PB-M-072,PB,Moret,0.6,1.192,completa,492.247,-87.336
+PB-M-073,PB,Moret,0.6,1.192,completa,492.849,-87.336
+PB-M-074,PB,Moret,0.6,1.192,completa,493.451,-87.336
+PB-M-075,PB,Moret,0.6,1.192,completa,494.053,-87.336
+PB-M-076,PB,Moret,0.6,1.192,completa,494.655,-87.336
+PB-M-077,PB,Moret,0.6,1.192,completa,495.257,-87.336
+PB-M-078,PB,Moret,0.6,1.192,completa,495.859,-87.336
+PB-M-079,PB,Moret,0.6,1.192,completa,496.461,-87.336
+PB-M-080,PB,Moret,0.6,1.12,recorte,497.063,-87.3
+PB-M-081,PB,Moret,0.471,0.6,recorte,495.257,-88.17
+PB-M-082,PB,Moret,0.33,0.589,recorte,495.994,-88.229
+PB-M-083,PB,Moret,0.589,0.598,recorte,496.46,-88.229
+PB-M-084,PB,Moret,0.6,1.194,completa,489.839,-88.531
+PB-M-085,PB,Moret,0.6,1.194,completa,490.441,-88.531
+PB-M-086,PB,Moret,0.6,1.194,completa,491.043,-88.531
+PB-M-087,PB,Moret,0.6,1.194,completa,491.645,-88.531
+PB-M-088,PB,Moret,0.6,1.194,completa,492.247,-88.531
+PB-M-089,PB,Moret,0.6,1.194,completa,492.849,-88.531
+PB-M-090,PB,Moret,0.6,1.194,completa,493.451,-88.531
+PB-M-091,PB,Moret,0.6,1.194,completa,494.053,-88.531
+PB-M-092,PB,Moret,0.284,1.194,recorte,494.497,-88.531
+PB-M-093,PB,Moret,0.6,1.194,completa,495.257,-89.122
+PB-M-094,PB,Moret,0.6,1.194,completa,495.859,-89.122
+PB-M-095,PB,Moret,0.6,1.194,completa,496.461,-89.122
+PB-M-096,PB,Moret,0.6,1.109,recorte,497.063,-89.165
+PB-M-097,PB,Moret,0.394,1.109,recorte,497.562,-89.165
+PB-M-098,PB,Moret,0.6,1.194,completa,489.839,-89.727
+PB-M-099,PB,Moret,0.6,1.194,completa,490.441,-89.727
+PB-M-100,PB,Moret,0.6,1.194,completa,491.043,-89.727
+PB-M-101,PB,Moret,0.6,1.194,completa,491.645,-89.727
+PB-M-102,PB,Moret,0.6,1.194,completa,492.247,-89.727
+PB-M-103,PB,Moret,0.6,1.194,completa,492.849,-89.727
+PB-M-104,PB,Moret,0.6,1.194,completa,493.451,-89.727
+PB-M-105,PB,Moret,0.6,1.194,completa,494.053,-89.727
+PB-M-106,PB,Moret,0.284,1.194,recorte,494.497,-89.727
+PB-M-107,PB,Moret,0.439,0.6,recorte,495.257,-89.941
+PB-M-108,PB,Moret,0.439,0.6,recorte,495.859,-89.941
+PB-M-109,PB,Moret,0.439,0.6,recorte,496.461,-89.941
+PB-M-110,PB,Moret,0.439,0.6,recorte,497.063,-89.941
+PB-M-111,PB,Moret,0.274,0.439,recorte,497.502,-89.941
+PB-M-112,PB,Moret,0.6,1.194,completa,489.839,-90.923
+PB-M-113,PB,Moret,0.6,1.194,completa,490.441,-90.923
+PB-M-114,PB,Moret,0.6,1.194,completa,491.043,-90.923
+PB-M-115,PB,Moret,0.6,1.194,completa,491.645,-90.923
+PB-M-116,PB,Moret,0.6,1.194,completa,492.247,-90.923
+PB-M-117,PB,Moret,0.6,1.194,completa,492.849,-90.923
+PB-M-118,PB,Moret,0.6,1.194,completa,493.451,-90.923
+PB-M-119,PB,Moret,0.6,1.194,completa,494.053,-90.923
+PB-M-120,PB,Moret,0.6,1.194,completa,494.655,-90.923
+PB-M-121,PB,Moret,0.6,1.18,completa,495.257,-90.93
+PB-M-122,PB,Moret,0.6,1.12,recorte,495.859,-90.9
+PB-M-123,PB,Moret,0.6,1.12,recorte,497.063,-90.9
+PB-M-124,PB,Moret,0.6,1.05,recorte,489.839,-92.047
+PB-M-125,PB,Moret,0.6,1.05,recorte,490.441,-92.047
+PB-M-126,PB,Moret,0.6,1.05,recorte,491.043,-92.047
+PB-M-127,PB,Moret,0.6,1.05,recorte,491.645,-92.047
+PB-M-128,PB,Moret,0.6,1.05,recorte,492.247,-92.047
+PB-M-129,PB,Moret,0.6,1.05,recorte,492.849,-92.047
+PB-M-130,PB,Moret,0.6,1.05,recorte,493.451,-92.047
+PB-M-131,PB,Moret,0.6,1.11,recorte,495.859,-92.017
+PB-M-132,PB,Moret,0.6,1.11,recorte,496.461,-92.017
+PB-M-133,PB,Moret,0.6,1.11,recorte,497.063,-92.017
+PB-M-134,PB,Moret,0.6,1.188,completa,494.053,-92.116
+PB-M-135,PB,Moret,0.6,1.188,completa,494.655,-92.116
+PB-R-001,PB,Royal Walnut,0.214,1.086,recorte,497.472,-83.803
+PB-R-002,PB,Royal Walnut,0.214,1.194,completa,497.472,-84.945
+PB-R-003,PB,Royal Walnut,0.214,1.194,completa,497.472,-86.141
+PB-R-004,PB,Royal Walnut,0.214,1.12,recorte,497.472,-87.3
+PB-R-005,PB,Royal Walnut,0.136,0.471,recorte,494.887,-88.17
+PB-R-006,PB,Royal Walnut,0.15,0.471,recorte,495.634,-88.17
+PB-R-007,PB,Royal Walnut,0.15,0.471,recorte,495.634,-88.17
+PB-R-008,PB,Royal Walnut,0.136,1.194,recorte,494.887,-89.122
+PB-R-009,PB,Royal Walnut,0.136,0.439,recorte,494.887,-89.941
+PB-R-010,PB,Royal Walnut,0.238,1.12,recorte,496.28,-90.9
+PB-R-011,PB,Royal Walnut,0.182,1.12,recorte,496.67,-90.9
+PB-R-012,PB,Royal Walnut,0.214,1.12,recorte,497.472,-90.9
+PB-R-013,PB,Royal Walnut,0.168,1.11,recorte,495.473,-92.017
+PB-R-014,PB,Royal Walnut,0.214,1.11,recorte,497.472,-92.017
+PB-R-015,PB,Royal Walnut,0.252,1.188,completa,495.083,-92.116
