@@ -188,9 +188,9 @@ def real_datos(modelo):
                 comp += r["completas"]
                 ent += [(*ajustar(p["ancho"], p["largo"], an, la), "X")
                         for p in r["piezas"] if not p["completa"]]
-            zml, zw, zl = G.GEN[modelo]["zoclo_m"], 0.149, 1.194
+            zml, zw, zl = G.GEN[modelo]["zoclo_m"], G.ZOCLO_ALTO, 1.194
         else:
-            zml, zw, zl = G.GEN[modelo]["zoclo_r"], 0.15, 1.20
+            zml, zw, zl = G.GEN[modelo]["zoclo_r"], G.ZOCLO_ALTO, 1.20
         ent += [(zw, zl, "Z")] * math.ceil(zml / zl)
         baldosas = empaquetar(ent, material, 0.0, True)
         cajas = math.ceil((comp + len(baldosas)) / pzc)

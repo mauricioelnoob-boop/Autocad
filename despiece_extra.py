@@ -19,9 +19,19 @@ Despiece de los acabados Moret que NO van en el piso plano:
 """
 import math
 import generadores as G
+from optimizador_recortes import empaquetar
 
 TW, TH = G.MORET[0], G.MORET[1]      # baldosa: 1.194 (largo) x 0.596 (corto)
 M_M2 = TW * TH
+
+
+def _tablones(pzs):
+    """Tablones Moret ENTEROS que se consumen al cortar estas piezas, por
+    rendimiento real (bin-packing guillotina del proyecto, con kerf de sierra).
+    Cuenta el desperdicio de corte que el método por ÁREA ignoraba: peraltes,
+    huellas y recortes de orilla salen de un tablón entero y dejan sobrante."""
+    rec = [(p["ancho"], p["largo"], p.get("id", "")) for p in pzs]
+    return len(empaquetar(rec, "Moret", G.ZOCLO_KERF, False))
 
 # ----- regadera -----
 def _tile_pared(w, h, etiqueta):
@@ -65,8 +75,10 @@ def regadera_resumen(modelo):
     comp = sum(1 for p in pzs if p["completa"])
     rec = sum(1 for p in pzs if not p["completa"])
     area = sum(p["w"] * p["h"] for p in pzs)
+    tablones = _tablones(pzs)
     return {"piezas": pzs, "completas": comp, "recortes": rec, "m2": area,
-            "cajas": math.ceil(area * 1.1 / G.MORET_CAJA)}
+            "tablones": tablones,
+            "cajas": math.ceil(tablones * 1.1 / G.MORET_PZCAJA)}
 
 
 # ----- escalera -----
@@ -114,10 +126,12 @@ def escalera_resumen(modelo):
     rec = sum(1 for p in pzs if not p["completa"])
     # m2 instalado: peraltes + huellas + descansos
     area = sum(p["ancho"] * p["largo"] for p in pzs)
+    tablones = _tablones(pzs)
     return {"piezas": pzs, "completas": comp, "recortes": rec, "m2": area,
             "n_escalones": n, "tramos": cfg["tramos"], "descansos": cfg["descansos"],
             "zoclo_orilla": cfg.get("zoclo_orilla", False),
-            "cajas": math.ceil(area * 1.15 / G.MORET_CAJA)}
+            "tablones": tablones,
+            "cajas": math.ceil(tablones * 1.15 / G.MORET_PZCAJA)}
 
 
 if __name__ == "__main__":

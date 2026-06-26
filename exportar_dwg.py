@@ -196,14 +196,17 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
         _txt(msp, f"B{n+1}", cx + aT / 2, cy + 0.07, 0.06, "CORTE-TEXTO"); n += 1
     filas_esc = (n + cols - 1) // cols
 
-    # ---- ZOCLO Moret (catálogo: 4 tiras de 0.149 por baldosa) ----
+    # ---- ZOCLO Moret (catálogo: 4 tiras de 0.146 por baldosa, con kerf) ----
+    import generadores as _G
+    H = _G.ZOCLO_ALTO          # 0.146
+    KERF = _G.ZOCLO_KERF       # 0.003 (3 cortes entre las 4 tiras)
     yz = y0 - filas_esc * gy - 0.8
-    _txt(msp, "DESPIECE ZOCLO MORET (4 tiras de 0.149 x 1.194 por baldosa)",
+    _txt(msp, "DESPIECE ZOCLO MORET (4 tiras de 0.146 x 1.194 por baldosa; margen para kerf de sierra 2-3 mm)",
          x0, yz + 0.5, 0.16, "CORTE-TEXTO")
     _rect(msp, x0, yz - lT, aT, lT, "CORTE-TILE")
     for i in range(4):
-        _rect(msp, x0 + i * 0.149, yz - lT, 0.149, lT, "CORTE-RECORTE")
-        _txt(msp, f"Z{i+1}", x0 + i * 0.149 + 0.07, yz - lT / 2, 0.05, "CORTE-TEXTO")
+        _rect(msp, x0 + i * (H + KERF), yz - lT, H, lT, "CORTE-RECORTE")
+        _txt(msp, f"Z{i+1}", x0 + i * (H + KERF) + H / 2, yz - lT / 2, 0.05, "CORTE-TEXTO")
 
 
 def exportar(modelo):

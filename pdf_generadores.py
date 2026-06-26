@@ -90,7 +90,7 @@ def pagina_tabla(pdf, modelo):
         ax.text(0.82, y, cajas, fontsize=8, color="#1b4f72", transform=ax.transAxes)
         ax.axhline(y - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
         y -= 0.085
-    nota = ("Zoclo: Moret se corta a 0.149 m (4 tiras por baldosa, sale exacto); Royal 0.15 m por tabla. Largo 1.20 m; ml del generador del cliente.\n"
+    nota = ("Zoclo: Moret se corta a 0.146 m = 4 tiras por baldosa contando el kerf de sierra (a 0.149 sólo salen 3); Royal 1 tira/tabla. Largo 1.194 m; ml del generador del cliente.\n"
             "Urbania White 0.30×0.45 m horizontal (lavandería) — 10 pzas/caja, 1.36 m²/caja.\n"
             "Malla Lyndhurst 0.30×0.60 m en charola de regadera (~1.5 m²/charola).\n"
             "Piso en muro de regadera = piso Moret acostado; fondo 1.50 m, alto = NPT − losa (P.B. 2.75 m, P.A. 2.90 m), 3 caras, menos la ventana (1.50×0.90 al plafón).")

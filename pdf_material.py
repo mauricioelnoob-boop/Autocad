@@ -48,9 +48,10 @@ PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
 
 def pagina_zoclo(pdf, guardar, modelo, material):
     """Catálogo de corte del ZOCLO: cómo sale el zoclo de cada baldosa/tabla.
-    Moret 0.596 m de alto -> 4 tiras de 0.149 m (0.149x4 = 0.596 EXACTO, sin que
-    sobre el pedacito de ~0.146 m que deja cortar a 0.15). Royal 0.20 m de alto
-    -> 1 tira de 0.15 m por tabla (sobra 0.05 m)."""
+    Moret 0.596 m de alto -> 4 tiras de 0.146 m. Council: 4 tiras necesitan 3
+    cortes; con kerf de sierra 3 mm, 4×0.146 + 3×0.003 = 0.593 <= 0.596 (caben con
+    holgura). A 0.149 el kerf NO deja caber la 4ª (sólo salen 3, como a 0.15).
+    Royal 0.20 m de alto -> 1 tira de 0.146 m por tabla (sobra 0.05 m)."""
     import math
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle, Patch
@@ -58,15 +59,15 @@ def pagina_zoclo(pdf, guardar, modelo, material):
     g = G.GEN[modelo]
     if material == "Moret":
         ml = g["zoclo_m"]; alto_t, largo_t = 0.596, 1.194
-        alto_z, por_tabla = 0.149, 4; pzcaja = G.MORET_PZCAJA
-        comprob = "0.149 m × 4 = 0.596 m  (EXACTO: aprovechas toda la baldosa)"
-        antes = ("Cortando a 0.15 m sólo salen 3 zoclos completos y queda un "
-                 "pedazo corto de ~0.146 m que se desperdicia.")
+        alto_z, por_tabla = G.ZOCLO_ALTO, 4; pzcaja = G.MORET_PZCAJA
+        comprob = "0.146 m × 4 + 3 cortes (kerf 3 mm) = 0.593 m ≤ 0.596 m  (4 tiras con holgura)"
+        antes = ("Cortando a 0.15 m sólo salen 3 zoclos y se tira ~0.146 m (~25%). "
+                 "A 0.149 el kerf de sierra impide la 4ª tira; por eso 0.146.")
     else:
         ml = g["zoclo_r"]; alto_t, largo_t = 0.20, 1.20
-        alto_z, por_tabla = 0.15, 1; pzcaja = G.ROYAL_PZCAJA
-        comprob = "1 zoclo de 0.15 m por tabla (la tabla Royal mide 0.20 m de alto)"
-        antes = "De cada tabla Royal (0.20 m) sale 1 zoclo de 0.15 m; sobran 0.05 m."
+        alto_z, por_tabla = G.ZOCLO_ALTO, 1; pzcaja = G.ROYAL_PZCAJA
+        comprob = "1 zoclo de 0.146 m por tabla (la tabla Royal mide 0.20 m de alto)"
+        antes = "De cada tabla Royal (0.20 m) sale 1 zoclo de 0.146 m; sobran ~0.05 m."
     tiras = math.ceil(ml / largo_t)
     tablas = math.ceil(tiras / por_tabla)
     cajas = math.ceil(tablas / pzcaja)
