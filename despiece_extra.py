@@ -27,7 +27,7 @@ M_M2 = TW * TH
 
 def _tablones(pzs):
     """Tablones Moret ENTEROS que se consumen al cortar estas piezas, por
-    rendimiento real (bin-packing guillotina del proyecto, con kerf de sierra).
+    rendimiento real (bin-packing guillotina del proyecto, kerf ≈ 0: diamante).
     Cuenta el desperdicio de corte que el método por ÁREA ignoraba: peraltes,
     huellas y recortes de orilla salen de un tablón entero y dejan sobrante."""
     rec = [(p["ancho"], p["largo"], p.get("id", "")) for p in pzs]

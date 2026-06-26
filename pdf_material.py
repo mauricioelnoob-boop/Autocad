@@ -48,10 +48,11 @@ PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
 
 def pagina_zoclo(pdf, guardar, modelo, material):
     """Catálogo de corte del ZOCLO: cómo sale el zoclo de cada baldosa/tabla.
-    Moret 0.596 m de alto -> 4 tiras de 0.146 m. Council: 4 tiras necesitan 3
-    cortes; con kerf de sierra 3 mm, 4×0.146 + 3×0.003 = 0.593 <= 0.596 (caben con
-    holgura). A 0.149 el kerf NO deja caber la 4ª (sólo salen 3, como a 0.15).
-    Royal 0.20 m de alto -> 1 tira de 0.146 m por tabla (sobra 0.05 m)."""
+    Corte con CORTADORA DE DIAMANTE (rayar y tronchar): kerf ≈ 0, la pieza se parte
+    exacto por la línea. Moret 0.596 m de alto -> 4 tiras de 0.148 m
+    (4×0.148 = 0.592 ≤ 0.596, ~4 mm de holgura para el calibre de fábrica 0.594-0.596;
+    a 0.149 el margen sería cero y un tablón corto caería a 3 tiras). A 0.15 sólo
+    salen 3 (0.60 > 0.596). Royal 0.20 m de alto -> 1 tira de 0.148 m por tabla."""
     import math
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle, Patch
@@ -60,14 +61,14 @@ def pagina_zoclo(pdf, guardar, modelo, material):
     if material == "Moret":
         ml = g["zoclo_m"]; alto_t, largo_t = 0.596, 1.194
         alto_z, por_tabla = G.ZOCLO_ALTO, 4; pzcaja = G.MORET_PZCAJA
-        comprob = "0.146 m × 4 + 3 cortes (kerf 3 mm) = 0.593 m ≤ 0.596 m  (4 tiras con holgura)"
-        antes = ("Cortando a 0.15 m sólo salen 3 zoclos y se tira ~0.146 m (~25%). "
-                 "A 0.149 el kerf de sierra impide la 4ª tira; por eso 0.146.")
+        comprob = "0.148 m × 4 = 0.592 m ≤ 0.596 m  (4 tiras/tablón con ~4 mm de holgura de calibre)"
+        antes = ("Cortadora de diamante (rayar y tronchar), kerf ≈ 0. A 0.15 sólo salen "
+                 "3 tiras; a 0.149 el margen es cero y un tablón a 0.594 cae a 3. Por eso 0.148.")
     else:
         ml = g["zoclo_r"]; alto_t, largo_t = 0.20, 1.20
         alto_z, por_tabla = G.ZOCLO_ALTO, 1; pzcaja = G.ROYAL_PZCAJA
-        comprob = "1 zoclo de 0.146 m por tabla (la tabla Royal mide 0.20 m de alto)"
-        antes = "De cada tabla Royal (0.20 m) sale 1 zoclo de 0.146 m; sobran ~0.05 m."
+        comprob = "1 zoclo de 0.148 m por tabla (la tabla Royal mide 0.20 m de alto)"
+        antes = "De cada tabla Royal (0.20 m) sale 1 zoclo de 0.148 m; sobran ~0.05 m."
     tiras = math.ceil(ml / largo_t)
     tablas = math.ceil(tiras / por_tabla)
     cajas = math.ceil(tablas / pzcaja)
@@ -848,7 +849,7 @@ def hacer_pdf(todas, material, path, modelo=""):
                 axg.text(0.82, yy, _ss, fontsize=7.5, color="#1b4f72", transform=axg.transAxes)
                 axg.axhline(yy - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
                 yy -= 0.085
-            axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.149 m (4 por baldosa, sale exacto); Royal 0.15 m por tabla. "
+            axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.148 m (4 por baldosa, cortadora de diamante, holgura para calibre); Royal 1 tira/tabla. "
                      "Urbania White 0.30×0.45 (lavandería). Malla Lyndhurst 0.30×0.60 (charola). "
                      "Muro de regadera = Moret acostado, fondo 1.50 m, ventana al plafón descontada, alto P.B. 2.75 / P.A. 2.90 m.",
                      fontsize=8, color="#444", transform=axg.transAxes, va="top")
