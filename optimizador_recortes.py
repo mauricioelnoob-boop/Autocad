@@ -29,6 +29,7 @@ Uso:
 import json
 import csv
 import sys
+import math
 import argparse
 from collections import defaultdict
 
@@ -36,6 +37,12 @@ from collections import defaultdict
 PISOS = {
     "Moret":        (0.596, 1.194),
     "Royal Walnut": (0.200, 1.200),
+}
+
+# Presentación comercial (cajas) y material suministrado (dato del proveedor).
+CAJAS = {
+    "Moret":        {"pzas_caja": 2, "m2_caja": 1.42, "suministrado_m2": 166.52},
+    "Royal Walnut": {"pzas_caja": 5, "m2_caja": 1.20, "suministrado_m2": 49.20},
 }
 
 EPS = 1e-6
@@ -62,7 +69,12 @@ def ajustar(pw, pl, ancho, largo):
 # --------------------------------------------------------------------------
 class Baldosa:
     """Una baldosa completa que se va recortando. Guarda piezas colocadas y
-    los rectángulos libres (sobrantes) disponibles para más recortes."""
+    los rectángulos libres (sobrantes) disponibles para más recortes.
+
+    SEGUIMIENTO DE REUSO: cada rectángulo libre recuerda de QUÉ pieza salió
+    (`origen`); así cada pieza colocada sabe si se cortó de la tabla nueva o del
+    SOBRANTE de otra pieza. `self.meta[i]` = (origen, orden_corte) para piezas[i].
+    """
 
     _contador = 0
 
@@ -72,47 +84,44 @@ class Baldosa:
         self.material = material
         self.ancho = ancho
         self.largo = largo
-        # piezas: lista de (x, y, w, l, etiqueta)
-        self.piezas = []
-        # rectángulos libres: lista de (x, y, w, l)
-        self.libres = [(0.0, 0.0, ancho, largo)]
+        self.piezas = []          # (x, y, w, l, etiqueta, rot)
+        self.meta = []            # (origen, orden) paralelo a piezas
+        # rectángulos libres: (x, y, w, l, origen)   origen = etiqueta o "TABLA"
+        self.libres = [(0.0, 0.0, ancho, largo, "TABLA")]
 
     def _buscar(self, pw, pl, kerf, rotar):
-        """Devuelve (indice_libre, w_usado, l_usado, rotada) del mejor hueco, o None."""
         mejor = None
-        for i, (fx, fy, fw, fl) in enumerate(self.libres):
+        for i, (fx, fy, fw, fl, org) in enumerate(self.libres):
             for (w, l, rot) in ((pw, pl, False), (pl, pw, True)) if rotar else ((pw, pl, False),):
-                need_w = w + (kerf if w + kerf <= fw + EPS else 0)
-                need_l = l + (kerf if l + kerf <= fl + EPS else 0)
                 if w <= fw + EPS and l <= fl + EPS:
-                    sobra = fw * fl - w * l       # área desperdiciada -> minimizar
+                    sobra = fw * fl - w * l
                     if mejor is None or sobra < mejor[0]:
                         mejor = (sobra, i, w, l, rot)
-        if mejor is None:
-            return None
-        return mejor[1], mejor[2], mejor[3], mejor[4]
+        return None if mejor is None else (mejor[1], mejor[2], mejor[3], mejor[4])
 
-    def colocar(self, pw, pl, etiqueta, kerf, rotar):
+    def evaluar(self, pw, pl, kerf, rotar):
+        mejor = None
+        for (fx, fy, fw, fl, org) in self.libres:
+            for (w, l, rot) in ((pw, pl, False), (pl, pw, True)) if rotar else ((pw, pl, False),):
+                if w <= fw + EPS and l <= fl + EPS:
+                    sobra = fw * fl - w * l
+                    if mejor is None or sobra < mejor:
+                        mejor = sobra
+        return mejor
+
+    def colocar(self, pw, pl, etiqueta, kerf, rotar, orden=0):
         r = self._buscar(pw, pl, kerf, rotar)
         if r is None:
             return False
         i, w, l, rot = r
-        fx, fy, fw, fl = self.libres.pop(i)
+        fx, fy, fw, fl, origen = self.libres.pop(i)
         self.piezas.append((fx, fy, w, l, etiqueta, rot))
+        self.meta.append((origen, orden))
 
-        # Corte guillotina: elegimos la división que deja el rectángulo libre
-        # más grande posible (mejor para seguir reusando).
-        cw = w + kerf if w + kerf <= fw + EPS else w   # ancho consumido con sierra
+        cw = w + kerf if w + kerf <= fw + EPS else w
         cl = l + kerf if l + kerf <= fl + EPS else l
-        # Opción A (corte vertical): derecha de ancho completo + arriba angosto
-        a1 = (fw - cw) * fl
-        a2 = cw * (fl - cl)
-        areaA = max(a1, a2)
-        # Opción B (corte horizontal): arriba de ancho completo + derecha bajo
-        b1 = fw * (fl - cl)
-        b2 = (fw - cw) * cl
-        areaB = max(b1, b2)
-
+        a1 = (fw - cw) * fl; a2 = cw * (fl - cl); areaA = max(a1, a2)
+        b1 = fw * (fl - cl); b2 = (fw - cw) * cl; areaB = max(b1, b2)
         nuevos = []
         if areaA >= areaB:
             if fw - cw > EPS:
@@ -124,10 +133,9 @@ class Baldosa:
                 nuevos.append((fx, fy + cl, fw, fl - cl))
             if fw - cw > EPS:
                 nuevos.append((fx + cw, fy, fw - cw, cl))
-        # Sólo guardamos sobrantes con tamaño útil (> 1 cm en ambos lados)
         for n in nuevos:
             if n[2] > 0.01 and n[3] > 0.01:
-                self.libres.append(n)
+                self.libres.append((n[0], n[1], n[2], n[3], etiqueta))  # sobrante DE esta pieza
         return True
 
     def area_usada(self):
@@ -137,28 +145,55 @@ class Baldosa:
         return self.ancho * self.largo
 
     def sobrantes_utiles(self):
-        return [(w, l) for (_, _, w, l) in self.libres if w > 0.05 and l > 0.05]
+        return [(w, l) for (_, _, w, l, _) in self.libres if w > 0.05 and l > 0.05]
 
 
 def empaquetar(recortes, material, kerf, rotar):
-    """recortes: lista de (ancho, largo, etiqueta). Devuelve lista de Baldosa."""
+    """recortes: lista de (ancho, largo, etiqueta). Devuelve lista de Baldosa.
+
+    Best-Fit-Decreasing: las piezas grandes primero; cada una se coloca en la
+    baldosa donde deja MENOS sobrante (reusando el SOBRANTE de cortes anteriores)
+    antes de abrir tabla nueva. Cada pieza queda con su ORDEN de corte y de qué
+    sobrante salió (Baldosa.meta), para imprimir la cadena de reuso.
+    """
     ancho, largo = PISOS[material]
-    # First-Fit-Decreasing: piezas grandes primero
     piezas = sorted(recortes, key=lambda p: p[0] * p[1], reverse=True)
     baldosas = []
+    orden = 0
     for (pw, pl, etiqueta) in piezas:
-        colocada = False
+        orden += 1
+        mejor_b, mejor_score = None, None
         for b in baldosas:
-            if b.colocar(pw, pl, etiqueta, kerf, rotar):
-                colocada = True
-                break
-        if not colocada:
+            s = b.evaluar(pw, pl, kerf, rotar)
+            if s is not None and (mejor_score is None or s < mejor_score):
+                mejor_score, mejor_b = s, b
+        if mejor_b is not None:
+            mejor_b.colocar(pw, pl, etiqueta, kerf, rotar, orden)
+        else:
             b = Baldosa(material, ancho, largo)
-            if not b.colocar(pw, pl, etiqueta, kerf, rotar):
-                # La pieza no cabe ni en una baldosa nueva (no debería pasar)
-                b.piezas.append((0, 0, pw, pl, etiqueta + " (NO CABE)", False))
+            if not b.colocar(pw, pl, etiqueta, kerf, rotar, orden):
+                b.piezas.append((0, 0, pw, pl, etiqueta + " (NO CABE)", False)); b.meta.append(("TABLA", orden))
             baldosas.append(b)
     return baldosas
+
+
+def cadena_de_corte(baldosas):
+    """Para cada baldosa, la secuencia ORDENADA de cortes y de qué sobrante sale
+    cada pieza. Devuelve lista de dicts: {id, material, cortes:[{orden, etiqueta,
+    w, l, rot, origen}], sobrante_reusable_m2, merma_m2}."""
+    out = []
+    for b in baldosas:
+        cortes = []
+        for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+            cortes.append({"orden": orden, "etiqueta": etq, "w": round(w, 4),
+                           "l": round(l, 4), "rot": rot, "origen": origen})
+        cortes.sort(key=lambda c: c["orden"])
+        reut = sum(w * l for (_, _, w, l, _) in b.libres if w >= 0.10 and l >= 0.10)
+        merma = sum(w * l for (_, _, w, l, _) in b.libres
+                    if (w > 0.005 and l > 0.005) and (w < 0.10 or l < 0.10))
+        out.append({"id": b.id, "material": b.material, "cortes": cortes,
+                    "sobrante_reusable_m2": round(reut, 4), "merma_m2": round(merma, 4)})
+    return out
 
 
 # --------------------------------------------------------------------------
@@ -186,6 +221,7 @@ def generar(piezas, kerf, rotar):
                       "area_piezas": 0.0, "area_baldosas": 0.0}
     plan_filas = []
     todas_baldosas = []
+    materiales = []      # datos estructurados por material (para el PDF)
 
     for material in PISOS:
         ps = por_material.get(material, [])
@@ -239,10 +275,24 @@ def generar(piezas, kerf, rotar):
         area_baldosas = total_baldosas * ancho * largo
         merma = area_baldosas - area_piezas
         W("")
-        W(f"  TOTAL BALDOSAS A COMPRAR ({material}): {total_baldosas}")
+        W(f"  TOTAL PIEZAS A COMPRAR ({material}): {total_baldosas} piezas")
         W(f"     = {len(completas)} completas + {n_recorte} para recortes")
-        W(f"     Área instalada: {f2(area_piezas)} m²   Área comprada: {f2(area_baldosas)} m²")
-        W(f"     Merma (desperdicio): {f2(merma)} m²  ({100*merma/area_baldosas:.1f}%)")
+
+        # --- Conversión a cajas y m² ---
+        cfg = CAJAS.get(material, {})
+        pzas_caja = cfg.get("pzas_caja")
+        m2_caja = cfg.get("m2_caja")
+        cajas = m2_compra = pzas_compradas = None
+        if pzas_caja and m2_caja:
+            cajas = math.ceil(total_baldosas / pzas_caja)
+            pzas_compradas = cajas * pzas_caja        # se compran cajas enteras
+            m2_compra = cajas * m2_caja
+            W(f"     En cajas: {cajas} cajas de {pzas_caja} pzas = {pzas_compradas} piezas")
+            W(f"     Equivale a: {f2(m2_compra)} m²  (caja = {m2_caja:g} m²)")
+            sumin = cfg.get("suministrado_m2")
+            if sumin is not None:
+                W(f"     (Dato proveedor: te suministraron {sumin:g} m² de {material})")
+        W(f"     Área neta instalada: {f2(area_piezas)} m²")
         W("")
 
         # Detalle: de qué baldosa sale cada recorte
@@ -259,6 +309,17 @@ def generar(piezas, kerf, rotar):
                                    "rotada" if rot else "normal", etq])
         W("")
 
+        materiales.append({
+            "material": material, "ancho": ancho, "largo": largo,
+            "completas": len(completas), "recortes": len(recortes),
+            "baldosas_recorte": n_recorte, "ahorro": ahorro,
+            "piezas_compra": total_baldosas,
+            "cajas": cajas, "pzas_caja": pzas_caja, "m2_caja": m2_caja,
+            "pzas_compradas": pzas_compradas, "m2_compra": m2_compra,
+            "area_instalada": area_piezas,
+            "suministrado_m2": cfg.get("suministrado_m2"),
+        })
+
         resumen_global["completas"] += len(completas)
         resumen_global["recortes"] += len(recortes)
         resumen_global["baldosas_recorte"] += n_recorte
@@ -274,20 +335,88 @@ def generar(piezas, kerf, rotar):
     W("=" * 70)
     W(f"   Baldosas completas        : {rg['completas']}")
     W(f"   Baldosas para recortes    : {rg['baldosas_recorte']}  (en vez de {rg['recortes']} sin optimizar)")
-    W(f"   TOTAL BALDOSAS A COMPRAR  : {total}")
+    W(f"   TOTAL PIEZAS A COMPRAR    : {total}")
     W(f"   Ahorro por reuso          : {sin_opt_total - total} baldosas")
     if rg["area_baldosas"]:
         merma = rg["area_baldosas"] - rg["area_piezas"]
         W(f"   Merma total               : {f2(merma)} m²  ({100*merma/rg['area_baldosas']:.1f}%)")
+    W("")
+    W("   CANTIDADES A COMPRAR (piezas / cajas / m²):")
+    for m in materiales:
+        if m["cajas"] is not None:
+            W(f"     {m['material']:13}: {m['piezas_compra']:3} pzas -> "
+              f"{m['cajas']} cajas ({m['pzas_compradas']} pzas) = {f2(m['m2_compra'])} m²")
+        else:
+            W(f"     {m['material']:13}: {m['piezas_compra']:3} pzas")
     W("=" * 70)
 
-    return "\n".join(lineas), plan_filas, todas_baldosas
+    return "\n".join(lineas), plan_filas, todas_baldosas, materiales
 
 
 # --------------------------------------------------------------------------
-#  Diagramas (opcional, requiere matplotlib)
+#  Reporte PDF (opcional, requiere matplotlib): resumen + diagramas de corte
 # --------------------------------------------------------------------------
-def dibujar(baldosas, path):
+def _pagina_resumen(pdf, materiales, plt):
+    """Primera página: tabla de cantidades a comprar (piezas, cajas, m²)."""
+    fig = plt.figure(figsize=(11.7, 8.3))
+    fig.suptitle("Cantidades a comprar — Optimización de recortes de piso",
+                 fontsize=15, y=0.96)
+
+    encab = ["Material", "Baldosa (m)", "Completas", "Recortes",
+             "Baldosas\nrecortes", "Ahorro\n(pzas)", "PIEZAS A\nCOMPRAR",
+             "Cajas", "Piezas/\ncaja", "m² A\nCOMPRAR"]
+    filas = []
+    tot_pzas = tot_cajas = 0
+    tot_m2 = 0.0
+    for m in materiales:
+        cajas = m["cajas"] if m["cajas"] is not None else "-"
+        pzcaja = m["pzas_caja"] if m["pzas_caja"] else "-"
+        m2 = f"{m['m2_compra']:.2f}" if m["m2_compra"] is not None else "-"
+        filas.append([m["material"], f'{m["ancho"]:.3f} x {m["largo"]:.3f}',
+                      m["completas"], m["recortes"], m["baldosas_recorte"],
+                      m["ahorro"], m["piezas_compra"], cajas, pzcaja, m2])
+        tot_pzas += m["piezas_compra"]
+        if m["cajas"]:
+            tot_cajas += m["cajas"]
+        if m["m2_compra"]:
+            tot_m2 += m["m2_compra"]
+    filas.append(["TOTAL", "", "", "", "", "", tot_pzas, tot_cajas, "", f"{tot_m2:.2f}"])
+
+    ax = fig.add_axes([0.04, 0.50, 0.92, 0.36])
+    ax.axis("off")
+    tabla = ax.table(cellText=filas, colLabels=encab, loc="center", cellLoc="center")
+    tabla.auto_set_font_size(False)
+    tabla.set_fontsize(8.5)
+    tabla.scale(1, 2.2)
+    ncol = len(encab)
+    for (r, c), cell in tabla.get_celld().items():
+        if r == 0:
+            cell.set_facecolor("#34495e"); cell.set_text_props(color="white", weight="bold")
+        elif r == len(filas):
+            cell.set_facecolor("#d5dbdb"); cell.set_text_props(weight="bold")
+        if c in (6, 9) and r != 0:           # columnas clave resaltadas
+            cell.set_facecolor("#fcf3cf" if r != len(filas) else "#f7dc6f")
+
+    # Notas con el dato del proveedor (sin veredicto de si alcanza o no)
+    notas = ["Material suministrado por el proveedor (dato informativo):"]
+    for m in materiales:
+        if m["suministrado_m2"] is not None:
+            cj = ""
+            if m["m2_caja"]:
+                cj = f"  (≈ {m['suministrado_m2']/m['m2_caja']:.1f} cajas / {m['suministrado_m2']/m['m2_caja']*m['pzas_caja']:.0f} pzas)"
+            notas.append(f"   • {m['material']}: {m['suministrado_m2']:g} m²{cj}")
+    notas.append("")
+    notas.append("Notas:")
+    notas.append("   • 'Piezas a comprar' = baldosas completas + baldosas abiertas para sacar recortes (ya optimizado).")
+    notas.append("   • Las cajas se redondean hacia arriba (se compran cajas enteras).")
+    notas.append("   • Diagramas de corte de cada baldosa en las páginas siguientes.")
+    fig.text(0.06, 0.42, "\n".join(notas), fontsize=10, va="top", family="monospace")
+
+    pdf.savefig(fig)
+    plt.close(fig)
+
+
+def dibujar(baldosas, path, materiales=None):
     try:
         import matplotlib
         matplotlib.use("Agg")
@@ -295,13 +424,15 @@ def dibujar(baldosas, path):
         from matplotlib.patches import Rectangle
         from matplotlib.backends.backend_pdf import PdfPages
     except Exception as e:
-        print(f"(diagramas omitidos: matplotlib no disponible: {e})")
+        print(f"(PDF omitido: matplotlib no disponible: {e})")
         return False
 
     colores = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce",
                "#85c1e9", "#f1948a", "#73c6b6", "#f8c471", "#aab7b8"]
     por_pag = 12
     with PdfPages(path) as pdf:
+        if materiales:
+            _pagina_resumen(pdf, materiales, plt)
         for inicio in range(0, len(baldosas), por_pag):
             grupo = baldosas[inicio:inicio + por_pag]
             fig, axes = plt.subplots(3, 4, figsize=(11.7, 8.3))
@@ -314,7 +445,7 @@ def dibujar(baldosas, path):
                                            edgecolor="black", lw=0.6, alpha=0.9))
                     ax.text(x + w / 2, y + l / 2, f"{w:.2f}x{l:.2f}",
                             ha="center", va="center", fontsize=5.5)
-                for (fx, fy, fw, fl) in b.libres:
+                for (fx, fy, fw, fl, *_z) in b.libres:
                     if fw > 0.05 and fl > 0.05:
                         ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#fdfefe",
                                                edgecolor="#cccccc", hatch="////", lw=0.4))
@@ -342,11 +473,11 @@ def main():
                     help="permitir rotar piezas 90° (cuidado con el sentido de la veta)")
     ap.add_argument("--reporte", default="reporte_recortes.txt")
     ap.add_argument("--plan", default="plan_corte.csv")
-    ap.add_argument("--pdf", default="diagramas_corte.pdf")
+    ap.add_argument("--pdf", default="reporte_recortes.pdf")
     args = ap.parse_args()
 
     piezas = json.load(open(args.piezas, encoding="utf-8"))
-    texto, plan_filas, baldosas = generar(piezas, args.kerf, args.rotar)
+    texto, plan_filas, baldosas, materiales = generar(piezas, args.kerf, args.rotar)
 
     print(texto)
     with open(args.reporte, "w", encoding="utf-8") as f:
@@ -355,8 +486,8 @@ def main():
         w = csv.writer(f)
         w.writerow(["material", "baldosa_n", "ancho_m", "largo_m", "orientacion", "pieza_y_ubicacion"])
         w.writerows(plan_filas)
-    if dibujar(baldosas, args.pdf):
-        print(f"\nDiagramas: {args.pdf}")
+    if dibujar(baldosas, args.pdf, materiales):
+        print(f"\nPDF (resumen + diagramas): {args.pdf}")
     print(f"Reporte:  {args.reporte}")
     print(f"Plan CSV: {args.plan}")
 

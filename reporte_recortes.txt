@@ -15,10 +15,12 @@
      Optimizado    : 79 baldosas (reusando sobrantes)
      AHORRO        : 29 baldosas  (27%)
 
-  TOTAL BALDOSAS A COMPRAR (Moret): 179
+  TOTAL PIEZAS A COMPRAR (Moret): 179 piezas
      = 100 completas + 79 para recortes
-     Área instalada: 119.677 m²   Área comprada: 127.381 m²
-     Merma (desperdicio): 7.704 m²  (6.0%)
+     En cajas: 90 cajas de 2 pzas = 180 piezas
+     Equivale a: 127.800 m²  (caja = 1.42 m²)
+     (Dato proveedor: te suministraron 166.52 m² de Moret)
+     Área neta instalada: 119.677 m²
 
   Plan de corte de las 79 baldosas de recorte:
      Baldosa #1   -> 1 pza(s): 0.596x1.180 @(495.26,-90.93)
@@ -114,10 +116,12 @@
      Optimizado    : 86 baldosas (reusando sobrantes)
      AHORRO        : 23 baldosas  (21%)
 
-  TOTAL BALDOSAS A COMPRAR (Royal Walnut): 175
+  TOTAL PIEZAS A COMPRAR (Royal Walnut): 175 piezas
      = 89 completas + 86 para recortes
-     Área instalada: 39.439 m²   Área comprada: 42.000 m²
-     Merma (desperdicio): 2.561 m²  (6.1%)
+     En cajas: 35 cajas de 5 pzas = 175 piezas
+     Equivale a: 42.000 m²  (caja = 1.2 m²)
+     (Dato proveedor: te suministraron 49.2 m² de Royal Walnut)
+     Área neta instalada: 39.439 m²
 
   Plan de corte de las 86 baldosas de recorte:
      Baldosa #80  -> 1 pza(s): 0.200x1.194 @(497.47,-86.14)
@@ -212,7 +216,11 @@
 ======================================================================
    Baldosas completas        : 189
    Baldosas para recortes    : 165  (en vez de 217 sin optimizar)
-   TOTAL BALDOSAS A COMPRAR  : 354
+   TOTAL PIEZAS A COMPRAR    : 354
    Ahorro por reuso          : 52 baldosas
    Merma total               : 10.265 m²  (6.1%)
+
+   CANTIDADES A COMPRAR (piezas / cajas / m²):
+     Moret        : 179 pzas -> 90 cajas (180 pzas) = 127.800 m²
+     Royal Walnut : 175 pzas -> 35 cajas (175 pzas) = 42.000 m²
 ======================================================================
