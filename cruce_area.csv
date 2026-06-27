@@ -1,8 +1,8 @@
 ﻿material,area_real_plano_m2,area_generador_m2,diferencia_m2
-Moret,119.68,134.78,-15.10
-Royal Walnut,37.87,40.20,-2.33
+Moret,113.62,114.30,-0.68
+Royal Walnut,39.23,39.23,+0.00
 
 planta,material,area_real_m2
-alta,Moret,29.74
-alta,Royal Walnut,37.87
-baja,Moret,89.94
+alta,Moret,22.27
+alta,Royal Walnut,39.23
+baja,Moret,91.35

@@ -167,13 +167,19 @@ def _zoclo_tablas(modelo, material):
 
 
 def real_datos(modelo):
-    """REQUERIDO REAL = baldosas que de verdad se ocupan (piso + regadera +
-    escalera + zoclo) con el corte real y redondeo a caja entera. El DESPERDICIO
-    real = comprado - neto."""
+    """REQUERIDO REAL = cajas a COMPRAR por material. Es el conteo OFICIAL por
+    partida con margen de obra (generadores.totales(): piso por área +10%, zoclo/
+    regadera/escalera por rendimiento-por-tablón +10%/+15%) — el que PROTEGE de
+    quedarse corto (fue el que cuadró con el faltante real de Cabernet). El
+    empaquetado combinado de abajo sólo se usa para informar el sobrante reusable
+    vs la merma, NO para decidir cuántas cajas comprar (ese número, con reuso
+    máximo, es teórico y subestima si el azulejero no reúsa cada recorte)."""
     from datos_piezas import cargar_anotado
     from optimizador_recortes import ajustar, empaquetar, PISOS
     todas = cargar_anotado(modelo)
     d = resumen_datos(modelo)
+    tot = G.totales(modelo)               # cajas OFICIALES por partida (con margen)
+    cajas_oficial = {"Moret": tot["Moret"]["total"], "Royal Walnut": tot["Royal"]["total"]}
     out = {}
     for material, pzc, cm2, net in (("Moret", G.MORET_PZCAJA, G.MORET_CAJA, d["moret"]["total"]),
                                     ("Royal Walnut", G.ROYAL_PZCAJA, G.ROYAL_CAJA, d["royal"]["total"])):
@@ -193,7 +199,9 @@ def real_datos(modelo):
             zml, zw, zl = G.GEN[modelo]["zoclo_r"], G.ZOCLO_ALTO, 1.20
         ent += [(zw, zl, "Z")] * math.ceil(zml / zl)
         baldosas = empaquetar(ent, material, 0.0, True)
-        cajas = math.ceil((comp + len(baldosas)) / pzc)
+        # cajas OFICIALES = conteo por partida con margen (generadores.totales),
+        # NO el empaquetado optimista (que subestima si no se reúsa cada sobrante).
+        cajas = cajas_oficial[material]
         comprado = cajas * cm2
         # separar el desperdicio: sobrante REUSABLE (>=10cm) vs MERMA real (<10cm)
         reut = merma = 0.0
@@ -281,7 +289,9 @@ def pagina_comparativo(pdf, modelo):
 
     nota = (f"CÓMO LEERLO:  el PRESUPUESTO surte la BASE + {bp}% de desperdicio = lo SUMINISTRADO\n"
             f"   (en esta hoja, Moret: base {ej[1]} + {bp}% ≈ {ej[2]} cajas).\n"
-            "REQUERIDO REAL = cajas que de verdad se ocupan (despiece con reuso máximo de sobrantes).\n"
+            "REQUERIDO REAL = cajas a comprar por partida (piso, zoclo, regadera, escalera) con margen\n"
+            "   de obra (+10%/+15%) y zoclo/regadera/escalera por rendimiento-por-tablón. Es el número\n"
+            "   que protege de quedarse corto (cuadró con el faltante real de Cabernet).\n"
             f"% REAL NECESARIO = desperdicio que en realidad se necesita sobre la base (base → requerido).\n"
             f"   Si es mayor al {bp}% presupuestado, hay que pedir ese % "
             f"(aquí Moret se ocupan {ej[3]} → ≈{ej[4]:.0f}%).\n"

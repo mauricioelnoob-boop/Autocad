@@ -10,7 +10,11 @@ para afinar el dato de piso.
 
 Salidas: cruce_area.csv  (+ impresión en consola)
 
-Uso:  python3 cruce_area_generador.py  Numeros_Generadores_....xlsx
+Fuente del "área generador": por defecto generadores.area_piso(Cabernet) (la
+medición canónica del piso, sin depender de un xlsx). Si se pasa un xlsx con el
+formato antiguo (hoja "Cabernet <material>" con fila "Area piso"), se usa ése.
+
+Uso:  python3 cruce_area_generador.py  [Numeros_Generadores_....xlsx]
 """
 
 import sys
@@ -19,6 +23,7 @@ from collections import defaultdict
 
 from optimizador_recortes import PISOS, ajustar
 from datos_piezas import cargar_anotado
+import generadores as G
 
 
 def area_real_por_material(piezas):
@@ -54,14 +59,19 @@ def area_generador(xlsx):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Uso: python3 cruce_area_generador.py  archivo.xlsx")
-        sys.exit(1)
-    xlsx = sys.argv[1]
+    xlsx = sys.argv[1] if len(sys.argv) >= 2 else None
 
     piezas = cargar_anotado()
     real, real_pl = area_real_por_material(piezas)
-    gen = area_generador(xlsx)
+    if xlsx:
+        gen = area_generador(xlsx)
+        if not gen:
+            print(f"(no se pudo leer área del xlsx '{xlsx}'; uso generadores.area_piso)")
+    else:
+        gen = {}
+    if not gen:
+        am, ar = G.area_piso("Cabernet")          # medición canónica del piso
+        gen = {"Moret": am, "Royal Walnut": ar}
 
     filas = []
     print("CRUCE DE ÁREA — despiece real (plano) vs generador (Cabernet)\n")
@@ -86,9 +96,8 @@ def main():
         for k in sorted(real_pl):
             w.writerow([k[0], k[1], f"{real_pl[k]:.2f}"])
 
-    print("\nNota: el generador estima por área a revestir; el despiece dibujado "
-          "da menos área.\nRevisa si falta despiece de algún cuarto o si el "
-          "generador usó área bruta.\nGuardado: cruce_area.csv")
+    print("\nNota: chequeo de auto-consistencia despiece vs generadores.area_piso "
+          "(deben coincidir salvo el ajuste de orilla < 1 m²).\nGuardado: cruce_area.csv")
 
 
 if __name__ == "__main__":

@@ -39,9 +39,12 @@ PISOS = {
     "Royal Walnut": (0.200, 1.200),
 }
 
-# Presentación comercial (cajas) y material suministrado (dato del proveedor).
+# Presentación comercial (cajas). m2_caja canónico = medida pieza × pzas/caja
+# (Moret 0.7116×2 = 1.4232, Royal 0.24×5 = 1.20). suministrado_m2 es el dato
+# histórico de Cabernet (legacy de este script standalone; el pipeline oficial
+# usa datos_cliente.SUMINISTRADO por modelo).
 CAJAS = {
-    "Moret":        {"pzas_caja": 2, "m2_caja": 1.42, "suministrado_m2": 166.52},
+    "Moret":        {"pzas_caja": 2, "m2_caja": 1.4232, "suministrado_m2": 166.52},
     "Royal Walnut": {"pzas_caja": 5, "m2_caja": 1.20, "suministrado_m2": 49.20},
 }
 

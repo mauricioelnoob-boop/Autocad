@@ -29,7 +29,7 @@ import openpyxl
 
 # m² y piezas por caja (del propio generador)
 CAJA = {
-    "Moret":        {"m2": 1.423, "pzas": 2},
+    "Moret":        {"m2": 1.4232, "pzas": 2},
     "Royal Walnut": {"m2": 1.200, "pzas": 5},
 }
 MODELOS = ["Chardonnay", "Cabernet", "Merlot"]

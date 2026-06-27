@@ -31,12 +31,13 @@ R_M2=ROYAL[0]*ROYAL[1]             # 0.24
 MORET_CAJA=1.4232; MORET_PZCAJA=2
 ROYAL_CAJA=1.20;   ROYAL_PZCAJA=5
 URB=(0.45,0.30); URB_M2=URB[0]*URB[1]  # 0.135 m2/pieza (Urbania White)
-URB_PZCAJA=10; URB_CAJA=1.36
+URB_PZCAJA=10; URB_CAJA=round(URB_M2*URB_PZCAJA,4)   # 1.35 m2/caja (derivado, como Moret/Royal)
 MALLA=(0.60,0.30); MALLA_M2=MALLA[0]*MALLA[1]   # 0.18 m2/pieza (Malla Lyndhurst)
 TABLON_W=0.596          # alto del tablón Moret (de donde se corta el zoclo a lo alto)
 ZOCLO_KERF=0.0          # cortadora de diamante (rayar y tronchar): kerf ≈ 0
 ZOCLO_ALTO=0.148        # Council: 4 tiras/tablón garantizadas con holgura para calibre 0.594-0.596
 ZOCLO_LARGO=1.194       # largo real de la tira (= largo del tablón)
+ZOCLO_ESC_ML=5.0        # ml de zoclo de orilla de escalera (Chardonnay, desde el 1er descanso)
 MALLA_M2_CHAROLA=1.5
 
 # Parámetros por modelo. zoclo ml = Excel del cliente. Urbania (lavandería) ~10 m2
@@ -68,6 +69,8 @@ def tiras_por_tablon(alto_tablon, H=ZOCLO_ALTO, kerf=ZOCLO_KERF):
     """Cuántas tiras de alto H salen de un tablón de 'alto_tablon', contando el
     kerf de los cortes internos: n tiras necesitan (n-1) cortes, así que
     n*H + (n-1)*kerf <= alto_tablon  ->  n = floor((alto_tablon+kerf)/(H+kerf))."""
+    if H <= 0:
+        raise ValueError(f"altura de zoclo H debe ser > 0, se recibió {H}")
     return max(1, int((alto_tablon + kerf) / (H + kerf) + 1e-9))
 
 def zoclo(ml, caja_m2):
@@ -77,7 +80,7 @@ def zoclo(ml, caja_m2):
     if abs(caja_m2 - MORET_CAJA) < 1e-6:
         alto_tablon, pzcaja, largo_tira = MORET[1], MORET_PZCAJA, ZOCLO_LARGO   # 0.596
     else:
-        alto_tablon, pzcaja, largo_tira = ROYAL[1], ROYAL_PZCAJA, 1.20          # 0.20
+        alto_tablon, pzcaja, largo_tira = ROYAL[1], ROYAL_PZCAJA, ROYAL[0]       # 0.20 alto, 1.20 largo
     pzas=math.ceil(ml/largo_tira)
     zpt=tiras_por_tablon(alto_tablon)
     tablones=math.ceil(pzas/zpt)
@@ -110,11 +113,16 @@ def reporte(modelo):
                   f'1.15m, peralte 0.175, huella 0.27, esc {tr} = {esc["m2"]:.1f} m2',
                   f'{esc["cajas"]} cajas (+15%)'))
         if esc.get('zoclo_orilla'):
-            zml=5.0   # ml aprox. de la orilla de la escalera desde el 1er descanso (Chardonnay)
-            zp,zm2,zc=zoclo(zml,MORET_CAJA)
+            zp,zm2,zc=zoclo(ZOCLO_ESC_ML,MORET_CAJA)
             R.append(('ZOCLO ESCALERA Chardonnay (0.148, orilla al muro)',
-                      f'~{zml:.1f} ml -> {zp} pzas', f'{math.ceil(zc*1.1)} cajas (+10%)'))
-    except Exception:
+                      f'~{ZOCLO_ESC_ML:.1f} ml -> {zp} pzas', f'{math.ceil(zc*1.1)} cajas (+10%)'))
+    except Exception as e:
+        # Fallback por ÁREA (subestima): sólo si el despiece real de regadera/
+        # escalera falla (p.ej. falta shapely). Se AVISA fuerte para no enmascarar
+        # la causa raíz, porque este estimado fue origen del faltante en Cabernet.
+        import sys
+        print(f"  [AVISO] despiece real de regadera/escalera falló ({e!r}); "
+              f"se usa estimado por ÁREA (subestima cajas). Revisar.", file=sys.stderr)
         bruto=sum(REG_PERIM*h for _,h in g['regaderas'])
         wm2=max(0.0, bruto - nch*VENTANA_M2); wp=math.ceil(wm2/M_M2)
         R.append(('PISO EN MURO DE REGADERA (Moret)', f'{nch} reg - ventana = {wm2:.2f} m2 -> {wp} pzas', f'{math.ceil(wm2*1.1/MORET_CAJA)} cajas (+10%)'))
@@ -144,7 +152,7 @@ def totales(modelo):
     e=DE.escalera_resumen(modelo); reg=DE.regadera_resumen(modelo)['cajas']; esc=e['cajas']
     zesc=0
     if e.get('zoclo_orilla'):
-        _,_,zc=zoclo(5.0,MORET_CAJA); zesc=math.ceil(zc*1.1)
+        _,_,zc=zoclo(ZOCLO_ESC_ML,MORET_CAJA); zesc=math.ceil(zc*1.1)
     return {
         'Moret':{'piso':piso_m,'zoclo':zm,'regadera':reg,'escalera':esc,'zoclo_esc':zesc,
                  'total':piso_m+zm+reg+esc+zesc},

@@ -9,6 +9,10 @@ Configuración por prototipo de casa. Todo lo específico de cada modelo
 correcciones puntuales) vive aquí. Las medidas de pieza y las cajas son
 compartidas (en optimizador_recortes.py: PISOS y CAJAS).
 
+NOTA: las llaves `regiones_royal` y `excluir_royal_baja` son DOCUMENTALES (de
+referencia): el pipeline NO las lee. La clasificación Royal/Moret se decide por
+las claves de A-ACABADOS ('3'/'4'/'5') + ancho del tablón y por `forzar_material`.
+
 Regla de material (planta alta):
   * Una pieza es Royal Walnut sólo si es un tablón de ~0.20 m DENTRO de una
     región de recámara. Las piezas de ~0.60 m (baño/vestidor) siempre son Moret,
@@ -137,8 +141,10 @@ MODELOS = {
             # media puerta (umbral de 0.09 m hacia el pasillo Moret M-007/M-010).
             _recorte("Royal Walnut", 328.907, -124.829, 0.090, 1.200),
             # PA-R-157: le falta el recortito Royal a su IZQUIERDA; topa el Moret
-            # (M-042) en el umbral de 0.066 m. Ambas piezas quedan intactas.
-            _recorte("Royal Walnut", 330.211, -129.954, 0.066, 1.200),
+            # (M-042) en el umbral. Ancho 0.065 (tras redondeo a 3 decimales) para
+            # NO solapar la pieza original a su derecha (borde 330.2767): queda un
+            # pelo de junta < 1 mm, nunca encimado. Ambas piezas quedan intactas.
+            _recorte("Royal Walnut", 330.211, -129.954, 0.065, 1.200),
         ],
         "reclasificar": [
             # Tiras de orilla de recámaras que salieron Moret -> son Royal Walnut.
@@ -175,7 +181,8 @@ MODELOS = {
             (331.05, 331.70, -127.70, -126.20),   # linternilla junto a PA-M-043
         ],
         # Baño de planta baja (claves 5/5 = Urbania): el despiece dejó el Moret
-        # continuo; ese piso es otro material, se excluye. (Por confirmar.)
+        # continuo; ese piso es otro material, se excluye (confirmado: el baño P.B.
+        # se excluye por caja; los recortes del cuarto de lavado se reponen aparte).
         "cajas_excluir": [
             # (era "baño P.B." — en realidad es el cuarto de lavado con piso Moret;
             #  el piso sigue hasta el muro, no se excluye)
