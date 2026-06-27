@@ -22,10 +22,10 @@ from openpyxl.worksheet.datavalidation import DataValidation
 # Se puede editar en la propia hoja conforme llega o se ajusta el material.
 from datos_cliente import SUMINISTRADO as RECIBIDO, LOTES
 
-MAT = [("Piso Moret Arena",  "caja 1.42 m² (2 pz)",  "Moret"),
-       ("Piso Royal Walnut", "caja 1.20 m² (5 pz)",  "Royal"),
-       ("Urbania White",     "caja 1.36 m² (10 pz)", "Urbania"),
-       ("Malla Lyndhurst",   "pieza 0.30×0.60 m",    "Malla")]
+MAT = [("Piso Moret Arena",  "caja 1.4232 m² (2 pz)", "Moret"),
+       ("Piso Royal Walnut", "caja 1.20 m² (5 pz)",   "Royal"),
+       ("Urbania White",     "caja 1.35 m² (10 pz)",  "Urbania"),
+       ("Malla Lyndhurst",   "pieza 0.30×0.60 m",     "Malla")]
 LISTA_MAT = ",".join(m[0] for m in MAT)
 
 EXTRAS = ["Boquilla Cantera", "Boquilla Chocolate", "Boquilla Blanco",
