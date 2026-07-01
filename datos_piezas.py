@@ -375,7 +375,7 @@ def _mascara_muros(cfg):
     relleno de cuarto. Devuelve la unión (o None) y guarda el ancho del muro más
     grueso para poder engrosar un poco la máscara y no dejar piso dentro."""
     try:
-        from shapely.geometry import Polygon
+        from shapely.geometry import Polygon, box
         from shapely.ops import unary_union
     except Exception:
         return None
@@ -394,7 +394,16 @@ def _mascara_muros(cfg):
             obst.append(pg)
     if not obst:
         return None
-    return unary_union(obst)
+    mask = unary_union(obst)
+    # Escopado por modelo: RESTA las columnas de cancelería de ~1 cm marcadas en
+    # `cancel_ignorar` (astillas no serruchables). Al quitarlas de la máscara esas
+    # tiras dejan de ser obstáculo y no aparecen como notch en el despiece. Las
+    # cajas se dimensionan para NO borrar el muro/tablaroca real (que corre a lo
+    # ancho mucho más allá de la caja): sólo desaparece la esquirla de 1 cm, y la
+    # pieza conserva su recorte de muro real (completa=False).
+    for (x0, x1, y0, y1) in cfg.get("cancel_ignorar", []):
+        mask = mask.difference(box(x0, y0, x1, y1))
+    return mask
 
 
 def recortar_muros_interiores(anotadas, cfg, extra_obst=None):

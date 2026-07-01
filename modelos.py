@@ -222,6 +222,14 @@ MODELOS = {
         "redimensionar": [
             {"x": 288.32, "y": -60.97, "x0": 287.88, "y0": -61.215, "wx": 0.692, "hy": 0.483},  # PA-M-001 se extiende hasta la mitad
         ],
+        # Columna de CANCELERÍA de ~1 cm (capa A-CANCELERIA) a x≈290.19-290.24:
+        # tiras verticales de 1 cm que muerden PA-M-012/020 como "astilla" no
+        # serruchable. Se RESTAN de la máscara de muros (ver _mascara_muros) para
+        # que NO cuenten como obstáculo. El muro/tablaroca REAL horizontal (bandas
+        # y≈-61.85..-61.73 y y≈-63.07..-62.95, que corren a lo ancho hasta x291.39)
+        # se CONSERVA: la caja sólo raspa su pico izquierdo (< 6 cm), así PA-M-012/
+        # 020 siguen con recorte de muro real (completa=False).
+        "cancel_ignorar": [(290.185, 290.25, -64.0, -61.7)],
         "reclasificar": [
             # Tiras de orilla de recámaras que salieron Moret -> Royal Walnut.
             {"x": 282.84, "y": -64.26, "material": "Royal Walnut"},
