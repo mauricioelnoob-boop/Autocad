@@ -12,17 +12,18 @@ SP="/tmp/claude-0/-home-user-Autocad/d15acb21-ec3d-5e7a-85b6-2130d9969519/scratc
 OUT="/home/user/Autocad/Renivelacion"; FECHA="01/07/2026"
 NAVY="#1F3864"; BLUE="#2E5496"; LT="#D9E2F3"; RED="#C00000"; GREY="#595959"; AMBER="#7F6000"
 
+# lote,mza,mod,planta,area,esp,vol,estado,foto,rot,digit_json,nota,espejo
 D=[
- (33,14,"Cabernet","P.B.",72.63,1.84,1.34,"Renivelado",B+"f72e3eba-1000289423.jpg",0,f"{SP}/digit/f2.json","Hoja sin V escrito; V dictado 1.34 m³."),
- (33,14,"Cabernet","P.A.",65.21,2.94,1.88,"Renivelado",B+"a8c1f97f-1000289422.jpg",0,f"{SP}/digit/f1.json","Hoja sin V escrito; V dictado 1.88 m³. Baño sup.-izq.: muros no modelados en DWG; puntos en posición de campo."),
- (9,7,"Merlot","P.B.",74.86,3.1,2.56,"Renivelado",B+"a8bd4639-1000289424.jpg",0,f"{SP}/digit/f3.json","V=2.56 m³ confirmado en hoja."),
- (9,7,"Merlot","P.A.",58.25,3.4,1.93,"Renivelado",B+"5aa389ee-1000289425.jpg",0,f"{SP}/digit/f4.json","⚠ La hoja de campo dice 'P.B.' por error: es P.A. (V=1.93)."),
- (10,7,"Merlot","P.B.",74.86,1.2,None,"No renivelado",B+"89ab954a-1000289426.jpg",0,f"{SP}/digit/f5.json","Levantada (V=1.06), sin ejecutar: desnivel mínimo."),
- (10,7,"Merlot","P.A.",58.25,2.5,1.5,"Renivelado",B+"ee4969c5-1000289428.jpg",0,f"{SP}/digit/f7.json","Hoja: V=1.46 ≈ 1.5 m³. Fotos 6 y 7 = misma hoja; dígito verificado: Lote 10."),
- (19,7,"Chardonnay","P.A.",59.86,3.4,1.5,"Renivelado",None,0,None,"Teórico 2.0 m³; rebaje de puntos altos → 1.5 m³. Hoja no fotografiada."),
- (19,7,"Chardonnay","P.B.",85.79,1.71,1.46,"Renivelado",None,0,None,"Hoja no fotografiada."),
- (17,7,"Chardonnay","P.B.",85.79,1.45,1.28,"Renivelado",None,0,None,"Con terraza 101.14 m² (no colada). Hoja no fotografiada."),
- (17,7,"Chardonnay","P.A.",59.86,2.24,2.59,"Por confirmar",None,0,None,"⚠ 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³)."),
+ (33,14,"Cabernet","P.B.",72.63,1.84,1.34,"Renivelado",B+"f72e3eba-1000289423.jpg",0,f"{SP}/digit/f2.json","Hoja sin V escrito; V dictado 1.34 m³.",False),
+ (33,14,"Cabernet","P.A.",65.21,2.94,1.88,"Renivelado",B+"a8c1f97f-1000289422.jpg",0,f"{SP}/digit/f1.json","Hoja sin V escrito. Baño sup-izq: contorno según levantamiento (zona de charola, sin piezas en DWG).",False),
+ (9,7,"Merlot","P.B.",74.86,3.1,2.56,"Renivelado",B+"a8bd4639-1000289424.jpg",0,f"{SP}/digit/f3.json","V=2.56 m³ confirmado en hoja.",False),
+ (9,7,"Merlot","P.A.",58.25,3.4,1.93,"Renivelado",B+"5aa389ee-1000289425.jpg",0,f"{SP}/digit/f4.json","⚠ La hoja de campo dice 'P.B.' por error: es P.A. (V=1.93).",False),
+ (10,7,"Merlot","P.B.",74.86,1.2,None,"No renivelado",B+"89ab954a-1000289426.jpg",0,f"{SP}/digit/f5.json","Levantada (V=1.06), sin ejecutar: desnivel mínimo. Plano espejeado: coincide con la casa en campo.",True),
+ (10,7,"Merlot","P.A.",58.25,2.5,1.5,"Renivelado",B+"ee4969c5-1000289428.jpg",0,f"{SP}/digit/f7.json","Hoja: V=1.46 ≈ 1.5 m³. Plano espejeado: coincide con la casa en campo.",True),
+ (19,7,"Chardonnay","P.B.",85.79,1.71,1.46,"Por renivelar",None,0,None,"Programado: jueves 2 de julio.",False),
+ (19,7,"Chardonnay","P.A.",59.86,3.4,1.5,"Por renivelar",None,0,None,"Programado: jueves 2 de julio. Teórico 2.0 m³; con rebaje de puntos altos ≈1.5 m³.",False),
+ (17,7,"Chardonnay","P.B.",85.79,1.45,1.28,"Por renivelar",None,0,None,"Con terraza 101.14 m² (no colada; no entra).",False),
+ (17,7,"Chardonnay","P.A.",59.86,2.24,2.59,"Por renivelar",None,0,None,"⚠ 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³): confirmar antes de pedir mortero.",False),
 ]
 
 def cover(pdf,titulo,sub):
@@ -35,8 +36,7 @@ def cover(pdf,titulo,sub):
          "Cotas medidas en malla de puntos; el promedio define el espesor de mortero\n"
          "premezclado y su volumen (m³) por planta.\n\n"
          "Convención: cota negativa = falta nivel (RELLENO) · cota positiva = sobra (CORTE).\n"
-         "Hojas digitalizadas con la GEOMETRÍA EXACTA de muros del despiece (DWG),\n"
-         "en la misma orientación que la hoja de campo.")
+         "Hojas digitalizadas con la GEOMETRÍA EXACTA de muros del despiece (DWG).")
     fig.text(0.5,0.47,txt,ha="center",fontsize=10.5,color="#333333",linespacing=1.6)
     fig.text(0.5,0.29,f"Fecha: {FECHA}",ha="center",fontsize=11,color=GREY)
     fig.text(0.5,0.26,"Levantó: Mauricio Gastelum Mora",ha="center",fontsize=11,color=GREY)
@@ -46,18 +46,21 @@ def tabla(pdf,rows,titulo):
     fig=plt.figure(figsize=(8.27,11.69)); fig.patch.set_facecolor("white")
     fig.text(0.06,0.95,titulo,fontsize=16,weight="bold",color=NAVY)
     fig.patches.append(plt.Rectangle((0.06,0.935),0.88,0.003,transform=fig.transFigure,color=BLUE))
-    ax=fig.add_axes([0.045,0.36,0.91,0.54]); ax.axis("off")
+    ax=fig.add_axes([0.045,0.34,0.91,0.56]); ax.axis("off")
     cols=["Lote","Mza","Modelo","Planta","Área m²","Prom. cm","Mortero m³","Estado"]
     cw=[0.075,0.075,0.135,0.09,0.115,0.115,0.13,0.265]
-    cells=[];colors=[];tot=0.0
+    cells=[];colors=[];tot_e=0.0;tot_p=0.0
     for r in rows:
         (lote,mza,mod,pl,area,esp,vol,est)=r[:8]
         vtxt=f"{vol:.2f}" if vol is not None else "—"
-        if vol is not None and est!="Por confirmar": tot+=vol
+        if vol is not None:
+            if est=="Renivelado": tot_e+=vol
+            elif est=="Por renivelar": tot_p+=vol
         cells.append([f"L{lote}",f"M{mza}",mod,pl,f"{area:.2f}",f"{esp:.2f}",vtxt,est])
-        c="#FDECEA" if est=="Por confirmar" else ("#FFF2CC" if est=="No renivelado" else "white")
+        c=("#DEEBF7" if est=="Por renivelar" else ("#FFF2CC" if est=="No renivelado" else "white"))
         colors.append([c]*8)
-    cells.append(["","","","","","TOTAL",f"{tot:.2f}",""]); colors.append([LT]*8)
+    cells.append(["","","","","","",f"{tot_e:.2f}","TOTAL EJECUTADO"]); colors.append([LT]*8)
+    cells.append(["","","","","","",f"{tot_p:.2f}","TOTAL POR RENIVELAR"]); colors.append(["#DEEBF7"]*8)
     t=ax.table(cellText=cells,colLabels=cols,loc="upper center",cellLoc="center",colWidths=cw)
     t.auto_set_font_size(False); t.set_fontsize(8.5); t.scale(1,1.62)
     for (r_,c_),cell in t.get_celld().items():
@@ -65,16 +68,15 @@ def tabla(pdf,rows,titulo):
         if r_==0: cell.set_facecolor(NAVY); cell.set_text_props(color="white",weight="bold")
         else:
             cell.set_facecolor(colors[r_-1][c_])
-            if r_==len(cells): cell.set_text_props(weight="bold")
-    y=0.335
-    fig.text(0.06,y,"Notas y verificación de hojas de campo",fontsize=12,weight="bold",color=NAVY); y-=0.024
+            if r_>=len(cells)-1: cell.set_text_props(weight="bold")
+    y=0.315
+    fig.text(0.06,y,"Notas y verificación",fontsize=12,weight="bold",color=NAVY); y-=0.024
     notas=[
       ("Verificación foto por foto (zoom + aritmética + geometría): f1=L33 P.A. · f2=L33 P.B. · f3=L9 P.B. (V=2.56) · f4=L9 P.A. (V=1.93; hoja dice 'P.B.' por error) · f5=L10 P.B. (V=1.06) · f6=f7=misma hoja, L10 P.A. (V=1.46).",BLUE),
-      ("L10 M7: P.B. levantada (1.06 m³) pero NO se renivela (prom. 1.2 cm). P.A. sí: 1.46 ≈ 1.5 m³.",AMBER),
-      ("L19 y L17 (Chardonnay): datos dictados; hojas de campo no incluidas en las fotos.",GREY),
-      ("Terrazas (L33/L34 Cabernet, L17 Chardonnay): sin colar; NO entran en la renivelación.",GREY),
-      ("⚠ L17 M7 P.A.: 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³). Por confirmar; fuera del total.",RED),
-      ("L34 M14 (Cabernet): PENDIENTE — se agrega cuando llegue su levantamiento.",BLUE),
+      ("L10 M7: P.B. levantada (1.06 m³) pero NO se renivela (prom. 1.2 cm). P.A. renivelada (1.46 ≈ 1.5 m³). Planos de L10 espejeados para coincidir con la casa en campo.",AMBER),
+      ("L19 M7 y L17 M7 (Chardonnay): POR RENIVELAR — L19 programado el jueves 2 de julio; L17 sin fecha. Volúmenes = estimación del levantamiento dictado.",BLUE),
+      ("Terrazas (no coladas): fuera de la renivelación.",GREY),
+      ("⚠ L17 M7 P.A.: 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³). Confirmar antes de pedir mortero.",RED),
     ]
     for tx,col in notas:
         for i,ln in enumerate(textwrap.wrap(tx,108)):
@@ -98,13 +100,13 @@ def build(rows,path,titulo,sub):
     with PdfPages(path) as pdf:
         cover(pdf,titulo,sub); tabla(pdf,rows,"Resumen de renivelación")
         for r in rows:
-            (lote,mza,mod,pl,area,esp,vol,est,foto,rot,dj,nota)=r
+            (lote,mza,mod,pl,area,esp,vol,est,foto,rot,dj,nota,esp_flag)=r
             if dj and os.path.exists(dj):
                 d=json.load(open(dj))
                 vtxt=f"{vol:.2f} m³" if vol is not None else "levantada, sin ejecutar"
                 tit=f"LOTE {lote} · MZA {mza} ({mod.upper()}) — {'PLANTA ALTA' if pl=='P.A.' else 'PLANTA BAJA'}"
                 sub2=f"Hoja digitalizada · {area:.2f} m² · prom. {esp:.2f} cm · mortero {vtxt}"+(f" · hoja: {d.get('V')}" if d.get("V") else "")
-                hoja_v3(pdf,d,mod,pl,tit,sub2,nota or "")
+                hoja_v3(pdf,d,mod,pl,tit,sub2,nota or "",espejo=esp_flag)
             if foto: foto_pag(pdf,foto,rot,f"Lote {lote} · Mza {mza} ({mod}) — {pl}")
     print("->",os.path.basename(path))
 

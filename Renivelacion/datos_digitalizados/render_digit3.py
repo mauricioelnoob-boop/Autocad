@@ -70,11 +70,6 @@ def geometria(modelo, planta):
         env=_box(pb[0]-0.25,pb[1]-0.25,pb[2]+0.25,pb[3]+0.25)   # caja recta: los cortes quedan ortogonales
         muros=[m.intersection(env) for m in muros if m.intersects(env)]
         muros=[m for m in muros if not m.is_empty and m.area>0.001]
-        foot=unary_union(muros+[piso])
-        filled=unary_union([ShPoly(g.exterior) for g in (foot.geoms if foot.geom_type=="MultiPolygon" else [foot])]).simplify(0.01).buffer(0)
-        per=filled.buffer(0.14, join_style=2).difference(filled.buffer(0.002))
-        muros.append(per.buffer(0))
-        piso=filled
     else:
         piso=None
     esc=[]
@@ -83,6 +78,13 @@ def geometria(modelo, planta):
         esc=[e for e in esc if not e.is_empty and lado(e.centroid.x)]
     except Exception: pass
     return muros, esc, piso
+
+def _armar(bandas, piso):
+    """huella rellena + anillo perimetral"""
+    foot=unary_union(list(bandas)+[piso])
+    filled=unary_union([ShPoly(g.exterior) for g in (foot.geoms if foot.geom_type=="MultiPolygon" else [foot])]).simplify(0.01).buffer(0)
+    per=filled.buffer(0.14, join_style=2).difference(filled.buffer(0.002))
+    return filled, per.buffer(0)
 
 def _var(a,b,vi):
     return [(a,b),(b,a),(1-a,b),(b,1-a),(a,1-b),(1-b,a),(1-a,1-b),(1-b,1-a)][vi]
@@ -148,8 +150,10 @@ def calibrar(d, muros, esc, piso=None):
                 if c<base: base,p=c,q
     return (base,vi,tuple(p))
 
-def hoja_v3(pdf, d, modelo, planta, titulo, sub, nota_footer):
-    muros, esc, piso = geometria(modelo, planta)
+def hoja_v3(pdf, d, modelo, planta, titulo, sub, nota_footer, espejo=False):
+    bandas, esc, piso0 = geometria(modelo, planta)
+    filled, per = _armar(bandas, piso0)
+    muros=list(bandas)+[per]; piso=filled
     score,vi,(u0,u1,v0,v1)=calibrar(d,muros,esc,piso)
     U=unary_union(muros)
     mx0,my0,mx1,my1=(piso.buffer(0.16).bounds if piso is not None else U.bounds)
@@ -161,6 +165,7 @@ def hoja_v3(pdf, d, modelo, planta, titulo, sub, nota_footer):
         """modelo -> display (misma orientación que la hoja de campo, escala real)."""
         u=(np.asarray(X,float)-mx0)/W; v=(np.asarray(Y,float)-my0)/H
         a,b=_inv(u,v,vi)
+        if espejo: a=1.0-a
         return a*SA, b*SB
     def f2d(px,py):
         """foto (0-100) -> display, pasando por la calibración (modelo)."""
@@ -169,6 +174,20 @@ def hoja_v3(pdf, d, modelo, planta, titulo, sub, nota_footer):
         X=mx0+(u-u0)/(u1-u0)*W; Y=my0+(v-v0)/(v1-v0)*H
         return m2d(X,Y)
 
+    _ext=d.get("extender_piso") or []
+    if _ext and piso is not None:
+        from shapely.geometry import box as _bx
+        def _f2m0(px,py):
+            aa=np.asarray(px,float)/100.0; bb=np.asarray(py,float)/100.0
+            uu,vv=_var(aa,bb,vi)
+            return mx0+(uu-u0)/(u1-u0)*W, my0+(vv-v0)/(v1-v0)*H
+        _rects=[]
+        for (ex0,ey0,ex1,ey1) in _ext:
+            RX,RY=_f2m0([ex0,ex1],[ey0,ey1])
+            _rects.append(_bx(min(RX),min(RY),max(RX),max(RY)))
+        piso,per=_armar(list(bandas)+_rects,unary_union([piso]+_rects))
+        muros=list(bandas)+[per]
+        U=unary_union(muros)
     pad=0.045*max(SA,SB)
     fig=plt.figure(figsize=(8.27,11.69)); fig.patch.set_facecolor("white")
     fig.patches.append(Rectangle((0.0,0.945),1.0,0.055,transform=fig.transFigure,color=NAVY))
@@ -213,12 +232,9 @@ def hoja_v3(pdf, d, modelo, planta, titulo, sub, nota_footer):
         MX,MY=f2m([p[0]],[p[1]]); mxp,myp=MX[0],MY[0]
         pt=Point(mxp,myp)
         if piso is not None and not piso.buffer(0.05).contains(pt):
+            # NINGÚN punto fuera de la obra: al interior más cercano
             q=_np_(piso.buffer(-0.15),pt)[0]
-            if pt.distance(q)<=0.90:
-                # desvío chico de calibración: jalarlo al interior
-                mxp,myp=q.x,q.y; pt=Point(mxp,myp)
-            # lejos del piso modelado = cuarto sin piezas en el DWG (p.ej. baño de
-            # charola): se respeta la posición de campo, sin aplastarlo al muro
+            mxp,myp=q.x,q.y; pt=Point(mxp,myp)
         if U.contains(pt) or U.distance(pt)<0.05:   # dentro o pegado a muro: empujar a espacio libre
             q=_np_(U.boundary,pt)[0]
             if U.contains(pt):
@@ -238,8 +254,9 @@ def hoja_v3(pdf, d, modelo, planta, titulo, sub, nota_footer):
         # anti-colisión: si hay otra etiqueta muy cerca, desplazar más
         extra=0
         for (ox,oy) in ocupados:
-            if abs(x-ox)<0.30 and abs(y-oy)<0.22: extra+=5
-        extra=min(extra,10)
+            if abs(x-ox)<0.30 and abs(y-oy)<0.22: extra+=6
+        extra=min(extra,12)
+        if extra: dx+=4 if dx>0 else -4
         ocupados.append((x,y))
         ax.annotate(f"{v:g}",(x,y),xytext=(dx,-dy-extra),textcoords="offset points",
                     fontsize=5.8,color=INK,ha=ha,zorder=5,clip_on=True,annotation_clip=True,
@@ -248,11 +265,11 @@ def hoja_v3(pdf, d, modelo, planta, titulo, sub, nota_footer):
     def _spot_libre(zpt):
         import math
         cands=[zpt]+[Point(zpt.x+r*math.cos(t),zpt.y+r*math.sin(t))
-                     for r in (0.35,0.6,0.9,1.3) for t in [k*math.pi/4 for k in range(8)]]
+                     for r in (0.35,0.6,0.9,1.3,1.8,2.4) for t in [k*math.pi/8 for k in range(16)]]
         for c in cands:
             if piso is not None and not piso.buffer(-0.12).contains(c): continue
             if U.buffer(0.06).contains(c): continue
-            if any(c.distance(pm)<0.34 for pm in puntos_m): continue
+            if any(c.distance(pm)<0.30 for pm in puntos_m): continue
             return c
         return zpt
     for z in d.get("zones",[]):
@@ -260,8 +277,8 @@ def hoja_v3(pdf, d, modelo, planta, titulo, sub, nota_footer):
         X,Y=m2d([zpt.x],[zpt.y]); x=min(max(X[0],pad),SA-pad); y=min(max(Y[0],pad),SB-pad)
         col=REL if z.get("tipo")=="relleno" else COR
         tint=REL_T if z.get("tipo")=="relleno" else COR_T
-        ax.text(x,y,z.get("label",""),fontsize=6.4,color=col,style="italic",ha="center",zorder=6,clip_on=True,
-                bbox=dict(boxstyle="round,pad=0.25",fc=tint,ec=col,lw=0.6,alpha=.93))
+        ax.text(x,y,z.get("label",""),fontsize=6.4,color=col,style="italic",ha="center",zorder=3.5,clip_on=True,
+                bbox=dict(boxstyle="round,pad=0.25",fc=tint,ec=col,lw=0.6,alpha=.85))
 
     lx=fig.add_axes([0.05,0.052,0.90,0.062]); lx.axis("off")
     lx.add_patch(Rectangle((0,0),1,1,transform=lx.transAxes,facecolor="#fafafa",edgecolor="#d5d9df",lw=0.8))
