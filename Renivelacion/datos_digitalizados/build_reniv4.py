@@ -20,10 +20,10 @@ D=[
  (9,7,"Merlot","P.A.",58.25,3.4,1.93,"Renivelado",B+"5aa389ee-1000289425.jpg",0,f"{SP}/digit/f4.json","⚠ La hoja de campo dice 'P.B.' por error: es P.A. (V=1.93).",False),
  (10,7,"Merlot","P.B.",74.86,1.2,None,"No renivelado",B+"89ab954a-1000289426.jpg",0,f"{SP}/digit/f5.json","Levantada (V=1.06), sin ejecutar: desnivel mínimo. Plano espejeado: coincide con la casa en campo.",True),
  (10,7,"Merlot","P.A.",58.25,2.5,1.5,"Renivelado",B+"ee4969c5-1000289428.jpg",0,f"{SP}/digit/f7.json","Plano espejeado (como en campo). Zona con escombro: renivelada, valores promediados de cuartos vecinos.",True),
- (19,7,"Chardonnay","P.B.",85.79,1.71,1.46,"Por renivelar",None,0,None,"Programado: jueves 2 de julio.",False),
- (19,7,"Chardonnay","P.A.",59.86,3.4,1.5,"Por renivelar",None,0,None,"Programado: jueves 2 de julio. Teórico 2.0 m³; con rebaje de puntos altos ≈1.5 m³.",False),
- (17,7,"Chardonnay","P.B.",85.79,1.45,1.28,"Por renivelar",None,0,None,"Con terraza 101.14 m² (no colada; no entra).",False),
- (17,7,"Chardonnay","P.A.",59.86,2.24,2.59,"Por renivelar",None,0,None,"⚠ 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³): confirmar antes de pedir mortero.",False),
+ (19,7,"Chardonnay","P.B.",85.79,1.71,1.46,"Por renivelar","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/1eee17e5-1000289703.jpg",0,f"{SP}/digit/f9.json","Por renivelar (hoy jueves 2 de julio). Hoja de campo en papel cuadriculado; ref hoja −2 cm.",False),
+ (19,7,"Chardonnay","P.A.",59.86,3.4,1.5,"Por renivelar","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/44dbdc10-1000289702.jpg",0,f"{SP}/digit/f8.json","Por renivelar (hoy jueves 2 de julio). Teórico 2.0 m³; con rebaje ≈1.5 m³. Ref hoja −3 cm; franja superior tapada por el clip en la foto.",False),
+ (17,7,"Chardonnay","P.B.",85.79,1.45,1.28,"Por renivelar","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/778d575e-1000289705.jpg",0,f"{SP}/digit/f11.json","Por renivelar. Terraza punteada no colada: fuera de la renivelación.",False),
+ (17,7,"Chardonnay","P.A.",59.86,2.24,2.59,"Por renivelar","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/1f9f3bb6-1000289704.jpg",0,f"{SP}/digit/f10.json","Por renivelar. ⚠ 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³); ref hoja −3 cm. Confirmar antes de pedir mortero.",False),
 ]
 
 def cover(pdf,titulo,sub):
@@ -78,7 +78,7 @@ def tabla(pdf,rows,titulo):
     notas=[
       ("Verificación foto por foto (zoom + aritmética + geometría): f1=L33 P.A. · f2=L33 P.B. · f3=L9 P.B. (V=2.56) · f4=L9 P.A. (V=1.93; hoja dice 'P.B.' por error) · f5=L10 P.B. (V=1.06) · f6=f7=misma hoja, L10 P.A. (V=1.46).",BLUE),
       ("L10 M7: P.B. levantada (1.06 m³) pero NO se renivela (prom. 1.2 cm). P.A. renivelada (1.46 ≈ 1.5 m³). Planos de L10 espejeados para coincidir con la casa en campo.",AMBER),
-      ("L19 M7 y L17 M7 (Chardonnay): POR RENIVELAR — L19 programado el jueves 2 de julio; L17 sin fecha. Volúmenes = estimación del levantamiento dictado.",BLUE),
+      ("L19 M7 y L17 M7 (Chardonnay): levantamientos DIGITALIZADOS (hojas del 2 de julio); POR RENIVELAR — L19 en proceso hoy jueves 2 de julio, L17 sin fecha. Referencias de hoja: L19 P.A. −3 cm, L19 P.B. −2 cm, L17 P.A. −3 cm.",BLUE),
       ("Terrazas (no coladas): fuera de la renivelación.",GREY),
       ("⚠ L17 M7 P.A.: 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³). Confirmar antes de pedir mortero.",RED),
     ]
