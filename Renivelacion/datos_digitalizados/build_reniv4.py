@@ -19,7 +19,7 @@ D=[
  (9,7,"Merlot","P.B.",74.86,3.1,2.56,"Renivelado",B+"a8bd4639-1000289424.jpg",0,f"{SP}/digit/f3.json","V=2.56 m³ confirmado en hoja.",False),
  (9,7,"Merlot","P.A.",58.25,3.4,1.93,"Renivelado",B+"5aa389ee-1000289425.jpg",0,f"{SP}/digit/f4.json","⚠ La hoja de campo dice 'P.B.' por error: es P.A. (V=1.93).",False),
  (10,7,"Merlot","P.B.",74.86,1.2,None,"No renivelado",B+"89ab954a-1000289426.jpg",0,f"{SP}/digit/f5.json","Levantada (V=1.06), sin ejecutar: desnivel mínimo. Plano espejeado: coincide con la casa en campo.",True),
- (10,7,"Merlot","P.A.",58.25,2.5,1.5,"Renivelado",B+"ee4969c5-1000289428.jpg",0,f"{SP}/digit/f7.json","Hoja: V=1.46 ≈ 1.5 m³. Plano espejeado: coincide con la casa en campo.",True),
+ (10,7,"Merlot","P.A.",58.25,2.5,1.5,"Renivelado",B+"ee4969c5-1000289428.jpg",0,f"{SP}/digit/f7.json","Plano espejeado (como en campo). Zona con escombro: renivelada, valores promediados de cuartos vecinos.",True),
  (19,7,"Chardonnay","P.B.",85.79,1.71,1.46,"Por renivelar",None,0,None,"Programado: jueves 2 de julio.",False),
  (19,7,"Chardonnay","P.A.",59.86,3.4,1.5,"Por renivelar",None,0,None,"Programado: jueves 2 de julio. Teórico 2.0 m³; con rebaje de puntos altos ≈1.5 m³.",False),
  (17,7,"Chardonnay","P.B.",85.79,1.45,1.28,"Por renivelar",None,0,None,"Con terraza 101.14 m² (no colada; no entra).",False),
@@ -49,6 +49,8 @@ def tabla(pdf,rows,titulo):
     ax=fig.add_axes([0.045,0.34,0.91,0.56]); ax.axis("off")
     cols=["Lote","Mza","Modelo","Planta","Área m²","Prom. cm","Mortero m³","Estado"]
     cw=[0.075,0.075,0.135,0.09,0.115,0.115,0.13,0.265]
+    LOTE_COL={33:"#FCE9D6", 9:"#E2EFDA", 10:"#EBE6F7", 19:"#DEEBF7", 17:"#FFF4CC"}
+    EST_COL={"Renivelado":"#C6EFCE","No renivelado":"#FFD966","Por renivelar":"#9DC3E6"}
     cells=[];colors=[];tot_e=0.0;tot_p=0.0
     for r in rows:
         (lote,mza,mod,pl,area,esp,vol,est)=r[:8]
@@ -57,8 +59,9 @@ def tabla(pdf,rows,titulo):
             if est=="Renivelado": tot_e+=vol
             elif est=="Por renivelar": tot_p+=vol
         cells.append([f"L{lote}",f"M{mza}",mod,pl,f"{area:.2f}",f"{esp:.2f}",vtxt,est])
-        c=("#DEEBF7" if est=="Por renivelar" else ("#FFF2CC" if est=="No renivelado" else "white"))
-        colors.append([c]*8)
+        base=LOTE_COL.get(lote,"white")
+        fila=[base]*8; fila[7]=EST_COL.get(est,base)
+        colors.append(fila)
     cells.append(["","","","","","",f"{tot_e:.2f}","TOTAL EJECUTADO"]); colors.append([LT]*8)
     cells.append(["","","","","","",f"{tot_p:.2f}","TOTAL POR RENIVELAR"]); colors.append(["#DEEBF7"]*8)
     t=ax.table(cellText=cells,colLabels=cols,loc="upper center",cellLoc="center",colWidths=cw)
@@ -70,7 +73,8 @@ def tabla(pdf,rows,titulo):
             cell.set_facecolor(colors[r_-1][c_])
             if r_>=len(cells)-1: cell.set_text_props(weight="bold")
     y=0.315
-    fig.text(0.06,y,"Notas y verificación",fontsize=12,weight="bold",color=NAVY); y-=0.024
+    fig.text(0.06,y,"Notas y verificación",fontsize=12,weight="bold",color=NAVY); y-=0.02
+    fig.text(0.07,y,"Color de fila = lote · color de la celda Estado: verde=renivelado, ámbar=no renivelado, azul=por renivelar.",fontsize=8.0,color=GREY,style="italic"); y-=0.022
     notas=[
       ("Verificación foto por foto (zoom + aritmética + geometría): f1=L33 P.A. · f2=L33 P.B. · f3=L9 P.B. (V=2.56) · f4=L9 P.A. (V=1.93; hoja dice 'P.B.' por error) · f5=L10 P.B. (V=1.06) · f6=f7=misma hoja, L10 P.A. (V=1.46).",BLUE),
       ("L10 M7: P.B. levantada (1.06 m³) pero NO se renivela (prom. 1.2 cm). P.A. renivelada (1.46 ≈ 1.5 m³). Planos de L10 espejeados para coincidir con la casa en campo.",AMBER),
