@@ -79,7 +79,14 @@ MODELOS = {
         "redimensionar": [
             {"x": 490.12, "y": -83.77, "x0": 489.539, "y0": -84.346, "wx": 0.600, "hy": 1.146},  # arriba de PB-M-054
             {"x": 506.117, "y": -87.084, "x0": 506.010, "y0": -87.428, "wx": 0.634, "hy": 0.688},  # recorte esquina escalera = UNA sola pieza hasta el borde de piso (x506.644)
-            {"x": 490.12, "y": -92.05, "x0": 489.539, "y0": -92.572, "wx": 0.600, "hy": 1.050},  # izq. de PB-M-159
+            # Fila inferior PB-M-143..146: el dibujo las llevó a la cara EXTERIOR del
+            # muro (-92.572); el muro de abajo tiene 0.18 de grosor y su cara interior
+            # está en -92.530 (donde sí quedaron PB-M-140..142). Se acortan las 4 al
+            # paño interior (obs. del usuario: "grosor del muro").
+            {"x": 489.839, "y": -92.047, "x0": 489.539, "y0": -92.530, "wx": 0.600, "hy": 1.008},  # PB-M-143
+            {"x": 490.441, "y": -92.047, "x0": 490.141, "y0": -92.530, "wx": 0.600, "hy": 1.008},  # PB-M-144
+            {"x": 491.043, "y": -92.047, "x0": 490.743, "y0": -92.530, "wx": 0.600, "hy": 1.008},  # PB-M-145
+            {"x": 491.645, "y": -92.047, "x0": 491.345, "y0": -92.530, "wx": 0.600, "hy": 1.008},  # PB-M-146
             {"x": 497.47, "y": -91.94, "x0": 497.365, "y0": -92.530, "wx": 0.214, "hy": 1.068},  # PB-M-150 a la esquina
             {"x": 504.20, "y": -85.68, "x0": 503.946, "y0": -85.496, "wx": 0.520, "hy": 0.436},  # PA-M-003: chica arriba, junta alineada con boquilla de 001/010 (y-85.496)
         ],
@@ -145,6 +152,10 @@ MODELOS = {
             # NO solapar la pieza original a su derecha (borde 330.2767): queda un
             # pelo de junta < 1 mm, nunca encimado. Ambas piezas quedan intactas.
             _recorte("Royal Walnut", 330.211, -129.954, 0.065, 1.200),
+            # Umbral de la puerta entre PB-M-120 y PB-M-109: tira que cruza el
+            # grosor del muro (0.18) dentro del vano; las dos piezas vecinas ya
+            # quedan al paño de su lado (ver redimensionar).
+            _recorte("Moret", 322.2983, -129.734, 0.180, 0.7361),
         ],
         "reclasificar": [
             # Tiras de orilla de recámaras que salieron Moret -> son Royal Walnut.
@@ -176,6 +187,12 @@ MODELOS = {
         # tomó como muro; en realidad es casi pieza completa.
         "redimensionar": [
             {"x": 331.09, "y": -126.79, "x0": 331.079, "y0": -127.385, "wx": 0.598, "hy": 1.194},
+            # PB-M-120 y PB-M-109 cruzaban el muro del vano (grosor 0.18, caras en
+            # x=322.2983 / x=322.4783) envolviéndolo con entrantes: cada una se corta
+            # al paño de SU lado y el umbral de la puerta se repone como recorte
+            # aparte (mismo criterio que la puerta PB-M-136 <-> PB-M-122 de Cabernet).
+            {"x": 322.139, "y": -129.595, "x0": 321.8407, "y0": -130.1919, "wx": 0.4576, "hy": 1.1940},  # PB-M-120 al paño izq.
+            {"x": 322.737, "y": -129.433, "x0": 322.4783, "y0": -129.8671, "wx": 0.5564, "hy": 0.8692},  # PB-M-109 al paño der.
         ],
         "muros_ignorar": [
             (331.05, 331.70, -127.70, -126.20),   # linternilla junto a PA-M-043

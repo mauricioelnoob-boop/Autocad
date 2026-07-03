@@ -217,11 +217,11 @@ def pagina_despiece_escalera(pdf, guardar, modelo):
     tramos = " + ".join(f"{t} escal." for t in cfg["tramos"])
     zoclo = ("  ·  + ZOCLO 0.15 m en la orilla (desde 1er descanso)"
              if res["zoclo_orilla"] else "")
-    fig.suptitle(f"DESPIECE — ESCALERA (catálogo de corte) · {modelo.upper()}\n"
+    fig.suptitle(f"DESPIECE — ESCALERA (catálogo ilustrativo) · {modelo.upper()}\n"
                  f"ancho 1.15 m · peralte 0.175 m · huella 0.27 m · {tramos} · "
                  f"{len(cfg['descansos'])} descanso(s){zoclo}\n"
                  f"{res['n_escalones']} peraltes (P) + {res['n_escalones']} huellas (H) + descansos · "
-                 f"{nb} piezas ≈ {res['cajas']} cajas (sumadas a la tabla)",
+                 f"los cortes H#/P#/D# van DENTRO del plan de corte general (reusan sobrantes del piso)",
                  fontsize=10.5, fontweight="bold")
     fig.legend(handles=[Patch(facecolor="#aed6f1", label="Peralte (P#)"),
                         Patch(facecolor="#f5b66b", label="Huella (H#) / entera"),
@@ -315,16 +315,36 @@ def _punto_escalera(modelo):
         return None
 
 
+def _entradas_extras(modelo, ancho, largo):
+    """Recortes del MURO DE REGADERA y de la ESCALERA (Moret) para empacarlos
+    JUNTO con los del piso: así sus sobrantes entran a la misma cadena de reuso
+    y se ve a dónde brinca cada uno (obs. del usuario)."""
+    try:
+        import despiece_extra as DE
+        ent = []
+        for res in (DE.regadera_resumen(modelo), DE.escalera_resumen(modelo)):
+            ent += [(*ajustar(p["ancho"], p["largo"], ancho, largo),
+                     p.get("id") or p.get("pared") or "extra")
+                    for p in res["piezas"] if not p["completa"]]
+        return ent
+    except Exception:
+        return []
+
+
 def empacar(piezas, material, modelo=None):
-    """Empaca los recortes en piezas nuevas y, si se da el modelo, ORDENA las
-    piezas del plan de corte en el ORDEN DE CORTE PROPUESTO: se empieza en
-    PLANTA ALTA junto a la ESCALERA (por ahí sube el material) y se va uno
-    alejando; al terminar P.A. se sigue con P.B., también desde la escalera.
-    La numeración M-01, M-02, ... queda en ese orden."""
+    """Empaca los recortes en piezas nuevas y, si se da el modelo:
+      * incluye TAMBIÉN los recortes del muro de regadera y de la escalera
+        (Moret), para que sus sobrantes entren a la misma cadena de reuso;
+      * ORDENA el plan de corte en el ORDEN DE CORTE PROPUESTO: se empieza en
+        PLANTA ALTA junto a la ESCALERA y se va uno alejando; al terminar P.A.
+        se sigue con P.B. La numeración M-01, M-02, ... queda en ese orden
+        (los cortes de escalera/regadera van al final)."""
     mapa = {p["id"]: p for p in piezas if p["material"] == material}
     ancho, largo = PISOS[material]
     recortes = [p for p in piezas if p["material"] == material and not p["completa"]]
     entradas = [(*ajustar(p["ancho"], p["largo"], ancho, largo), p["id"]) for p in recortes]
+    if modelo and material == "Moret":
+        entradas += _entradas_extras(modelo, ancho, largo)
     baldosas = empaquetar(entradas, material, 0.0, True)
     pe = _punto_escalera(modelo) if modelo else None
     if pe is not None and baldosas:
@@ -434,28 +454,22 @@ def hacer_pdf(todas, material, path, modelo=""):
 
     baldosas, mapa, (ancho, largo) = empacar(todas, material, modelo)
 
-    # EXTRAS Moret (muro de regadera + escalera): se empacan también y entran al
-    # conteo de cajas y a las tablas de sobrante/desperdicio (además de su propia
-    # página de despiece). Sólo aplican al PDF de Moret.
+    # EXTRAS Moret (muro de regadera + escalera): sus RECORTES ya vienen
+    # empacados DENTRO de `baldosas` (empacar los mete a la misma cadena de
+    # reuso, así sus sobrantes también se aprovechan y se ve a dónde brincan).
+    # Aquí sólo se toman los resúmenes para conteos y páginas propias.
     extra_reg = extra_esc = None
-    extra_baldosas = []
     extra_completas = 0
     if material == "Moret" and modelo:
         try:
             import despiece_extra as DE
-            from optimizador_recortes import ajustar as _aj, empaquetar as _emp
             extra_reg = DE.regadera_resumen(modelo)
             extra_esc = DE.escalera_resumen(modelo)
-            for res in (extra_reg, extra_esc):
-                extra_completas += res["completas"]
-                ent = [(*_aj(p["ancho"], p["largo"], ancho, largo),
-                        p.get("id") or p.get("pared") or "extra")
-                       for p in res["piezas"] if not p["completa"]]
-                extra_baldosas += _emp(ent, material, 0.0, True)
+            extra_completas = extra_reg["completas"] + extra_esc["completas"]
         except Exception:
             extra_reg = extra_esc = None
 
-    baldosas_all = baldosas + extra_baldosas
+    baldosas_all = baldosas
     area_reut = area_desp = 0.0
     for b in baldosas_all:
         for (fx, fy, fw, fl, *_z) in b.libres:

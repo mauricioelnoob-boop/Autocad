@@ -48,7 +48,7 @@ CAPA = {("Moret", True): "MORET-COMPLETAS", ("Moret", False): "MORET-RECORTES",
 LAYERS = {
     "MORET-COMPLETAS": 30, "MORET-RECORTES": 41,
     "ROYAL-COMPLETAS": 4, "ROYAL-RECORTES": 151, "ETIQUETAS": 7,
-    "SOBRANTE-JUNTO-AL-RECORTE": 2,
+    "MUROS": 8, "SOBRANTE-JUNTO-AL-RECORTE": 2,
     "PLAN-CORTE-PIEZAS-A-ABRIR": 7, "PLAN-CORTE-RECORTES": 3, "PLAN-CORTE-SOBRANTES": 2,
     "PLAN-CORTE-DESPERDICIO": 1, "PLAN-CORTE-TEXTOS": 5, "RESUMEN": 5,
     "ZOCLO": 3, "URBANIA-LAVANDERIA": 5, "REGADERA-MALLA-MURO": 1,
@@ -61,6 +61,7 @@ LEYENDA_CAPAS = [
     ("ROYAL-COMPLETAS", "piezas completas de Royal Walnut; 1 polilinea = 1 pieza"),
     ("ROYAL-RECORTES", "piezas de Royal Walnut que llevan corte"),
     ("ETIQUETAS", "ID de cada pieza del plano (PB/PA - M/R - numero)"),
+    ("MUROS", "muros REALES del plano de origen (capa A-MUROS del DWG), con su grosor"),
     ("SOBRANTE-JUNTO-AL-RECORTE", "amarillo PEGADO a cada recorte del plano: lo que le falta al recorte"
                                   " para completar la pieza entera (puede salir de los muros)"),
     ("PLAN-CORTE-PIEZAS-A-ABRIR", "plan de corte: contorno de cada pieza ENTERA que se abre (M-01, M-02...)"),
@@ -96,6 +97,10 @@ def dibujar_acabados(msp, modelo):
         return
     for a, b in zoclo:
         msp.add_line(a, b, dxfattribs={"layer": "ZOCLO"})
+    # MUROS reales, sacados del plano de origen (capa A-MUROS del DWG): así se
+    # revisan las piezas contra el grosor del muro directamente en AutoCAD.
+    for a, b in muros:
+        msp.add_line(a, b, dxfattribs={"layer": "MUROS"})
     for c in claves:
         if c[0] == "5":
             _txt(msp, "URBANIA", c[1], c[2], 0.12, "URBANIA-LAVANDERIA")
@@ -272,23 +277,17 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0):
         if not focal:
             continue
         completas = sum(1 for p in focal if p["completa"])
+        # los recortes de regadera/escalera ya vienen empacados DENTRO (empacar)
         baldosas, _, (aB, lB) = empacar(piezas, material, modelo)
         extra_comp = 0
-        extra_bald = []
         if material == "Moret":
             try:
                 import despiece_extra as DE
-                from optimizador_recortes import ajustar as _aj, empaquetar as _emp
-                for res in (DE.regadera_resumen(modelo), DE.escalera_resumen(modelo)):
-                    extra_comp += res["completas"]
-                    ent = [(*_aj(p["ancho"], p["largo"], aB, lB),
-                            p.get("id") or p.get("pared") or "extra")
-                           for p in res["piezas"] if not p["completa"]]
-                    extra_bald += _emp(ent, material, 0.0, True)
+                extra_comp = (DE.regadera_resumen(modelo)["completas"]
+                              + DE.escalera_resumen(modelo)["completas"])
             except Exception:
                 extra_comp = 0
-                extra_bald = []
-        bald_all = baldosas + extra_bald
+        bald_all = baldosas
         area_reut = area_desp = 0.0
         n_sob = n_desp = 0
         for b in bald_all:
@@ -366,17 +365,15 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
         _txt(msp, etq, cx + aT / 2, cy + 0.07, 0.06, "PLAN-CORTE-TEXTOS")
 
     # ---- ESCALERA ----
+    # Los CORTES de la escalera (H#/P#/D#) van DENTRO del plan de corte general
+    # (reusan sobrantes del piso y ahí dicen a dónde brinca cada sobrante).
+    # Aquí sólo quedan las piezas ENTERAS de los descansos, para contarlas.
     res = DE.escalera_resumen(modelo)
-    recortes = [p for p in res["piezas"] if not p["completa"]]
     enteras = [p for p in res["piezas"] if p["completa"]]
-    entradas = [(*ajustar(p["ancho"], p["largo"], aT, lT), p["id"]) for p in recortes]
-    baldosas = empaquetar(entradas, "Moret", 0.0, True)
-    _txt(msp, f"DESPIECE ESCALERA (ancho 1.15, peralte 0.175, huella 0.27) - {res['n_escalones']} escalones",
+    _txt(msp, f"ESCALERA (ancho 1.15, peralte 0.175, huella 0.27) - {res['n_escalones']} escalones; "
+              f"sus cortes estan en el PLAN DE CORTE general; aqui solo las enteras de descansos",
          x0, y0 + 0.5, 0.16, "PLAN-CORTE-TEXTOS")
     n = 0
-    for b in baldosas:
-        cx = x0 + (n % cols) * gx; cy = y0 - (n // cols) * gy
-        _baldosa(cx, cy, f"B{n+1}", b.piezas, b.libres); n += 1
     for p in enteras:
         cx = x0 + (n % cols) * gx; cy = y0 - (n // cols) * gy
         _rect(msp, cx, cy - lT, aT, lT, "PLAN-CORTE-PIEZAS-A-ABRIR")
