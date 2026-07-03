@@ -23,7 +23,7 @@ D=[
  (19,7,"Chardonnay","P.B.",85.79,1.71,1.46,"Renivelado","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/59ebea00-1000289915.jpg",0,f"{SP}/digit/f9.json","Renivelado el jueves 2 de julio. Ref hoja −2 cm.",False),
  (19,7,"Chardonnay","P.A.",59.86,3.4,1.5,"Renivelado","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/fed7a705-1000289916.jpg",0,f"{SP}/digit/f8.json","Renivelado el jueves 2 de julio. Teórico 2.0 m³; con rebaje ≈1.5 m³. Ref hoja −3 cm.",False),
  (17,7,"Chardonnay","P.B.",85.79,1.45,1.28,"Por renivelar","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/778d575e-1000289705.jpg",0,f"{SP}/digit/f11.json","Por renivelar. Terraza punteada no colada: fuera de la renivelación.",False),
- (17,7,"Chardonnay","P.A.",59.86,2.24,2.59,"Por renivelar","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/1f9f3bb6-1000289704.jpg",0,f"{SP}/digit/f10.json","Por renivelar. ⚠ 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³); ref hoja −3 cm. Confirmar antes de pedir mortero.",False),
+ (17,7,"Chardonnay","P.A.",59.86,2.24,2.59,"Por renivelar","/root/.claude/uploads/d15acb21-ec3d-5e7a-85b6-2130d9969519/1f9f3bb6-1000289704.jpg",0,f"{SP}/digit/f10.json","Por renivelar. La hoja reporta V=2.59 m³; por área × promedio (2.24 cm × 59.86 m²) resulta ≈1.34 m³. Ref hoja −3 cm.",False),
 ]
 
 def cover(pdf,titulo,sub):
@@ -80,7 +80,7 @@ def tabla(pdf,rows,titulo):
       ("L10 M7: P.B. levantada (1.06 m³) pero NO se renivela (prom. 1.2 cm). P.A. renivelada (1.46 ≈ 1.5 m³). Planos en la orientación del dibujo de campo.",AMBER),
       ("L19 M7 (Chardonnay): RENIVELADO el jueves 2 de julio (ambas plantas). L17 M7 (Chardonnay): POR RENIVELAR, sin fecha. Referencias de hoja: L19 P.A. −3 cm, L19 P.B. −2 cm, L17 P.A. −3 cm.",BLUE),
       ("Terrazas (no coladas): fuera de la renivelación.",GREY),
-      ("⚠ L17 M7 P.A.: 2.59 m³ no cuadra con 2.24 cm × 59.86 m² (≈1.34 m³). Confirmar antes de pedir mortero.",RED),
+      ("L17 M7 P.A.: la hoja reporta 2.59 m³; por área × promedio (2.24 cm × 59.86 m²) resulta ≈1.34 m³.",GREY),
     ]
     for tx,col in notas:
         for i,ln in enumerate(textwrap.wrap(tx,108)):

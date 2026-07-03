@@ -154,8 +154,8 @@ def _txt_origen(pid, origen_de, tabla_de, pc):
     if org is None:
         return "?"
     if org == "TABLA":
-        return f"abre la tabla {pc}-{tabla_de.get(pid, 0):02d}"
-    return f"de la SOBRA DE {org} (tabla {pc}-{tabla_de.get(pid, 0):02d}, no abre pieza)"
+        return f"abre la pieza {pc}-{tabla_de.get(pid, 0):02d}"
+    return f"de la SOBRA DE {org} (pieza {pc}-{tabla_de.get(pid, 0):02d}, no abre pieza)"
 
 
 def _pagina_tablas_filtradas(pdf, guardar, modelo, titulo, baldosas, idxs, marcados, pc):
@@ -201,7 +201,7 @@ def _pagina_tablas_filtradas(pdf, guardar, modelo, titulo, baldosas, idxs, marca
                         rotation=0 if fw >= fl else 90)
             ax.set_xlim(-0.03, aT + 0.03); ax.set_ylim(-0.03, lT + 0.03)
             ax.set_aspect("equal"); ax.axis("off")
-            ax.set_title(f"Tabla {pc}-{idx:02d} (misma del plan general)",
+            ax.set_title(f"Pieza {pc}-{idx:02d} (misma del plan general)",
                          fontsize=9, weight="bold")
         for ax in axes[len(grupo):]:
             ax.axis("off")
@@ -742,13 +742,18 @@ def hacer_pdf(todas, material, path, modelo=""):
                       if origen_de.get(p["id"], "TABLA") != "TABLA")
 
         def _etq_salto(ax, x, y, w, l, pid):
-            """Escribe dentro del sobrante amarillo hacia qué faltante morado va."""
+            """Escribe dentro del sobrante hacia qué faltante morado va; si el
+            sobrante es MERMA (<10 cm, como el de 5 cm de PB-M-070 en Merlot)
+            no se manda a guardar: se marca como desperdicio."""
             if w * l < 0.018:
                 return
             dest = destino_de.get(pid)
             if dest:
                 txt = "→ " + "\n→ ".join(dest[:3]) + ("\n…" if len(dest) > 3 else "")
                 col = "#6c3483"
+            elif not es_reutilizable(w, l):
+                txt = "merma"
+                col = "#922b21"
             else:
                 txt = "→ GUARDAR"
                 col = "#7d6608"
@@ -782,18 +787,21 @@ def hacer_pdf(todas, material, path, modelo=""):
                 ax.add_patch(Rectangle((tx, ty), Wt, Lt, fill=False,
                                        edgecolor="#7f8c8d", lw=0.5, ls="--"))
                 # el sobrante (lo que NO es el recorte), con su destino adentro
+                def _tira(sx, sy, sw, sl):
+                    # amarillo = sobrante que sirve o que brinca; ROJO = merma
+                    # (<10 cm) que nadie usa: no se manda a guardar
+                    util = bool(destino_de.get(p["id"])) or es_reutilizable(sw, sl)
+                    ax.add_patch(Rectangle((sx, sy), sw, sl,
+                                           facecolor="#fcf3cf" if util else "#f5b7b1",
+                                           edgecolor="#b7950b" if util else "#922b21",
+                                           lw=0.3, alpha=0.7, hatch=".." if util else "xx"))
+                    _etq_salto(ax, sx, sy, sw, sl, p["id"])
                 if Wt - p["wx"] > 0.02:
                     ox = (p["x0"] + p["wx"]) if p["x"] >= cxh else tx
-                    ax.add_patch(Rectangle((ox, p["y0"]), Wt - p["wx"], p["hy"],
-                                           facecolor="#fcf3cf", edgecolor="#b7950b",
-                                           lw=0.3, alpha=0.7, hatch=".."))
-                    _etq_salto(ax, ox, p["y0"], Wt - p["wx"], p["hy"], p["id"])
+                    _tira(ox, p["y0"], Wt - p["wx"], p["hy"])
                 if Lt - p["hy"] > 0.02:
                     oy = (p["y0"] + p["hy"]) if p["y"] >= cyh else ty
-                    ax.add_patch(Rectangle((p["x0"], oy), p["wx"], Lt - p["hy"],
-                                           facecolor="#fcf3cf", edgecolor="#b7950b",
-                                           lw=0.3, alpha=0.7, hatch=".."))
-                    _etq_salto(ax, p["x0"], oy, p["wx"], Lt - p["hy"], p["id"])
+                    _tira(p["x0"], oy, p["wx"], Lt - p["hy"])
                 # el recorte en su lugar real (un solo color neutro)
                 ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
                                        facecolor="#aed6f1", edgecolor="#1b4f72", lw=0.6))

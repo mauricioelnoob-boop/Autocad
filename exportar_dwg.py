@@ -52,7 +52,7 @@ LAYERS = {
     "PLAN-CORTE-PIEZAS-A-ABRIR": 7, "PLAN-CORTE-RECORTES": 3, "PLAN-CORTE-SOBRANTES": 2,
     "PLAN-CORTE-DESPERDICIO": 1, "PLAN-CORTE-TEXTOS": 5, "RESUMEN": 5,
     "ZOCLO": 3, "URBANIA-LAVANDERIA": 5, "REGADERA-MALLA-MURO": 1,
-    "ESCALERA-REGADERA-ZOCLO": 6,
+    "ESCALERA-REGADERA-ZOCLO": 6, "ESCALERA-REGADERA-ZOCLO-TEXTO": 7,
 }
 
 # Variante "fusionada" (segundo ZIP): una sola capa por material con TODAS las
@@ -66,7 +66,7 @@ LAYERS_FUSIONADO = {
     "PLAN-CORTE-PIEZAS-A-ABRIR": 7, "PLAN-CORTE-RECORTES": 3, "PLAN-CORTE-SOBRANTES": 2,
     "PLAN-CORTE-DESPERDICIO": 1, "PLAN-CORTE-TEXTOS": 5, "RESUMEN": 5,
     "ZOCLO": 3, "URBANIA-LAVANDERIA": 5, "REGADERA-MALLA-MURO": 1,
-    "ESCALERA-REGADERA-ZOCLO": 6,
+    "ESCALERA-REGADERA-ZOCLO": 6, "ESCALERA-REGADERA-ZOCLO-TEXTO": 7,
 }
 
 # Qué es cada capa (esta leyenda también se escribe DENTRO del DXF, capa RESUMEN):
@@ -79,15 +79,19 @@ LEYENDA_CAPAS = [
     ("MUROS", "muros del plano de origen: estructurales (A-MUROS) + muros falsos de"
               " tablaroca (A-TABLAROCA, mas delgados), con su grosor"),
     ("SOBRANTE-JUNTO-AL-RECORTE", "amarillo PEGADO a cada recorte del plano: lo que le falta al recorte"
-                                  " para completar la pieza entera (puede salir de los muros)"),
+                                  " para completar la pieza entera (puede salir de los muros);"
+                                  " si la tira es MERMA (<10 cm) va en ROJO (PLAN-CORTE-DESPERDICIO)"),
 ]
 
 LEYENDA_CAPAS_FUSIONADO = [
-    ("MORET", "TODAS las piezas de Moret que se COMPRAN: enteras + las que se abren para recorte;"
-              " 1 polilinea = 1 pieza completa a colocar o recortar (contar con QSELECT)"),
+    ("MORET", "TODAS las piezas de Moret que se COMPRAN: enteras y abiertas del plano"
+              " + piezas de escalera/regadera (abiertas y enteras) + piezas de zoclo;"
+              " 1 polilinea = 1 pieza completa que se compra: apaga las demas capas,"
+              " selecciona todo y el conteo es tu compra (QSELECT)"),
     ("MORET-FALTANTES", "recortes que salen del SOBRANTE de otra pieza: NO abren pieza nueva"
                         " (los morados del PDF); no suman al conteo de piezas"),
-    ("ROYAL", "TODAS las piezas de Royal Walnut que se compran (enteras + abiertas p/recorte)"),
+    ("ROYAL", "TODAS las piezas de Royal Walnut que se compran (enteras + abiertas del plano"
+              " + tablas de zoclo Royal); 1 polilinea = 1 pieza (QSELECT)"),
     ("ROYAL-FALTANTES", "recortes de Royal que salen de un sobrante: no abren pieza nueva"),
     ("ETIQUETAS", "ID de cada pieza del plano (PB/PA - M/R - numero)"),
     ("MUROS", "muros del plano de origen: estructurales (A-MUROS) + muros falsos de"
@@ -106,9 +110,11 @@ LEYENDA_COMUN = [
     ("ZOCLO", "linea de zoclo sobre el perimetro de piso"),
     ("URBANIA-LAVANDERIA", "marca de la zona con piso Urbania (lavanderia)"),
     ("REGADERA-MALLA-MURO", "marca de regaderas (malla en charola + muro Moret)"),
-    ("ESCALERA-REGADERA-ZOCLO", "despiece y plan de corte de la ESCALERA y de los MUROS DE BANO"
-                                " (regadera) + catalogo de corte del zoclo; es informativo:"
-                                " sus rectangulos NO cuentan como piezas del plano"),
+    ("ESCALERA-REGADERA-ZOCLO", "geometria del despiece y plan de corte de ESCALERA, MUROS DE BANO"
+                                " (regadera) y ZOCLO; en el archivo de conteo, lo que ahi es pieza"
+                                " completa que se compra va en la capa del material (MORET/ROYAL)"),
+    ("ESCALERA-REGADERA-ZOCLO-TEXTO", "SOLO los textos del bloque de escalera/regadera/zoclo"
+                                      " (apagala si quieres ver la geometria limpia)"),
 ]
 
 
@@ -783,16 +789,21 @@ def dibujar_sobrantes_en_plano(msp, piezas, modelo):
             oy = (p["y0"] + p["hy"]) if ty == p["y0"] else ty
             tiras.append((p["x0"], oy, p["wx"], Lt - p["hy"]))
         for (sx, sy, sw, sl) in tiras:
-            _rect(msp, sx, sy, sw, sl, "SOBRANTE-JUNTO-AL-RECORTE")
-        # etiqueta 'SOBRA DE <id>' en la tira más grande donde quepa
+            # tira MERMA (<10 cm): en ROJO (desperdicio), no se manda a guardar
+            _rect(msp, sx, sy, sw, sl,
+                  "SOBRANTE-JUNTO-AL-RECORTE" if es_reutilizable(sw, sl)
+                  else "PLAN-CORTE-DESPERDICIO")
+        # etiqueta 'SOBRA DE <id>' / 'MERMA DE <id>' en la tira más grande
         if tiras:
             sx, sy, sw, sl = max(tiras, key=lambda t: t[2] * t[3])
             corto, largo_l = min(sw, sl), max(sw, sl)
             if corto >= 0.045 and largo_l >= 0.30:
-                s = f"SOBRA DE {p['id']}"
+                reut = es_reutilizable(sw, sl)
+                s = f"{'SOBRA' if reut else 'MERMA'} DE {p['id']}"
                 _txt(msp, s, sx + sw / 2, sy + sl / 2,
                      min(0.045, corto * 0.5, largo_l / (len(s) * 0.75)),
-                     "SOBRANTE-JUNTO-AL-RECORTE", rot=0 if sw >= sl else 90)
+                     "SOBRANTE-JUNTO-AL-RECORTE" if reut else "PLAN-CORTE-DESPERDICIO",
+                     rot=0 if sw >= sl else 90)
         puestos = sob if puestos is None else _uni([puestos, sob])
 
 
@@ -856,7 +867,7 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0, fusionado=False):
         completas = sum(1 for p in focal if p["completa"])
         recortes_plano = [p for p in focal if not p["completa"]]
         # los recortes de regadera/escalera ya vienen empacados DENTRO (empacar)
-        baldosas, _, (aB, lB) = empacar(piezas, material, modelo)
+        baldosas, mapa_mat, (aB, lB) = empacar(piezas, material, modelo)
         # de que sale cada recorte del plano: "TABLA" abre pieza nueva; otra
         # etiqueta = sale del sobrante de esa pieza (FALTANTE, no abre pieza)
         origen_de = {}
@@ -866,6 +877,23 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0, fusionado=False):
         abren = sum(1 for p in recortes_plano
                     if origen_de.get(p["id"], "TABLA") == "TABLA")
         faltan = len(recortes_plano) - abren
+        # piezas abiertas por cortes de ESCALERA/REGADERA (no estan en el plano)
+        # y faltantes de escalera/regadera (salen de un sobrante)
+        abren_extra = sum(1 for b in baldosas
+                          if b.piezas and b.piezas[0][4] not in mapa_mat)
+        faltan_extra = sum(1 for b in baldosas
+                           for (x, y, w, l, etq, rot), (origen, orden)
+                           in zip(b.piezas, b.meta)
+                           if etq not in mapa_mat and origen != "TABLA")
+        # piezas destinadas a ZOCLO (plan de corte de zoclo, a la derecha)
+        try:
+            import generadores as _G
+            if material == "Moret":
+                zoclo_pzs = math.ceil(math.ceil(_G.GEN[modelo]["zoclo_m"] / 1.194) / 4)
+            else:
+                zoclo_pzs = math.ceil(_G.GEN[modelo]["zoclo_r"] / 1.20)
+        except Exception:
+            zoclo_pzs = 0
         extra_comp = 0
         if material == "Moret":
             try:
@@ -898,12 +926,23 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0, fusionado=False):
         base = "MORET" if material == "Moret" else "ROYAL"
         lineas.append(f"{material.upper()}{nota_extra}:")
         if fusionado:
-            # cada cifra de capa CUADRA con QSELECT sobre esa capa
+            # cada cifra de capa CUADRA con QSELECT sobre esa capa. La capa del
+            # material tiene TODAS las piezas completas que se COMPRAN: apaga
+            # las demas capas, selecciona todo y el conteo es tu compra.
+            tot_capa = completas + abren + abren_extra + extra_comp + zoclo_pzs
+            desglose = (f"{completas} enteras del plano + {abren} recortes del plano"
+                        f" que abren pieza")
+            if extra_comp or abren_extra:
+                desglose += (f" + {abren_extra} abiertas por escalera/regadera"
+                             f" + {extra_comp} enteras de descansos/muros de bano")
+            if zoclo_pzs:
+                desglose += f" + {zoclo_pzs} piezas de zoclo"
             lineas += [
-                f"  CAPA {base} (QSELECT): {completas + abren} polilineas = {completas} enteras"
-                f" + {abren} recortes que abren pieza nueva",
-                f"  CAPA {base}-FALTANTES (QSELECT): {faltan} recortes que salen de un sobrante"
-                f" (no abren pieza)",
+                f"  CAPA {base} (QSELECT): {tot_capa} polilineas = {desglose}",
+                f"  CAPA {base}-FALTANTES (QSELECT): {faltan + faltan_extra} recortes que salen"
+                f" de un sobrante (no abren pieza)"
+                + (f"   [{faltan} del plano + {faltan_extra} de escalera/regadera]"
+                   if faltan_extra else ""),
             ]
         else:
             lineas += [
@@ -963,16 +1002,20 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0, fusionado=False):
         t.set_placement((x0, y0 - k * 0.42), align=ezdxf.enums.TextEntityAlignment.MIDDLE_LEFT)
 
 
-def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
-    """Bloque ESCALERA-REGADERA-ZOCLO, a la derecha del plano (todo en la capa
-    ESCALERA-REGADERA-ZOCLO, informativa; NO suma piezas del plano):
+def dibujar_despiece_extra(msp, modelo, x0, y0, piezas, fusionado=False):
+    """Bloque ESCALERA-REGADERA-ZOCLO, a la derecha del plano. Geometría en la
+    capa ESCALERA-REGADERA-ZOCLO y TODOS los textos en ...-ZOCLO-TEXTO.
       1. ESQUEMA de la escalera (perfil con P#/H#/descansos).
-      2. PLAN DE CORTE - ESCALERA: de que tabla (M-xx) o de que sobrante sale
-         cada corte P#/H#/D#, con las tablas dibujadas y sus sobrantes con
-         destino (las tablas son las MISMAS del plan de corte general).
-      3. PLAN DE CORTE - MUROS DE BANO (regadera): alzados de las 3 caras con
-         el id de cada pieza, y de donde sale cada recorte.
-      4. DESPIECE DEL ZOCLO (tiras de 0.149, 4 exactas por pieza)."""
+      2. PLAN DE CORTE - ESCALERA: piezas dibujadas con sus cortes, sobrantes
+         (amarillo=guardar / rojo=merma) y destino; enteras de descanso.
+      3. PLAN DE CORTE - MUROS DE BANO (regadera): alzados + piezas.
+      4. PLAN DE CORTE - ZOCLO completo (todas las piezas, 4 tiras de 0.149).
+    En el archivo de CONTEO (fusionado): cada pieza completa que se COMPRA de
+    este bloque va en la capa del material (MORET / ROYAL): piezas que abren
+    los cortes de escalera/regadera (si no estan ya contadas en el plano),
+    enteras de descansos y muros, y piezas de zoclo. Los cortes que salen de
+    un SOBRANTE van en MORET-FALTANTES. Asi QSELECT sobre MORET da TODAS las
+    piezas que se compran."""
     try:
         import despiece_extra as DE
         from optimizador_recortes import PISOS
@@ -981,6 +1024,11 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
         return
     from collections import defaultdict
     CAPA_X = "ESCALERA-REGADERA-ZOCLO"
+    CAPA_T = "ESCALERA-REGADERA-ZOCLO-TEXTO"
+    # capa de PIEZA COMPLETA COMPRADA en el archivo de conteo:
+    CAPA_M = "MORET" if fusionado else CAPA_X
+    CAPA_R = "ROYAL" if fusionado else CAPA_X
+    CAPA_F = "MORET-FALTANTES" if fusionado else CAPA_X
     aT, lT = PISOS["Moret"]                       # 0.596 x 1.194
 
     # --- la MISMA cadena de corte del plan general (no una aparte) ---
@@ -996,14 +1044,20 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
         if org != "TABLA":
             destino_de[org].append(pid)
 
+    def _abre_extra(idx):
+        """True si la pieza M-idx la ABRE un corte de escalera/regadera (no
+        esta dibujada en el plano): en el conteo debe sumar aqui."""
+        b = baldosas[idx - 1]
+        return bool(b.piezas) and b.piezas[0][4] not in mapa
+
     def _titulo(y, texto, alto=0.18):
         y -= 0.6                      # aire ANTES de cada sección
-        _txt(msp, texto, x0, y, alto, CAPA_X)
+        _txt(msp, texto, x0, y, alto, CAPA_T)
         return y - 0.6
 
     def _lineas(y, filas, alto=0.13):
         for ln in filas:
-            _txt(msp, ln, x0, y, alto, CAPA_X)
+            _txt(msp, ln, x0, y, alto, CAPA_T)
             y -= 0.38
         return y
 
@@ -1012,30 +1066,35 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
         if org is None:
             return "?"
         if org == "TABLA":
-            return f"abre la tabla {pc}-{tabla_de.get(pid, 0):02d}"
-        return f"sale de la SOBRA DE {org} (tabla {pc}-{tabla_de.get(pid, 0):02d}, no abre pieza)"
+            return f"abre la pieza {pc}-{tabla_de.get(pid, 0):02d}"
+        return f"sale de la SOBRA DE {org} (pieza {pc}-{tabla_de.get(pid, 0):02d}, no abre pieza)"
 
     def _tabla(cx, cy, idx, marcados):
-        """Dibuja la tabla M-idx (la misma del plan general) con sus cortes,
-        y en cada sobrante su medida y destino."""
+        """Dibuja la pieza M-idx (la misma del plan general) con sus cortes,
+        sobrantes (amarillo=guardar, rojo=merma) y faltantes (de sobrante)."""
         b = baldosas[idx - 1]
-        _rect(msp, cx, cy - lT, aT, lT, CAPA_X)
+        capa_madre = CAPA_M if _abre_extra(idx) else CAPA_X
+        _rect(msp, cx, cy - lT, aT, lT, capa_madre)
         for (px, py, pw, pl, pid, rot), (origen, orden) in zip(b.piezas, b.meta):
-            _rect(msp, cx + px, cy - lT + py, pw, pl, CAPA_X)
+            es_faltante_extra = (pid not in mapa) and origen != "TABLA"
+            _rect(msp, cx + px, cy - lT + py, pw, pl,
+                  CAPA_F if es_faltante_extra else CAPA_X)
             marca = "*" if pid in marcados else ""
             _txt(msp, f"{marca}{pid}", cx + px + pw / 2, cy - lT + py + pl / 2,
-                 min(0.038, max(0.02, min(pw, pl) * 0.2)), CAPA_X,
+                 min(0.038, max(0.02, min(pw, pl) * 0.2)), CAPA_T,
                  rot=0 if pw >= pl else 90)
         for (fx, fy, fw, fl, *_z) in b.libres:
             if fw > 0.03 and fl > 0.03:
-                _rect(msp, cx + fx, cy - lT + fy, fw, fl, CAPA_X)
-                # etiqueta SOLO si el sobrante da para contenerla (las tiras
-                # diminutas quedan sin texto: no ensucian el dibujo)
+                reut = es_reutilizable(fw, fl)
+                _rect(msp, cx + fx, cy - lT + fy, fw, fl,
+                      "PLAN-CORTE-SOBRANTES" if reut else "PLAN-CORTE-DESPERDICIO")
                 if min(fw, fl) >= 0.05 and fw * fl >= 0.02:
-                    _txt(msp, f"SOBRA {_fmt(fw)}x{_fmt(fl)} -> GUARDAR",
-                         cx + fx + fw / 2, cy - lT + fy + fl / 2, 0.028, CAPA_X,
+                    _txt(msp, (f"SOBRA {_fmt(fw)}x{_fmt(fl)} -> GUARDAR" if reut
+                               else f"MERMA {_fmt(fw)}x{_fmt(fl)} (<10 cm, ya no sirve)"),
+                         cx + fx + fw / 2, cy - lT + fy + fl / 2, 0.028, CAPA_T,
                          rot=0 if fw >= fl else 90)
-        _txt(msp, f"{pc}-{idx:02d}", cx + aT / 2, cy + 0.08, 0.055, CAPA_X)
+        nota = "" if _abre_extra(idx) else " (contada en el plano)"
+        _txt(msp, f"{pc}-{idx:02d}{nota}", cx + aT / 2, cy + 0.08, 0.055, CAPA_T)
 
     y = y0
 
@@ -1052,48 +1111,57 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
         for _ in range(tramo):
             n_esc += 1
             msp.add_line((ex, ey), (ex, ey + 0.175), dxfattribs={"layer": CAPA_X})
-            _txt(msp, f"P{n_esc}", ex - 0.10, ey + 0.0875, 0.045, CAPA_X)
+            _txt(msp, f"P{n_esc}", ex - 0.10, ey + 0.0875, 0.045, CAPA_T)
             ey += 0.175
             msp.add_line((ex, ey), (ex + 0.27, ey), dxfattribs={"layer": CAPA_X})
-            _txt(msp, f"H{n_esc}", ex + 0.135, ey + 0.055, 0.045, CAPA_X)
+            _txt(msp, f"H{n_esc}", ex + 0.135, ey + 0.055, 0.045, CAPA_T)
             ex += 0.27
         if t_i < len(cfg["descansos"]):
             ent, rec = cfg["descansos"][t_i]
             msp.add_line((ex, ey), (ex + DESC_LARGO, ey), dxfattribs={"layer": CAPA_X})
             _txt(msp, f"DESCANSO {t_i+1} ({ent} ent + {rec} rec)",
-                 ex + DESC_LARGO / 2, ey + 0.09, 0.045, CAPA_X)
+                 ex + DESC_LARGO / 2, ey + 0.09, 0.045, CAPA_T)
             ex += DESC_LARGO
     if res.get("zoclo_orilla"):
         _txt(msp, "+ zoclo de 0.149 en la orilla (pegado al muro) desde el 1er descanso",
-             x0, py_ - 0.35, 0.11, CAPA_X)
+             x0, py_ - 0.35, 0.11, CAPA_T)
     y = py_ - 0.9
 
     # ================= 2) PLAN DE CORTE - ESCALERA =================
     esc_rec = [p for p in res["piezas"] if not p["completa"]]
     esc_ent = [p for p in res["piezas"] if p["completa"]]
-    y = _titulo(y, "2) PLAN DE CORTE - ESCALERA (de donde sale cada corte;"
-                   " las tablas son las MISMAS del plan de corte general)")
+    y = _titulo(y, "2) PLAN DE CORTE - ESCALERA (piezas dibujadas con sus cortes y sobrantes;"
+                   " son las MISMAS piezas del plan de corte general)")
     filas = [f"{p['id']} ({_fmt(p['ancho'])}x{_fmt(p['largo'])}): {_origen_txt(p['id'])}"
              for p in esc_rec]
-    filas += [f"{p['id']}: pieza ENTERA de descanso (se coloca completa, sin corte)"
-              for p in esc_ent]
     y = _lineas(y, filas)
     y -= 0.8
     idxs = sorted({tabla_de[p["id"]] for p in esc_rec if p["id"] in tabla_de})
     marcados = {p["id"] for p in esc_rec}
+    ya_dibujadas = set(idxs)      # cada pieza M-xx se dibuja UNA sola vez
     cols, gx, gy = 6, aT + 0.55, lT + 0.85
     for k, idx in enumerate(idxs):
         cx = x0 + (k % cols) * gx
         cy = y - (k // cols) * gy
         _tabla(cx, cy - 0.2, idx, marcados)
     y -= ((len(idxs) + cols - 1) // cols) * gy + 1.4 if idxs else 0.6
+    # piezas ENTERAS de los descansos: se colocan completas (cuentan como compra)
+    if esc_ent:
+        y = _titulo(y, f"ENTERAS DE DESCANSO ({len(esc_ent)}): se colocan completas, sin corte",
+                    alto=0.15)
+        for k, p in enumerate(esc_ent):
+            cx = x0 + (k % cols) * gx
+            cy = y - 0.2 - (k // cols) * gy
+            _rect(msp, cx, cy - lT, aT, lT, CAPA_M)
+            _txt(msp, f"{p['id']} (entera)", cx + aT / 2, cy - lT / 2, 0.05, CAPA_T, rot=90)
+        y -= ((len(esc_ent) + cols - 1) // cols) * gy + 1.0
 
     # ================= 3) PLAN DE CORTE - MUROS DE BANO =================
     paredes = DE.regadera_paredes(modelo)
     rres = DE.regadera_resumen(modelo)
     y = _titulo(y, f"3) MUROS DE BANO (REGADERA) - piso Moret ACOSTADO en 3 caras;"
                    f" {rres['completas']} enteras + {rres['recortes']} recortes")
-    # alzados de cada cara, con el id de cada pieza
+    # alzados de cada cara: las piezas ENTERAS del muro cuentan como compra
     cx = x0
     fila_h = 0.0
     for (titulo, w, h, pzs) in paredes:
@@ -1103,11 +1171,12 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
             fila_h = 0.0
         _rect(msp, cx, y - h, w, h, CAPA_X)
         for p in pzs:
-            _rect(msp, cx + p["x"], y - h + p["y"], p["w"], p["h"], CAPA_X)
+            _rect(msp, cx + p["x"], y - h + p["y"], p["w"], p["h"],
+                  CAPA_M if p["completa"] else CAPA_X)
             _txt(msp, p["id"], cx + p["x"] + p["w"] / 2, y - h + p["y"] + p["h"] / 2,
-                 0.05, CAPA_X, rot=0 if p["w"] >= p["h"] else 90)
+                 0.05, CAPA_T, rot=0 if p["w"] >= p["h"] else 90)
         etq_corta = (pzs[0]["pared"] if pzs else titulo.split("—")[0].strip())
-        _txt(msp, f"{etq_corta} ({w:.2f}x{h:.2f})", cx + w / 2, y + 0.12, 0.06, CAPA_X)
+        _txt(msp, f"{etq_corta} ({w:.2f}x{h:.2f})", cx + w / 2, y + 0.12, 0.06, CAPA_T)
         cx += w + 0.6
         fila_h = max(fila_h, h)
     y -= fila_h + 1.0
@@ -1115,9 +1184,15 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
     filas = [f"{p['id']} ({_fmt(p['ancho'])}x{_fmt(p['largo'])}): {_origen_txt(p['id'])}"
              for p in reg_rec]
     filas.append("(las piezas enteras de los muros se colocan completas, sin corte)")
+    compartidas = sorted({tabla_de[p["id"]] for p in reg_rec
+                          if p["id"] in tabla_de} & ya_dibujadas)
+    if compartidas:
+        filas.append("(las piezas " + ", ".join(f"{pc}-{i:02d}" for i in compartidas)
+                     + " ya estan dibujadas en la seccion de ESCALERA: es la misma pieza)")
     y = _lineas(y, filas)
     y -= 0.8
-    idxs = sorted({tabla_de[p["id"]] for p in reg_rec if p["id"] in tabla_de})
+    idxs = sorted({tabla_de[p["id"]] for p in reg_rec if p["id"] in tabla_de}
+                  - ya_dibujadas)
     marcados = {p["id"] for p in reg_rec}
     for k, idx in enumerate(idxs):
         cx = x0 + (k % cols) * gx
@@ -1125,20 +1200,48 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
         _tabla(cx, cy - 0.2, idx, marcados)
     y -= ((len(idxs) + cols - 1) // cols) * gy + 1.4 if idxs else 0.6
 
-    # ================= 4) DESPIECE DEL ZOCLO =================
+    # ================= 4) PLAN DE CORTE - ZOCLO (COMPLETO) =================
     H = _G.ZOCLO_ALTO          # 0.149: 4 x 0.149 = 0.596, tiras exactas
     import math as _math
     ml = _G.GEN[modelo]["zoclo_m"]
     tiras = _math.ceil(ml / 1.194)
     tablas_z = _math.ceil(tiras / 4)
-    y = _titulo(y, f"4) ZOCLO MORET - tiras de {H:.3f} x 1.194 (4 x {H:.3f} = 0.596:"
-                   " 4 tiras EXACTAS por pieza; cortadora de diamante, corte sin merma)")
-    y = _lineas(y, [f"{ml:.2f} ml de zoclo -> {tiras} tiras -> {tablas_z} piezas destinadas a zoclo"])
-    y -= 0.2
-    _rect(msp, x0, y - lT, aT, lT, CAPA_X)
-    for i in range(4):
-        _rect(msp, x0 + i * H, y - lT, H, lT, CAPA_X)
-        _txt(msp, f"Z{i+1} ({H:.3f})", x0 + i * H + H / 2, y - lT / 2, 0.045, CAPA_X, rot=90)
+    y = _titulo(y, f"4) PLAN DE CORTE - ZOCLO MORET COMPLETO: {ml:.2f} ml -> {tiras} tiras"
+                   f" de {H:.3f} x 1.194 -> {tablas_z} piezas (4 tiras EXACTAS por pieza;"
+                   " cortadora de diamante, corte sin merma)")
+    zn = 0
+    for k in range(tablas_z):
+        cx = x0 + (k % cols) * gx
+        cy = y - 0.2 - (k // cols) * gy
+        _rect(msp, cx, cy - lT, aT, lT, CAPA_M)
+        for i in range(4):
+            zn += 1
+            if zn <= tiras:
+                _rect(msp, cx + i * H, cy - lT, H, lT, CAPA_X)
+                _txt(msp, f"Z{zn}", cx + i * H + H / 2, cy - lT / 2, 0.04, CAPA_T, rot=90)
+            else:
+                _rect(msp, cx + i * H, cy - lT, H, lT, "PLAN-CORTE-SOBRANTES")
+                _txt(msp, "SOBRA (tira libre)", cx + i * H + H / 2, cy - lT / 2,
+                     0.032, CAPA_T, rot=90)
+        _txt(msp, f"ZOCLO {pc}-Z{k+1:02d}", cx + aT / 2, cy + 0.08, 0.05, CAPA_T)
+    y -= ((tablas_z + cols - 1) // cols) * gy + 1.0
+
+    # ---- zoclo ROYAL (1 tira de 0.149 por tabla de 0.20 x 1.20) ----
+    ml_r = _G.GEN[modelo]["zoclo_r"]
+    tiras_r = _math.ceil(ml_r / 1.20)
+    y = _titulo(y, f"4b) PLAN DE CORTE - ZOCLO ROYAL COMPLETO: {ml_r:.2f} ml -> {tiras_r} tablas"
+                   f" (de cada tabla Royal de 0.20 x 1.20 sale 1 tira de {H:.3f})")
+    aR, lR = 0.20, 1.20
+    gxr, gyr = lR + 0.4, aR + 0.55        # tablas Royal acostadas (1.20 x 0.20)
+    colsr = 4
+    for k in range(tiras_r):
+        cx = x0 + (k % colsr) * gxr
+        cy = y - 0.2 - (k // colsr) * gyr
+        _rect(msp, cx, cy - aR, lR, aR, CAPA_R)
+        _rect(msp, cx, cy - aR, lR, H, CAPA_X)
+        _txt(msp, f"ZR{k+1}", cx + lR / 2, cy - aR + H / 2, 0.045, CAPA_T)
+        _rect(msp, cx, cy - aR + H, lR, aR - H, "PLAN-CORTE-DESPERDICIO")
+    y -= ((tiras_r + colsr - 1) // colsr) * gyr + 1.0
 
 
 def exportar(modelo, fusionado=False):
@@ -1219,7 +1322,7 @@ def exportar(modelo, fusionado=False):
                 max_x_global = max(max_x_global, e.dxf.insert[0] + ancho_txt)
         except Exception:
             pass
-    dibujar_despiece_extra(msp, modelo, max_x_global + 3.0, maxy, piezas)
+    dibujar_despiece_extra(msp, modelo, max_x_global + 3.0, maxy, piezas, fusionado)
 
     # Nombre ASCII (sin ñ) para los CAD: evita que AutoCAD falle al resolver la
     # ruta por el carácter especial. Los PDF/Excel sí conservan "Viñas".
