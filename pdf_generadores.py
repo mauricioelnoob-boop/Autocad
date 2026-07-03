@@ -62,7 +62,10 @@ def _datos_dwg(modelo):
     doc = json.loads(open(cfg["json"], "rb").read().decode("utf-8", "replace"))
     objs = doc["OBJECTS"]; capas = _capas(objs)
     zoclo = _segmentos(objs, capas, "A-ZOCLO")
-    muros = _segmentos(objs, capas, "A-MUROS")
+    # muros = los estructurales (A-MUROS, incluye A-MUROS BAJOS por fragmento)
+    # + los MUROS FALSOS de tablaroca (más delgados), que también delimitan piso
+    muros = (_segmentos(objs, capas, "A-MUROS")
+             + _segmentos(objs, capas, "A-TABLAROCA"))
     escal = _segmentos(objs, capas, "A-ESCALON")
     claves = json.load(open(cfg["claves"]))
     return zoclo, muros, escal, claves
@@ -90,7 +93,7 @@ def pagina_tabla(pdf, modelo):
         ax.text(0.82, y, cajas, fontsize=8, color="#1b4f72", transform=ax.transAxes)
         ax.axhline(y - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
         y -= 0.085
-    nota = ("Zoclo: Moret se corta a 0.148 m = 4 tiras por baldosa con cortadora de diamante (rayar y tronchar, kerf~0); 0.148 deja holgura para el calibre 0.594-0.596 (a 0.149 el margen es cero). Royal 1 tira/tabla. Largo 1.194 m; ml del generador del cliente.\n"
+    nota = ("Zoclo: Moret se corta a 0.149 m = 4 tiras EXACTAS por pieza (4 x 0.149 = 0.596) con cortadora de diamante (rayar y tronchar, corte sin merma). Royal 1 tira/tabla. Largo 1.194 m; ml del generador del cliente.\n"
             "Urbania White 0.30×0.45 m horizontal (lavandería) — 10 pzas/caja, 1.36 m²/caja.\n"
             "Malla Lyndhurst 0.30×0.60 m en charola de regadera (~1.5 m²/charola).\n"
             "Piso en muro de regadera = piso Moret acostado; fondo 1.50 m, alto = NPT − losa (P.B. 2.75 m, P.A. 2.90 m), 3 caras, menos la ventana (1.50×0.90 al plafón).")

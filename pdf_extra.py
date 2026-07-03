@@ -214,7 +214,13 @@ def real_datos(modelo):
                         merma += fw * fl
         out[material] = {"neto": net, "cajas": cajas, "comprado": comprado,
                          "desp": max(0.0, comprado - net),
-                         "reusable": reut, "merma": merma}
+                         "reusable": reut, "merma": merma,
+                         # conteos EN PIEZAS para la justificación:
+                         "pzs_caja": pzc,
+                         "pzs_enteras": comp,               # se colocan completas
+                         "pzs_abiertas": len(baldosas),     # se abren para recortes
+                         "recortes": len(ent),              # cortes colocados
+                         "reuso": len(ent) - len(baldosas)}  # salen de sobrantes
     # Urbania (despiece real) y Malla
     *_, upz, ucajas, uarea = urbania_despiece(modelo)[3:]
     out["Urbania"] = {"neto": uarea, "cajas": ucajas, "comprado": ucajas * G.URB_CAJA,
@@ -309,10 +315,76 @@ def pagina_comparativo(pdf, modelo):
     pdf.savefig(fig); plt.close(fig)
 
 
+def pagina_justificacion(pdf, modelo):
+    """JUSTIFICACIÓN EN PIEZAS: de las cajas requeridas, cuántas piezas se
+    COLOCAN (enteras y abiertas para recorte), cuántas quedan de reserva y
+    cuánto es desperdicio — con el argumento de que ni optimizando al máximo
+    (reusando todos los sobrantes) el piso alcanza con el % presupuestado."""
+    R = real_datos(modelo)
+    bp = int(round(BUDGET_PCT * 100))
+    fig = plt.figure(figsize=(11.7, 8.3))
+    ax = fig.add_subplot(111); ax.axis("off")
+    ax.set_title(f"JUSTIFICACIÓN EN PIEZAS — A DÓNDE VA CADA CAJA · {modelo.upper()}",
+                 fontsize=14.5, fontweight="bold", y=0.98)
+
+    cols = ["MATERIAL", "CAJAS\nREQUERIDAS", "PIEZAS\nCOMPRADAS",
+            "SE COLOCAN\nENTERAS", "SE ABREN\nP/RECORTES", "RESERVA\n(no se tocan)",
+            "RECORTES\nCOLOCADOS", "DE ELLOS, DE\nSOBRANTE (reuso)"]
+    cell = []
+    args = {}
+    for etq, key in (("PISO Moret Arena", "Moret"), ("PISO Royal Walnut", "Royal Walnut")):
+        r = R[key]
+        compradas = r["cajas"] * r["pzs_caja"]
+        usadas = r["pzs_enteras"] + r["pzs_abiertas"]
+        reserva = max(0, compradas - usadas)
+        cell.append([etq, f"{r['cajas']}", f"{compradas}", f"{r['pzs_enteras']}",
+                     f"{r['pzs_abiertas']}", f"{reserva}", f"{r['recortes']}", f"{r['reuso']}"])
+        args[key] = (r, compradas, usadas, reserva)
+    t = ax.table(cellText=cell, colLabels=cols, cellLoc="center", loc="center",
+                 bbox=[0.0, 0.60, 1.0, 0.30],
+                 colWidths=[0.20, 0.10, 0.10, 0.11, 0.11, 0.12, 0.12, 0.14])
+    t.auto_set_font_size(False); t.set_fontsize(9.5); t.scale(1, 2.2)
+    for (rr, cc), c in t.get_celld().items():
+        if rr == 0:
+            c.set_facecolor("#1b4f72"); c.set_text_props(color="white", weight="bold")
+        if rr > 0 and cc == 0:
+            c.set_text_props(weight="bold", ha="left")
+
+    import textwrap
+    import math as _m
+    y = 0.54
+    for etq, key in (("MORET", "Moret"), ("ROYAL WALNUT", "Royal Walnut")):
+        r, compradas, usadas, reserva = args[key]
+        pct_real = 100.0 * (r["comprado"] - r["neto"]) / r["comprado"] if r["comprado"] else 0.0
+        cajas_min = _m.ceil(usadas / r["pzs_caja"])
+        parrafos = [
+            f"{etq}: las {r['cajas']} cajas = {compradas} piezas. En obra se colocan {usadas}: "
+            f"{r['pzs_enteras']} van ENTERAS y {r['pzs_abiertas']} se ABREN para sacar {r['recortes']} "
+            f"recortes. El plan ya reutiliza los sobrantes: {r['reuso']} recortes salen de sobras y NO "
+            f"abren pieza (sin ese reuso se abrirían {r['reuso']} piezas más ≈ "
+            f"+{_m.ceil(r['reuso']/r['pzs_caja'])} cajas).",
+            f"El mínimo físico son {usadas} piezas = {cajas_min} cajas AUN OPTIMIZANDO AL MÁXIMO; las "
+            f"{max(0, r['cajas']-cajas_min)} cajas restantes son margen de obra (roturas, calibre, zoclo "
+            f"por rendimiento real de tablón) y reserva del mismo lote. Sobrante reutilizable "
+            f"{r['reusable']:.2f} m² (se guarda) y merma real {r['merma']:.2f} m² (pedazos <10 cm, "
+            f"inevitables por la geometría de los cortes).",
+            f"Desperdicio real sobre lo comprado: {pct_real:.1f}% — por eso el {bp}% presupuestado "
+            f"NO alcanza en este material.",
+        ]
+        txt = "\n".join(textwrap.fill(p, 118) for p in parrafos)
+        ax.text(0.01, y, txt, fontsize=8.6, va="top", transform=ax.transAxes,
+                bbox=dict(boxstyle="round", facecolor="#fbfcfc", edgecolor="#aeb6bf"))
+        y -= 0.27
+    fig.text(0.5, 0.02, f"{PIE}        Justificación en piezas — {modelo}        {FECHA}",
+             ha="center", fontsize=8, color="#555")
+    pdf.savefig(fig); plt.close(fig)
+
+
 def comparativo(salida="Viñas Norte - Generadores.pdf"):
     with PdfPages(salida) as pdf:
         for m in ("Cabernet", "Merlot", "Chardonnay"):
             pagina_comparativo(pdf, m)
+            pagina_justificacion(pdf, m)
     print("->", salida)
 
 

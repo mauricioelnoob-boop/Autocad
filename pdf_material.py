@@ -48,11 +48,10 @@ PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
 
 def pagina_zoclo(pdf, guardar, modelo, material):
     """Catálogo de corte del ZOCLO: cómo sale el zoclo de cada pieza.
-    Corte con CORTADORA DE DIAMANTE (rayar y tronchar): sin merma de corte, la pieza se parte
-    exacto por la línea. Moret 0.596 m de alto -> 4 tiras de 0.148 m
-    (4×0.148 = 0.592 ≤ 0.596, ~4 mm de holgura para el calibre de fábrica 0.594-0.596;
-    a 0.149 el margen sería cero y un tablón corto caería a 3 tiras). A 0.15 sólo
-    salen 3 (0.60 > 0.596). Royal 0.20 m de alto -> 1 tira de 0.148 m por tabla."""
+    Corte con CORTADORA DE DIAMANTE (rayar y tronchar): sin merma de corte, la
+    pieza se parte exacto por la línea. Las tiras son de 0.149 m (dato de obra):
+    Moret 0.596 m de alto -> 4 tiras EXACTAS (4 × 0.149 = 0.596, sin sobrante).
+    Royal 0.20 m de alto -> 1 tira de 0.149 m por tabla."""
     import math
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle, Patch
@@ -61,14 +60,14 @@ def pagina_zoclo(pdf, guardar, modelo, material):
     if material == "Moret":
         ml = g["zoclo_m"]; alto_t, largo_t = 0.596, 1.194
         alto_z, por_tabla = G.ZOCLO_ALTO, 4; pzcaja = G.MORET_PZCAJA
-        comprob = "0.148 m × 4 = 0.592 m ≤ 0.596 m  (4 tiras/pieza con ~4 mm de holgura de calibre)"
-        antes = ("Cortadora de diamante (rayar y tronchar), corte sin merma. A 0.15 sólo salen "
-                 "3 tiras; a 0.149 el margen es cero y una pieza a 0.594 cae a 3. Por eso 0.148.")
+        comprob = "0.149 m × 4 = 0.596 m  (4 tiras EXACTAS por pieza, sin sobrante)"
+        antes = ("Cortadora de diamante (rayar y tronchar), corte sin merma: la pieza "
+                 "se raya y parte exacto por la línea, las 4 tiras usan toda la pieza.")
     else:
         ml = g["zoclo_r"]; alto_t, largo_t = 0.20, 1.20
         alto_z, por_tabla = G.ZOCLO_ALTO, 1; pzcaja = G.ROYAL_PZCAJA
-        comprob = "1 zoclo de 0.148 m por pieza (la pieza Royal mide 0.20 m de alto)"
-        antes = "De cada pieza Royal (0.20 m) sale 1 zoclo de 0.148 m; sobran ~0.05 m."
+        comprob = "1 zoclo de 0.149 m por pieza (la pieza Royal mide 0.20 m de alto)"
+        antes = "De cada pieza Royal (0.20 m) sale 1 zoclo de 0.149 m; sobran ~0.05 m."
     tiras = math.ceil(ml / largo_t)
     tablas = math.ceil(tiras / por_tabla)
     cajas = math.ceil(tablas / pzcaja)
@@ -134,12 +133,92 @@ def _dibujar_pared(ax, titulo, w, h, piezas):
     ax.tick_params(labelsize=6)
 
 
-def pagina_despiece_regadera(pdf, guardar, modelo):
-    """DESPIECE del muro de regadera: las 3 caras (fondo + 2 laterales) de cada
-    regadera, con piezas completas (naranja) y recortes (azul), y su resumen de
-    sobrante/desperdicio (incluido también en la tabla global)."""
+def _origenes_plan(baldosas):
+    """Mapas del plan de corte compartido: de qué sale cada corte (origen),
+    en qué tabla quedó (tabla_de) y a qué faltantes brinca cada sobra."""
+    from collections import defaultdict
+    origen_de, tabla_de = {}, {}
+    for idx, b in enumerate(baldosas, 1):
+        for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+            origen_de[etq] = origen
+            tabla_de[etq] = idx
+    destino_de = defaultdict(list)
+    for pid, org in origen_de.items():
+        if org != "TABLA":
+            destino_de[org].append(pid)
+    return origen_de, tabla_de, destino_de
+
+
+def _txt_origen(pid, origen_de, tabla_de, pc):
+    org = origen_de.get(pid)
+    if org is None:
+        return "?"
+    if org == "TABLA":
+        return f"abre la tabla {pc}-{tabla_de.get(pid, 0):02d}"
+    return f"de la SOBRA DE {org} (tabla {pc}-{tabla_de.get(pid, 0):02d}, no abre pieza)"
+
+
+def _pagina_tablas_filtradas(pdf, guardar, modelo, titulo, baldosas, idxs, marcados, pc):
+    """Dibuja las tablas del plan general cuyos índices están en `idxs`,
+    resaltando las piezas `marcados` (escalera o muros de baño); cada sobrante
+    lleva su medida y destino (los brincos ya consumidos aparecen como piezas
+    dentro de la misma tabla)."""
     import matplotlib.pyplot as plt
-    from matplotlib.patches import Patch
+    from matplotlib.patches import Rectangle, Patch
+    from optimizador_recortes import PISOS
+    aT, lT = PISOS["Moret"]
+    por_pag = 9
+    idxs = list(idxs)
+    npag = (len(idxs) + por_pag - 1) // por_pag
+    for ini in range(0, len(idxs), por_pag):
+        grupo = idxs[ini:ini + por_pag]
+        fig, axes = plt.subplots(3, 3, figsize=(16, 11)); axes = axes.ravel()
+        for ax, idx in zip(axes, grupo):
+            b = baldosas[idx - 1]
+            ax.add_patch(Rectangle((0, 0), aT, lT, fill=False, edgecolor="black", lw=1.6))
+            for (x, y, w, l, pid, rot), (origen, orden) in zip(b.piezas, b.meta):
+                es_m = pid in marcados
+                ax.add_patch(Rectangle((x, y), w, l,
+                                       facecolor="#f5b66b" if es_m else "#d6dbdf",
+                                       edgecolor="black", lw=1.2 if es_m else 0.5))
+                src = "nueva" if origen == "TABLA" else f"de sobra de {origen}"
+                ax.text(x + w / 2, y + l / 2, f"{pid}\n{_fmt(w)}x{_fmt(l)}\n({src})",
+                        ha="center", va="center", fontsize=5 if min(w, l) > 0.2 else 3.8,
+                        rotation=0 if w >= l else 90)
+            for (fx, fy, fw, fl, *_z) in b.libres:
+                if fw <= 0.005 or fl <= 0.005:
+                    continue
+                reut = es_reutilizable(fw, fl)
+                ax.add_patch(Rectangle((fx, fy), fw, fl,
+                                       facecolor="#f9e79f" if reut else "#f1948a",
+                                       edgecolor="#b7950b" if reut else "#922b21",
+                                       lw=0.8, hatch=".." if reut else "xx"))
+                ax.text(fx + fw / 2, fy + fl / 2,
+                        f"SOBRA\n{_fmt(fw)}x{_fmt(fl)}\n→ GUARDAR" if reut
+                        else f"desperd.\n{_fmt(fw)}x{_fmt(fl)}",
+                        ha="center", va="center", fontsize=4.4,
+                        color="#7d6608" if reut else "#641e16",
+                        rotation=0 if fw >= fl else 90)
+            ax.set_xlim(-0.03, aT + 0.03); ax.set_ylim(-0.03, lT + 0.03)
+            ax.set_aspect("equal"); ax.axis("off")
+            ax.set_title(f"Tabla {pc}-{idx:02d} (misma del plan general)",
+                         fontsize=9, weight="bold")
+        for ax in axes[len(grupo):]:
+            ax.axis("off")
+        fig.suptitle(f"{titulo}   pág. {ini // por_pag + 1} de {npag}\n"
+                     "naranja = corte de esta sección · gris = otros cortes de la misma tabla · "
+                     "amarillo = sobrante (dice a dónde va) · rojo = desperdicio",
+                     fontsize=11.5, fontweight="bold")
+        fig.tight_layout(rect=[0, 0.03, 1, 0.94])
+        guardar(fig)
+
+
+def pagina_despiece_regadera(pdf, guardar, modelo, baldosas=None, pc="M"):
+    """DESPIECE del muro de regadera (3 caras por regadera) con el ID de cada
+    pieza, y su PLAN DE CORTE real: de qué tabla del plan general o de qué
+    sobrante sale cada recorte (misma cadena de reuso)."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch, Rectangle
     import despiece_extra as DE
     paredes = DE.regadera_paredes(modelo)
     res = DE.regadera_resumen(modelo)
@@ -150,6 +229,10 @@ def pagina_despiece_regadera(pdf, guardar, modelo):
     axes = axes.flatten() if hasattr(axes, "flatten") else [axes]
     for ax, (titulo, w, h, pzs) in zip(axes, paredes):
         _dibujar_pared(ax, titulo, w, h, pzs)
+        for p in pzs:
+            ax.text(p["x"] + p["w"] / 2, p["y"] + p["h"] / 2, p["id"],
+                    ha="center", va="center", fontsize=5,
+                    rotation=0 if p["w"] >= p["h"] else 90)
     for ax in axes[n:]:
         ax.axis("off")
     fig.suptitle(f"DESPIECE — MURO DE REGADERA (piso Moret acostado) · {modelo.upper()}\n"
@@ -162,74 +245,108 @@ def pagina_despiece_regadera(pdf, guardar, modelo):
     fig.tight_layout(rect=[0, 0.05, 1, 0.92])
     guardar(fig)
 
+    if not baldosas:
+        return
+    # --- PLAN DE CORTE de los muros de baño: origen de cada recorte + tablas ---
+    origen_de, tabla_de, _dest = _origenes_plan(baldosas)
+    reg_rec = [p for _t, _w, _h, ps in paredes for p in ps if not p["completa"]]
+    fig = plt.figure(figsize=(11.7, 8.3))
+    ax = fig.add_subplot(111); ax.axis("off")
+    ax.set_title(f"PLAN DE CORTE — MUROS DE BAÑO (REGADERA) · {modelo.upper()}\n"
+                 "de dónde sale cada recorte (las tablas son las MISMAS del plan de corte general)",
+                 fontsize=13, fontweight="bold")
+    lineas = [f"{p['id']} ({_fmt(p['ancho'])}x{_fmt(p['largo'])}): "
+              f"{_txt_origen(p['id'], origen_de, tabla_de, pc)}" for p in reg_rec]
+    lineas.append("")
+    lineas.append(f"(las {res['completas']} piezas enteras de los muros se colocan completas, sin corte)")
+    if len(lineas) <= 20:
+        columnas = ((0.08, lineas),)
+    else:
+        mitad = (len(lineas) + 1) // 2
+        columnas = ((0.0, lineas[:mitad]), (0.52, lineas[mitad:]))
+    for col_x, chunk in columnas:
+        y = 0.88
+        for ln in chunk:
+            ax.text(col_x, y, ln, fontsize=7.2, family="monospace", transform=ax.transAxes)
+            y -= 0.04
+    guardar(fig)
+    idxs = sorted({tabla_de[p["id"]] for p in reg_rec if p["id"] in tabla_de})
+    if idxs:
+        _pagina_tablas_filtradas(pdf, guardar, modelo,
+                                 f"TABLAS DEL PLAN DE CORTE CON CORTES DE MUROS DE BAÑO · {modelo.upper()}",
+                                 baldosas, idxs, {p["id"] for p in reg_rec}, pc)
 
-def pagina_despiece_escalera(pdf, guardar, modelo):
-    """DESPIECE de la escalera tipo CATÁLOGO DE CORTE: cada pieza completa con
-    los recortes que se le sacan, marcados P1, P2… (peraltes), H1, H2… (huellas) y
-    D#-R# (recortes de descanso). Datos del cliente: ancho 1.15 m, peralte 0.175 m,
-    huella 0.27 m. Cada peralte/huella es un recorte de una pieza."""
+
+def pagina_despiece_escalera(pdf, guardar, modelo, baldosas=None, pc="M"):
+    """ESCALERA completa: esquema del perfil (P#/H#/descansos) + PLAN DE CORTE
+    real de sus piezas: de qué tabla del plan general o de qué sobrante sale
+    cada peralte/huella/recorte de descanso, con las tablas dibujadas y sus
+    sobrantes con destino."""
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle, Patch
     import despiece_extra as DE
-    from optimizador_recortes import ajustar, empaquetar, PISOS
     res = DE.escalera_resumen(modelo)
-    aT, lT = PISOS["Moret"]                          # 0.596 x 1.194
+    cfg = DE.ESCALERA[modelo]
     recortes = [p for p in res["piezas"] if not p["completa"]]
     enteras = [p for p in res["piezas"] if p["completa"]]
-    entradas = [(*ajustar(p["ancho"], p["largo"], aT, lT), p["id"]) for p in recortes]
-    baldosas = empaquetar(entradas, "Moret", 0.0, True)
 
-    def color_for(pid):
-        return "#aed6f1" if pid.startswith("P") else "#f5b66b" if pid.startswith("H") else "#c39bd3"
-
-    nb = len(baldosas) + len(enteras)
-    cols = 5
-    rows = (nb + cols - 1) // cols
-    fig, axes = plt.subplots(rows, cols, figsize=(11.7, 2.5 * rows + 1.5))
-    axes = axes.flatten() if hasattr(axes, "flatten") else [axes]
-    ai = 0
-    for idx, b in enumerate(baldosas, 1):
-        ax = axes[ai]; ai += 1
-        ax.add_patch(Rectangle((0, 0), aT, lT, facecolor="#fbfbfb", edgecolor="#333", lw=1.4))
-        for (x, y, w, l, pid, rot) in b.piezas:
-            ax.add_patch(Rectangle((x, y), w, l, facecolor=color_for(pid),
-                         edgecolor="#333", lw=0.5))
-            ax.text(x + w / 2, y + l / 2, pid, ha="center", va="center",
-                    fontsize=5.5, rotation=90 if l > w else 0)
-        for (fx, fy, fw, fl, *_z) in b.libres:
-            if fw > 0.02 and fl > 0.02:
-                ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#efefef",
-                             edgecolor="#cfcfcf", lw=0.3))
-        ax.set_xlim(-0.03, aT + 0.03); ax.set_ylim(-0.03, lT + 0.03)
-        ax.set_aspect("equal"); ax.set_title(f"Pieza {idx}", fontsize=7)
-        ax.set_xticks([]); ax.set_yticks([])
-    for p in enteras:
-        ax = axes[ai]; ai += 1
-        ax.add_patch(Rectangle((0, 0), aT, lT, facecolor="#f5b66b", edgecolor="#333", lw=1.4))
-        ax.text(aT / 2, lT / 2, p["id"] + "\n(entera)", ha="center", va="center", fontsize=6)
-        ax.set_xlim(-0.03, aT + 0.03); ax.set_ylim(-0.03, lT + 0.03)
-        ax.set_aspect("equal"); ax.set_title("Descanso", fontsize=7)
-        ax.set_xticks([]); ax.set_yticks([])
-    for ax in axes[ai:]:
-        ax.axis("off")
-
-    cfg = DE.ESCALERA[modelo]
-    tramos = " + ".join(f"{t} escal." for t in cfg["tramos"])
-    zoclo = ("  ·  + ZOCLO 0.15 m en la orilla (desde 1er descanso)"
+    fig = plt.figure(figsize=(11.7, 8.3))
+    # --- esquema del perfil (mitad superior) ---
+    axp = fig.add_axes([0.05, 0.52, 0.9, 0.36])
+    ex = ey = 0.0
+    n_esc = 0
+    DESC = 1.0
+    for t_i, tramo in enumerate(cfg["tramos"]):
+        for _ in range(tramo):
+            n_esc += 1
+            axp.plot([ex, ex], [ey, ey + 0.175], color="#1b4f72", lw=1.6)
+            axp.text(ex - 0.05, ey + 0.0875, f"P{n_esc}", ha="right", va="center",
+                     fontsize=6, color="#1b4f72")
+            ey += 0.175
+            axp.plot([ex, ex + 0.27], [ey, ey], color="#ca6f1e", lw=1.6)
+            axp.text(ex + 0.135, ey + 0.03, f"H{n_esc}", ha="center", fontsize=6,
+                     color="#ca6f1e")
+            ex += 0.27
+        if t_i < len(cfg["descansos"]):
+            ent, rec = cfg["descansos"][t_i]
+            axp.plot([ex, ex + DESC], [ey, ey], color="#1e8449", lw=2.2)
+            axp.text(ex + DESC / 2, ey + 0.05,
+                     f"DESCANSO {t_i+1}\n{ent} entera(s) + {rec} recorte(s)",
+                     ha="center", fontsize=6.5, color="#1e8449")
+            ex += DESC
+    axp.set_aspect("equal"); axp.axis("off")
+    zoclo = (" · lleva ZOCLO de 0.149 en la orilla desde el 1er descanso"
              if res["zoclo_orilla"] else "")
-    fig.suptitle(f"DESPIECE — ESCALERA (catálogo ilustrativo) · {modelo.upper()}\n"
-                 f"ancho 1.15 m · peralte 0.175 m · huella 0.27 m · {tramos} · "
-                 f"{len(cfg['descansos'])} descanso(s){zoclo}\n"
-                 f"{res['n_escalones']} peraltes (P) + {res['n_escalones']} huellas (H) + descansos · "
-                 f"los cortes H#/P#/D# van DENTRO del plan de corte general (reusan sobrantes del piso)",
-                 fontsize=10.5, fontweight="bold")
-    fig.legend(handles=[Patch(facecolor="#aed6f1", label="Peralte (P#)"),
-                        Patch(facecolor="#f5b66b", label="Huella (H#) / entera"),
-                        Patch(facecolor="#c39bd3", label="Recorte de descanso (D#-R#)"),
-                        Patch(facecolor="#efefef", label="sobrante")],
-               loc="lower center", ncol=4, fontsize=8)
-    fig.tight_layout(rect=[0, 0.05, 1, 0.90])
+    tramos = "+".join(str(t) for t in cfg["tramos"])
+    fig.suptitle(f"ESCALERA — ESQUEMA Y PLAN DE CORTE · {modelo.upper()}\n"
+                 f"ancho 1.15 · peralte 0.175 · huella 0.27 · tramos {tramos} · "
+                 f"{res['n_escalones']} escalones{zoclo}",
+                 fontsize=13, fontweight="bold")
+
+    # --- origen de cada pieza (mitad inferior, 2 columnas) ---
+    axl = fig.add_axes([0.02, 0.03, 0.96, 0.46]); axl.axis("off")
+    if baldosas:
+        origen_de, tabla_de, _dest = _origenes_plan(baldosas)
+        lineas = [f"{p['id']} ({_fmt(p['ancho'])}x{_fmt(p['largo'])}): "
+                  f"{_txt_origen(p['id'], origen_de, tabla_de, pc)}" for p in recortes]
+    else:
+        lineas = [f"{p['id']} ({_fmt(p['ancho'])}x{_fmt(p['largo'])})" for p in recortes]
+    lineas += [f"{p['id']}: pieza ENTERA de descanso (se coloca completa, sin corte)"
+               for p in enteras]
+    mitad = (len(lineas) + 1) // 2
+    for col_x, chunk in ((0.0, lineas[:mitad]), (0.5, lineas[mitad:])):
+        y = 0.95
+        for ln in chunk:
+            axl.text(col_x, y, ln, fontsize=7.6, family="monospace", transform=axl.transAxes)
+            y -= 0.055
     guardar(fig)
+
+    if baldosas:
+        idxs = sorted({tabla_de[p["id"]] for p in recortes if p["id"] in tabla_de})
+        if idxs:
+            _pagina_tablas_filtradas(pdf, guardar, modelo,
+                                     f"TABLAS DEL PLAN DE CORTE CON CORTES DE ESCALERA · {modelo.upper()}",
+                                     baldosas, idxs, {p["id"] for p in recortes}, pc)
 
 
 def pagina_muro_regadera(pdf, guardar, modelo):
@@ -315,6 +432,17 @@ def _punto_escalera(modelo):
         return None
 
 
+def _medida_real(v):
+    """Dimensión de recorte dibujada 'a calibre de pieza' -> medida real: los
+    vicios del plano (0.600 / 1.200) pasan a 0.596 / 1.194, igual que el DXF.
+    Así el plan de corte nunca pide un corte de 0.6 que la pieza no da."""
+    if 0.590 <= v <= 0.6085:
+        return 0.596
+    if 1.188 <= v <= 1.2065:
+        return 1.194
+    return v
+
+
 def _entradas_extras(modelo, ancho, largo):
     """Recortes del MURO DE REGADERA y de la ESCALERA (Moret) para empacarlos
     JUNTO con los del piso: así sus sobrantes entran a la misma cadena de reuso
@@ -323,7 +451,7 @@ def _entradas_extras(modelo, ancho, largo):
         import despiece_extra as DE
         ent = []
         for res in (DE.regadera_resumen(modelo), DE.escalera_resumen(modelo)):
-            ent += [(*ajustar(p["ancho"], p["largo"], ancho, largo),
+            ent += [(*ajustar(_medida_real(p["ancho"]), _medida_real(p["largo"]), ancho, largo),
                      p.get("id") or p.get("pared") or "extra")
                     for p in res["piezas"] if not p["completa"]]
         return ent
@@ -342,7 +470,8 @@ def empacar(piezas, material, modelo=None):
     mapa = {p["id"]: p for p in piezas if p["material"] == material}
     ancho, largo = PISOS[material]
     recortes = [p for p in piezas if p["material"] == material and not p["completa"]]
-    entradas = [(*ajustar(p["ancho"], p["largo"], ancho, largo), p["id"]) for p in recortes]
+    entradas = [(*ajustar(_medida_real(p["ancho"]), _medida_real(p["largo"]), ancho, largo), p["id"])
+                for p in recortes]
     if modelo and material == "Moret":
         entradas += _entradas_extras(modelo, ancho, largo)
     baldosas = empaquetar(entradas, material, 0.0, True)
@@ -827,11 +956,13 @@ def hacer_pdf(todas, material, path, modelo=""):
             except Exception:
                 pass
             try:
-                pagina_despiece_regadera(pdf, guardar, modelo)    # despiece 3 caras + recortes
+                # despiece 3 caras + PLAN DE CORTE real (misma cadena del plan general)
+                pagina_despiece_regadera(pdf, guardar, modelo, baldosas_all, PREF_CORTE[material])
             except Exception:
                 pass
             try:
-                pagina_despiece_escalera(pdf, guardar, modelo)    # despiece escalera (peralte 0.175)
+                # esquema de la escalera + PLAN DE CORTE real de P#/H#/D#
+                pagina_despiece_escalera(pdf, guardar, modelo, baldosas_all, PREF_CORTE[material])
             except Exception:
                 pass
 
@@ -849,7 +980,7 @@ def hacer_pdf(todas, material, path, modelo=""):
             for (fx, fy, fw, fl, *_z) in b.libres:
                 if fw <= 0.005 or fl <= 0.005:
                     continue
-                clave = (round(min(fw, fl), 2), round(max(fw, fl), 2))
+                clave = (round(min(fw, fl), 3), round(max(fw, fl), 3))
                 if es_reutilizable(fw, fl):
                     reut[clave] += 1
                 else:
@@ -859,7 +990,7 @@ def hacer_pdf(todas, material, path, modelo=""):
             items = sorted(cont.items(), key=lambda kv: -kv[0][0] * kv[0][1] * kv[1])
             filas = []
             for (a, b_), n in items[:limite]:
-                filas.append([f"{a:.2f} x {b_:.2f}", n, f"{a*b_*n:.3f}"])
+                filas.append([f"{_fmt(a)} x {_fmt(b_)}", n, f"{a*b_*n:.3f}"])
             if len(items) > limite:
                 resto = items[limite:]
                 nn = sum(n for _, n in resto)
@@ -934,7 +1065,7 @@ def hacer_pdf(todas, material, path, modelo=""):
                 axg.text(0.82, yy, _ss, fontsize=7.5, color="#1b4f72", transform=axg.transAxes)
                 axg.axhline(yy - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
                 yy -= 0.085
-            axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.148 m (4 por pieza, cortadora de diamante, holgura para calibre); Royal 1 tira/pieza. "
+            axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.149 m (4 tiras exactas por pieza, cortadora de diamante, corte sin merma); Royal 1 tira/pieza. "
                      "Urbania White 0.30×0.45 (lavandería). Malla Lyndhurst 0.30×0.60 (charola). "
                      "Muro de regadera = Moret acostado, fondo 1.50 m, ventana al plafón descontada, alto P.B. 2.75 / P.A. 2.90 m.",
                      fontsize=8, color="#444", transform=axg.transAxes, va="top")

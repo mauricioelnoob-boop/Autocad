@@ -52,6 +52,7 @@ LAYERS = {
     "PLAN-CORTE-PIEZAS-A-ABRIR": 7, "PLAN-CORTE-RECORTES": 3, "PLAN-CORTE-SOBRANTES": 2,
     "PLAN-CORTE-DESPERDICIO": 1, "PLAN-CORTE-TEXTOS": 5, "RESUMEN": 5,
     "ZOCLO": 3, "URBANIA-LAVANDERIA": 5, "REGADERA-MALLA-MURO": 1,
+    "ESCALERA-REGADERA-ZOCLO": 6,
 }
 
 # Variante "fusionada" (segundo ZIP): una sola capa por material con TODAS las
@@ -65,6 +66,7 @@ LAYERS_FUSIONADO = {
     "PLAN-CORTE-PIEZAS-A-ABRIR": 7, "PLAN-CORTE-RECORTES": 3, "PLAN-CORTE-SOBRANTES": 2,
     "PLAN-CORTE-DESPERDICIO": 1, "PLAN-CORTE-TEXTOS": 5, "RESUMEN": 5,
     "ZOCLO": 3, "URBANIA-LAVANDERIA": 5, "REGADERA-MALLA-MURO": 1,
+    "ESCALERA-REGADERA-ZOCLO": 6,
 }
 
 # Qué es cada capa (esta leyenda también se escribe DENTRO del DXF, capa RESUMEN):
@@ -74,7 +76,8 @@ LEYENDA_CAPAS = [
     ("ROYAL-COMPLETAS", "piezas completas de Royal Walnut; 1 polilinea = 1 pieza"),
     ("ROYAL-RECORTES", "piezas de Royal Walnut que llevan corte"),
     ("ETIQUETAS", "ID de cada pieza del plano (PB/PA - M/R - numero)"),
-    ("MUROS", "muros REALES del plano de origen (capa A-MUROS del DWG), con su grosor"),
+    ("MUROS", "muros del plano de origen: estructurales (A-MUROS) + muros falsos de"
+              " tablaroca (A-TABLAROCA, mas delgados), con su grosor"),
     ("SOBRANTE-JUNTO-AL-RECORTE", "amarillo PEGADO a cada recorte del plano: lo que le falta al recorte"
                                   " para completar la pieza entera (puede salir de los muros)"),
 ]
@@ -87,7 +90,8 @@ LEYENDA_CAPAS_FUSIONADO = [
     ("ROYAL", "TODAS las piezas de Royal Walnut que se compran (enteras + abiertas p/recorte)"),
     ("ROYAL-FALTANTES", "recortes de Royal que salen de un sobrante: no abren pieza nueva"),
     ("ETIQUETAS", "ID de cada pieza del plano (PB/PA - M/R - numero)"),
-    ("MUROS", "muros REALES del plano de origen (capa A-MUROS del DWG), con su grosor"),
+    ("MUROS", "muros del plano de origen: estructurales (A-MUROS) + muros falsos de"
+              " tablaroca (A-TABLAROCA, mas delgados), con su grosor"),
     ("SOBRANTE-JUNTO-AL-RECORTE", "amarillo PEGADO a cada recorte del plano: lo que le falta al recorte"
                                   " para completar la pieza entera (puede salir de los muros)"),
 ]
@@ -102,6 +106,9 @@ LEYENDA_COMUN = [
     ("ZOCLO", "linea de zoclo sobre el perimetro de piso"),
     ("URBANIA-LAVANDERIA", "marca de la zona con piso Urbania (lavanderia)"),
     ("REGADERA-MALLA-MURO", "marca de regaderas (malla en charola + muro Moret)"),
+    ("ESCALERA-REGADERA-ZOCLO", "despiece y plan de corte de la ESCALERA y de los MUROS DE BANO"
+                                " (regadera) + catalogo de corte del zoclo; es informativo:"
+                                " sus rectangulos NO cuentan como piezas del plano"),
 ]
 
 
@@ -123,7 +130,8 @@ BOQUILLA = {"Moret": 0.002, "Royal Walnut": 0.001}
 def _relayar_juntas(piezas, modelo=None):
     """Devuelve una COPIA de las piezas re-tendida con la BOQUILLA REAL para el
     DXF: piezas completas EXACTAS de 0.596 x 1.194 con boquilla de 2 mm en
-    Moret (Royal Walnut ya viene a paso real con 1 mm y no se toca).
+    Moret (Royal Walnut ya viene a paso real con 1 mm y no se re-tiende;
+    solo sus juntas a hueso del dibujo se abren a 1 mm cediendo el corte).
 
     Cómo: por cada CUARTO (piezas Moret conectadas) se detectan las COLUMNAS y
     FILAS de la retícula y se re-calcula su paso: todo paso nominal (0.600 a
@@ -152,6 +160,7 @@ def _relayar_juntas(piezas, modelo=None):
 
     ps = [dict(p) for p in piezas]
     orig_dim = {p["id"]: (p["wx"], p["hy"]) for p in piezas if "id" in p}
+    orig_pos = {p["id"]: (p["x0"], p["y0"]) for p in piezas if "id" in p}
     # máscara de muros: las piezas que CRUZAN muro (umbrales de puerta, muescas)
     # no generan aristas ni se mueven: cada cuarto ancla contra SU muro y el
     # corrimiento no se propaga de un cuarto a otro (ni empuja piezas al muro)
@@ -164,13 +173,13 @@ def _relayar_juntas(piezas, modelo=None):
             mask = None
 
     def _cap(p, eje, propuesto):
-        # tope FISICO: el corte tiene que caber en la pieza madre 0.596x1.194
-        # (nunca se fuerza por debajo de lo que ya traia el dibujo)
-        k = 0 if eje == "wx" else 1
+        # tope FISICO: el corte tiene que caber en la pieza madre 0.596x1.194.
+        # Aplica aun si el dibujo original traia el corte MAS GRANDE que la
+        # madre (PB-M-022/023 de Chardonnay venian dibujados de 1.210: de una
+        # pieza de 1.194 ese corte no sale; era vicio del dibujo)
         otro = p["hy"] if eje == "wx" else p["wx"]
         madre = 1.194 if otro <= 0.608 else 0.596
-        tope = max(madre, orig_dim.get(p.get("id"), (0.02, 0.02))[k])
-        return max(0.02, min(propuesto, tope))
+        return max(0.02, min(propuesto, madre))
 
     moret = [p for p in ps if p["material"] == "Moret"]
     if not moret:
@@ -192,7 +201,7 @@ def _relayar_juntas(piezas, modelo=None):
             vals = sorted(p[a0] for p in moviles)
             cols = [[vals[0]]]
             for v in vals[1:]:
-                if v - cols[-1][-1] <= 0.0015:
+                if v - cols[-1][-1] <= 0.004:
                     cols[-1].append(v)
                 else:
                     cols.append([v])
@@ -200,7 +209,7 @@ def _relayar_juntas(piezas, modelo=None):
 
             def _idx(v):
                 k = min(range(len(orig)), key=lambda i: abs(orig[i] - v))
-                return k if abs(orig[k] - v) <= 0.0015 else None
+                return k if abs(orig[k] - v) <= 0.004 else None
 
             # aristas: SOLO entre columnas de piezas vecinas en la misma fila
             # (así las retículas corridas de cuartos distintos no se mezclan)
@@ -217,6 +226,15 @@ def _relayar_juntas(piezas, modelo=None):
                 fila.sort(key=lambda p: p[a0])
                 for p, q in zip(fila, fila[1:]):
                     if q[a0] - (p[a0] + p[w]) <= 0.045:
+                        # tras un RECORTE la retícula se corta: el corte es el
+                        # que absorbe la diferencia (su largo lo ajusta a 2 mm
+                        # exactos la cascada D). Si aquí se forzara "medida del
+                        # corte + 2 mm" como paso, el corrimiento del paso real
+                        # se propagaría de cuarto en cuarto a través de los
+                        # cortes (así se cayó 8 cm la zona alta de Chardonnay).
+                        paso = _snap_real(p[w])
+                        if paso not in (0.596, 1.194):
+                            continue
                         i, j = _idx(p[a0]), _idx(q[a0])
                         if i is None or j is None or i == j:
                             continue
@@ -224,7 +242,7 @@ def _relayar_juntas(piezas, modelo=None):
                         # Normaliza TODAS las juntas, incluidas las chuecas de
                         # hasta 4.5 cm (ahí no cabe un muro: vicio del dibujo,
                         # p.ej. la de PB-M-080/081) y las de piezas tocándose.
-                        t = _snap_real(p[w]) + 0.002
+                        t = paso + 0.002
                         ady[i].append((j, t))
                         ady[j].append((i, -t))
             # columnas ANCLADAS A MURO: si una pieza tiene muro pegado a su
@@ -232,7 +250,8 @@ def _relayar_juntas(piezas, modelo=None):
             # su columna se fija en su posición original y no la arrastra el
             # corrimiento del resto del cuarto
             fijas = set()
-            if mask is not None:
+            if False and mask is not None:   # (anclas a muro desactivadas: creaban
+                                             # conflictos insolubles con el paso real)
                 for p in moviles:
                     i = _idx(p[a0])
                     if i is None or i in fijas:
@@ -292,6 +311,46 @@ def _relayar_juntas(piezas, modelo=None):
                         pos[u] = nuevo
                     if peor < 1e-7:
                         break
+                # RE-CENTRADO: el bloque completo se coloca donde estaba en el
+                # dibujo (promedio de sus columnas). El corrimiento del paso
+                # real queda repartido mitad y mitad en los dos muros del
+                # bloque (lo tapa el zoclo) en vez de acumularse todo en el
+                # extremo lejano e invadir el muro. Las boquillas internas no
+                # cambian: el corrimiento es uniforme.
+                delta = sum(orig[i] - pos[i] for i in comp
+                            if pos.get(i) is not None) / max(
+                    1, sum(1 for i in comp if pos.get(i) is not None))
+                # ... pero SIN meter al muro las piezas que en el dibujo van A
+                # HUESO contra muro: esas acotan el corrimiento del bloque y la
+                # holgura se va al extremo libre (en obra: al zoclo o al vano)
+                if mask is not None:
+                    lo, hi = -1e9, 1e9
+                    for p in moviles:
+                        i = _idx(p[a0])
+                        if i is None or pos.get(i) is None:
+                            continue
+                        x0, y0 = p["x0"], p["y0"]
+                        x1, y1 = x0 + p["wx"], y0 + p["hy"]
+                        if eje == "x":
+                            f_ini = _box(x0 - 0.012, y0 + 0.02, x0 - 0.001, y1 - 0.02)
+                            f_fin = _box(x1 + 0.001, y0 + 0.02, x1 + 0.012, y1 - 0.02)
+                        else:
+                            f_ini = _box(x0 + 0.02, y0 - 0.012, x1 - 0.02, y0 - 0.001)
+                            f_fin = _box(x0 + 0.02, y1 + 0.001, x1 - 0.02, y1 + 0.012)
+                        if (not f_ini.is_empty
+                                and f_ini.intersection(mask).area > 0.55 * f_ini.area):
+                            lo = max(lo, p[a0] - pos[i] - 0.0015)
+                        if (not f_fin.is_empty
+                                and f_fin.intersection(mask).area > 0.55 * f_fin.area):
+                            hi = min(hi, p[a0] + p[w] - _snap_real(p[w])
+                                     - pos[i] + 0.0015)
+                    if lo > hi:            # bloque sobre-determinado: al medio
+                        delta = (lo + hi) / 2
+                    else:
+                        delta = min(max(delta, lo), hi)
+                for i in comp:
+                    if pos.get(i) is not None:
+                        pos[i] += delta
 
 
             # precomputar (con coordenadas ORIGINALES): borde lejano y si la
@@ -299,7 +358,11 @@ def _relayar_juntas(piezas, modelo=None):
             datos = []
             for p in moviles:
                 lejos = p[a0] + p[w]
-                remata = (not p["completa"]) and not any(
+                # remata SOLO si su medida dibujada en este eje es PARCIAL: un
+                # 0.600/1.200 dibujado es paso de pieza completa y va a medida
+                # real exacta (si rematara, estiraría p.ej. PB-M-108 a 0.640 y
+                # su esquina ya no coincidiría con la junta de la fila de abajo)
+                remata = (not p["completa"]) and _snap_real(p[w]) not in (0.596, 1.194) and not any(
                     q is not p
                     and -0.001 <= q[a0] - lejos <= 0.045
                     and min(p[o0] + p[ow], q[o0] + q[ow]) - max(p[o0], q[o0]) > 0.02
@@ -329,29 +392,41 @@ def _relayar_juntas(piezas, modelo=None):
                     fx = min(a["x0"] + a["wx"], b["x0"] + b["wx"]) - max(a["x0"], b["x0"])
                     if fy > 0.05:
                         g = b["x0"] - (a["x0"] + a["wx"])
-                        if 0.00005 < g <= 0.045 and abs(g - 0.002) > 0.0005:
+                        # incluye g = 0: piezas A HUESO también reciben boquilla
+                        if -1e-9 <= g <= 0.045 and abs(g - 0.002) > 0.0005:
+                            # el corte crece (o encoge) hacia la junta; si el
+                            # tope de madre recortó la propuesta y saldría un
+                            # encogimiento espurio, mejor se deja la holgura
                             if not a["completa"]:
-                                a["wx"] = _cap(a, "wx", a["wx"] + g - 0.002)
+                                prop = a["wx"] + g - 0.002
+                                na = _cap(a, "wx", prop)
+                                if na > a["wx"] or abs(na - prop) < 1e-9:
+                                    a["wx"] = na
                             elif not b["completa"]:
-                                nb = _cap(b, "wx", b["wx"] + g - 0.002)
-                                b["x0"] -= nb - b["wx"]
-                                b["wx"] = nb
-                            else:
-                                a["x0"] += g - 0.002     # completa: se recorre; la
-                                                          # holgura pasa a su junta de
-                                                          # atrás y la siguiente ronda
-                                                          # la absorbe (cascada)
+                                prop = b["wx"] + g - 0.002
+                                nb = _cap(b, "wx", prop)
+                                if nb > b["wx"] or abs(nb - prop) < 1e-9:
+                                    b["x0"] -= nb - b["wx"]
+                                    b["wx"] = nb
+                            # entre completas NO se corre nada: la holgura del
+                            # dibujo queda donde está (los cortes son los únicos
+                            # que absorben); así ninguna fila abandona su muro
+                            # ni se rompe la colinealidad de las columnas
                     if fx > 0.05:
                         g = b["y0"] - (a["y0"] + a["hy"])
-                        if 0.00005 < g <= 0.045 and abs(g - 0.002) > 0.0005:
+                        if -1e-9 <= g <= 0.045 and abs(g - 0.002) > 0.0005:
                             if not a["completa"]:
-                                a["hy"] = _cap(a, "hy", a["hy"] + g - 0.002)
+                                prop = a["hy"] + g - 0.002
+                                na = _cap(a, "hy", prop)
+                                if na > a["hy"] or abs(na - prop) < 1e-9:
+                                    a["hy"] = na
                             elif not b["completa"]:
-                                nb = _cap(b, "hy", b["hy"] + g - 0.002)
-                                b["y0"] -= nb - b["hy"]
-                                b["hy"] = nb
-                            else:
-                                a["y0"] += g - 0.002     # completa: se recorre (cascada)
+                                prop = b["hy"] + g - 0.002
+                                nb = _cap(b, "hy", prop)
+                                if nb > b["hy"] or abs(nb - prop) < 1e-9:
+                                    b["y0"] -= nb - b["hy"]
+                                    b["hy"] = nb
+                            # (ídem en y: entre completas no se corre nada)
 
         # pase final: si al llevar una completa a su medida real (celda dibujada
         # corta) quedó encimada con la vecina, retrocede el borde invasor (nunca
@@ -377,12 +452,129 @@ def _relayar_juntas(piezas, modelo=None):
                 p = par[0][0]                      # de preferencia retrocede el corte Moret
                 if p["material"] != "Moret":
                     p = par[0][1] if par[0][1]["material"] == "Moret" else a
+                otro_p = b if p is a else a
                 k = 0 if eje == "wx" else 1
+                # retrocede la penetración Y ADEMAS deja la boquilla: si se
+                # quedara a hueso (0 mm), el borde del corte quedaría corrido
+                # exactamente 2 mm respecto a la completa de al lado y en el
+                # zoom de una esquina en T ese jog es lo primero que se ve
+                holg = 0.002 if otro_p["material"] == "Moret" else 0.001
                 # una completa solo retrocede lo que había CRECIDO sobre el dibujo;
                 # un corte puede retroceder hasta 2 cm
                 piso_min = (orig_dim.get(p.get("id"), (0.02, 0.02))[k]
                             if p["completa"] else 0.02)
-                p[eje] = max(p[eje] - pen, min(piso_min, p[eje]))
+                p[eje] = max(p[eje] - pen - holg, min(piso_min, p[eje]))
+
+    # Royal Walnut ya viene a paso real (boquilla de 1 mm): NO se re-tiende;
+    # solo las juntas que el dibujo dejó A HUESO (o casi) se abren a 1 mm
+    # cediendo el lado de CORTE (la completa de 0.200 x 1.200 no se toca)
+    royal_ps = [p for p in ps if p["material"] == "Royal Walnut"]
+    for a in royal_ps:
+        for b in royal_ps:
+            if a is b:
+                continue
+            fy = min(a["y0"] + a["hy"], b["y0"] + b["hy"]) - max(a["y0"], b["y0"])
+            fx = min(a["x0"] + a["wx"], b["x0"] + b["wx"]) - max(a["x0"], b["x0"])
+            if fy > 0.05:
+                g = b["x0"] - (a["x0"] + a["wx"])
+                if -1e-9 <= g < 0.0005:
+                    if not a["completa"]:
+                        a["wx"] = max(0.02, a["wx"] - (0.001 - g))
+                    elif not b["completa"]:
+                        b["x0"] += 0.001 - g
+                        b["wx"] = max(0.02, b["wx"] - (0.001 - g))
+            if fx > 0.05:
+                g = b["y0"] - (a["y0"] + a["hy"])
+                if -1e-9 <= g < 0.0005:
+                    if not a["completa"]:
+                        a["hy"] = max(0.02, a["hy"] - (0.001 - g))
+                    elif not b["completa"]:
+                        b["y0"] += 0.001 - g
+                        b["hy"] = max(0.02, b["hy"] - (0.001 - g))
+
+    # ninguna pieza Moret sale más grande que la madre 0.596 x 1.194: los
+    # vicios del dibujo (cortes de 1.210 como PB-M-022/023) se recortan por
+    # el lado lejano; el origen se queda en su nodo para no romper esquinas
+    for p in moret:
+        for eje in ("wx", "hy"):
+            tope = _cap(p, eje, p[eje])
+            if p[eje] > tope:
+                p[eje] = tope
+
+    # pase de COLINEALIDAD en T: un corte cuyo borde lejano caía en la MISMA
+    # línea de junta que el de su pieza vecina (esquina en T del dibujo, como
+    # PA-M-050 sobre PA-M-054) se re-alinea a esa línea si el re-tendido los
+    # separó unos mm y su frente quedó libre: el jog de 2 mm en una esquina
+    # en T es lo primero que se ve al hacer zoom.
+    for eje, a0k, o0k, owk in (("wx", "x0", "y0", "hy"), ("hy", "y0", "x0", "wx")):
+        for a in moret:
+            if a["completa"] or a.get("id") not in orig_pos:
+                continue
+            ka = 0 if eje == "wx" else 1
+            ofa = orig_pos[a["id"]][ka] + orig_dim[a["id"]][ka]
+            fa = a[a0k] + a[eje]
+            for b in moret:
+                if b is a or b.get("id") not in orig_pos:
+                    continue
+                # vecinos en T: bandas pegadas en el otro eje, traslape en éste
+                sep = max(b[o0k] - (a[o0k] + a[owk]), a[o0k] - (b[o0k] + b[owk]))
+                tras = (min(a[a0k] + a[eje], b[a0k] + b[eje])
+                        - max(a[a0k], b[a0k]))
+                if not (-0.001 <= sep <= 0.045 and tras > 0.05):
+                    continue
+                kb = 0 if eje == "wx" else 1
+                ofb = orig_pos[b["id"]][kb] + orig_dim[b["id"]][kb]
+                if abs(ofa - ofb) > 0.0025:
+                    continue                      # en el dibujo no eran colineales
+                fb = b[a0k] + b[eje]
+                d = fb - fa
+                if not (0.0005 < abs(d) <= 0.014):
+                    continue
+                if d > 0 and mask is not None:
+                    # crecer hacia la línea vecina, nunca hacia dentro de un muro
+                    if eje == "wx":
+                        franja = _box(fa, a["y0"] + 0.02, fb, a["y0"] + a["hy"] - 0.02)
+                    else:
+                        franja = _box(a["x0"] + 0.02, fa, a["x0"] + a["wx"] - 0.02, fb)
+                    if not franja.is_empty and franja.intersection(mask).area > 0.2 * franja.area:
+                        continue
+                # el frente del corte tiene que estar libre (si tiene junta
+                # armada a 2 mm, re-alinearlo la rompería)
+                libre = not any(
+                    q is not a
+                    and min(a[o0k] + a[owk], q[o0k] + q[owk]) - max(a[o0k], q[o0k]) > 0.02
+                    and -0.001 <= q[a0k] - fa <= 0.045
+                    for q in moret + [p for p in ps if p["material"] == "Royal Walnut"])
+                if not libre:
+                    continue
+                nuevo = _cap(a, eje, a[eje] + d)
+                if abs((a[a0k] + nuevo) - fb) <= 0.0006:
+                    a[eje] = nuevo
+                    break
+
+    # las MUESCAS (notch) son absolutas: abrazan el muro real, que no se mueve.
+    # Si la pieza se corrió, el lado de la muesca que iba al ras de un borde
+    # de la pieza se EXTIENDE hasta el borde nuevo, para que el contorno
+    # dibujado no muerda el muro (PB-M-103, PA-M-009)
+    for p in ps:
+        if not p.get("notch") or p.get("id") not in orig_pos:
+            continue
+        ox0, oy0 = orig_pos[p["id"]]
+        ow, oh = orig_dim[p["id"]]
+        nuevo_notch = []
+        for ring in p["notch"]:
+            ring = [list(pt) for pt in ring]
+            for pt in ring:
+                if abs(pt[0] - ox0) < 1e-6:
+                    pt[0] = p["x0"]
+                elif abs(pt[0] - (ox0 + ow)) < 1e-6:
+                    pt[0] = p["x0"] + p["wx"]
+                if abs(pt[1] - oy0) < 1e-6:
+                    pt[1] = p["y0"]
+                elif abs(pt[1] - (oy0 + oh)) < 1e-6:
+                    pt[1] = p["y0"] + p["hy"]
+            nuevo_notch.append(ring)
+        p["notch"] = nuevo_notch
 
     for p in ps:
         for k in ("x0", "y0", "wx", "hy"):
@@ -594,13 +786,24 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0, fusionado=False):
     import datetime
     from optimizador_recortes import CAJAS
     lineas = [f"RESUMEN DE PIEZAS - {modelo.upper()}", ""]
+    tablas_por_mat = {}
     for material in ("Moret", "Royal Walnut"):
         focal = [p for p in piezas if p["material"] == material]
         if not focal:
             continue
         completas = sum(1 for p in focal if p["completa"])
+        recortes_plano = [p for p in focal if not p["completa"]]
         # los recortes de regadera/escalera ya vienen empacados DENTRO (empacar)
         baldosas, _, (aB, lB) = empacar(piezas, material, modelo)
+        # de que sale cada recorte del plano: "TABLA" abre pieza nueva; otra
+        # etiqueta = sale del sobrante de esa pieza (FALTANTE, no abre pieza)
+        origen_de = {}
+        for b in baldosas:
+            for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+                origen_de[etq] = origen
+        abren = sum(1 for p in recortes_plano
+                    if origen_de.get(p["id"], "TABLA") == "TABLA")
+        faltan = len(recortes_plano) - abren
         extra_comp = 0
         if material == "Moret":
             try:
@@ -610,6 +813,7 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0, fusionado=False):
             except Exception:
                 extra_comp = 0
         bald_all = baldosas
+        tablas_por_mat[material] = len(bald_all)
         area_reut = area_desp = 0.0
         n_sob = n_desp = 0
         for b in bald_all:
@@ -629,17 +833,39 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0, fusionado=False):
         pct = 100.0 * (area_reut + area_desp) / m2_comprados if m2_comprados else 0.0
         nota_extra = ("  (incluye muro de regadera y escalera)"
                       if material == "Moret" and extra_comp else "")
-        capa_comp = (("MORET" if material == "Moret" else "ROYAL") if fusionado
-                     else CAPA[(material, True)])
+        base = "MORET" if material == "Moret" else "ROYAL"
+        lineas.append(f"{material.upper()}{nota_extra}:")
+        if fusionado:
+            # cada cifra de capa CUADRA con QSELECT sobre esa capa
+            lineas += [
+                f"  CAPA {base} (QSELECT): {completas + abren} polilineas = {completas} enteras"
+                f" + {abren} recortes que abren pieza nueva",
+                f"  CAPA {base}-FALTANTES (QSELECT): {faltan} recortes que salen de un sobrante"
+                f" (no abren pieza)",
+            ]
+        else:
+            lineas += [
+                f"  CAPA {base}-COMPLETAS (QSELECT): {completas} piezas completas en el plano",
+                f"  CAPA {base}-RECORTES (QSELECT): {len(recortes_plano)} piezas con corte en el plano"
+                f"   [{abren} abren pieza nueva + {faltan} salen de un sobrante]",
+            ]
+        extra_txt = (f" + {extra_comp} enteras extra (descansos de escalera y muro de regadera,"
+                     f" fuera del plano)" if extra_comp else "")
         lineas += [
-            f"{material.upper()}{nota_extra}:",
-            f"  PIEZAS COMPLETAS: {completas + extra_comp}   [en plano: {completas} = entidades de la capa {capa_comp}"
-            + (f"; extras regadera/escalera: {extra_comp}]" if extra_comp else "]"),
-            f"  PIEZAS ABIERTAS P/RECORTES: {len(bald_all)}   |   TOTAL DE PIEZAS: {total}"
-            f"   |   CAJAS: {cajas} ({m2_comprados:.2f} m2)",
+            f"  PIEZAS QUE SE COMPRAN: {completas} enteras del plano{extra_txt}"
+            f" + {len(bald_all)} que se abren p/recorte = {total}   |   CAJAS: {cajas} ({m2_comprados:.2f} m2)",
             f"  SOBRANTE REUTILIZABLE: {area_reut:.2f} m2 en {n_sob} pzas -> GUARDAR EN RESERVA"
             f"   |   DESPERDICIO: {area_desp:.2f} m2 ({n_desp} pedazos <10 cm)"
             f"   |   SOBRA TOTAL: {pct:.1f}% de lo comprado",
+            "",
+        ]
+    if tablas_por_mat:
+        tot_tablas = sum(tablas_por_mat.values())
+        det = " + ".join(f"{n} {m}" for m, n in tablas_por_mat.items())
+        lineas += [
+            f"PLAN DE CORTE (abajo): la capa PLAN-CORTE-PIEZAS-A-ABRIR tiene {tot_tablas}"
+            f" contornos ({det}), uno por pieza que se abre; incluye las tablas de"
+            " escalera/regadera.",
             "",
         ]
     if fusionado:
@@ -675,57 +901,178 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0, fusionado=False):
         t.set_placement((x0, y0 - k * 0.42), align=ezdxf.enums.TextEntityAlignment.MIDDLE_LEFT)
 
 
-def dibujar_despiece_extra(msp, modelo, x0, y0):
-    """Agrega al DXF el DESPIECE de la ESCALERA (peraltes P#, huellas H#) y del
-    ZOCLO (catálogo de corte), a la derecha del plano, como baldosas con sus
-    recortes acomodados. Sólo aplica al Moret (acabados de escalera y zoclo)."""
+def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
+    """Bloque ESCALERA-REGADERA-ZOCLO, a la derecha del plano (todo en la capa
+    ESCALERA-REGADERA-ZOCLO, informativa; NO suma piezas del plano):
+      1. ESQUEMA de la escalera (perfil con P#/H#/descansos).
+      2. PLAN DE CORTE - ESCALERA: de que tabla (M-xx) o de que sobrante sale
+         cada corte P#/H#/D#, con las tablas dibujadas y sus sobrantes con
+         destino (las tablas son las MISMAS del plan de corte general).
+      3. PLAN DE CORTE - MUROS DE BANO (regadera): alzados de las 3 caras con
+         el id de cada pieza, y de donde sale cada recorte.
+      4. DESPIECE DEL ZOCLO (tiras de 0.149, 4 exactas por pieza)."""
     try:
         import despiece_extra as DE
-        from optimizador_recortes import ajustar, empaquetar, PISOS
+        from optimizador_recortes import PISOS
+        import generadores as _G
     except Exception:
         return
+    from collections import defaultdict
+    CAPA_X = "ESCALERA-REGADERA-ZOCLO"
     aT, lT = PISOS["Moret"]                       # 0.596 x 1.194
-    cols, gx, gy = 6, aT + 0.30, lT + 0.55
 
-    def _baldosa(cx, cy, etq, piezas, libres):
-        _rect(msp, cx, cy - lT, aT, lT, "PLAN-CORTE-PIEZAS-A-ABRIR")
-        for (px, py, pw, pl, pid, rot) in piezas:
-            _rect(msp, cx + px, cy - lT + py, pw, pl, "PLAN-CORTE-RECORTES")
-            _txt(msp, pid, cx + px + pw / 2, cy - lT + py + pl / 2, 0.045, "PLAN-CORTE-TEXTOS")
-        for (fx, fy, fw, fl, *_z) in libres:
+    # --- la MISMA cadena de corte del plan general (no una aparte) ---
+    baldosas, mapa, _dims = empacar(piezas, "Moret", modelo)
+    pc = PREF_CORTE["Moret"]
+    origen_de, tabla_de = {}, {}
+    for idx, b in enumerate(baldosas, 1):
+        for (px, py, pw, pl, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+            origen_de[etq] = origen
+            tabla_de[etq] = idx
+    destino_de = defaultdict(list)
+    for pid, org in origen_de.items():
+        if org != "TABLA":
+            destino_de[org].append(pid)
+
+    def _titulo(y, texto, alto=0.18):
+        _txt(msp, texto, x0, y, alto, CAPA_X)
+        return y - 0.5
+
+    def _lineas(y, filas, alto=0.13):
+        for ln in filas:
+            _txt(msp, ln, x0, y, alto, CAPA_X)
+            y -= 0.38
+        return y
+
+    def _origen_txt(pid):
+        org = origen_de.get(pid)
+        if org is None:
+            return "?"
+        if org == "TABLA":
+            return f"abre la tabla {pc}-{tabla_de.get(pid, 0):02d}"
+        return f"sale de la SOBRA DE {org} (tabla {pc}-{tabla_de.get(pid, 0):02d}, no abre pieza)"
+
+    def _tabla(cx, cy, idx, marcados):
+        """Dibuja la tabla M-idx (la misma del plan general) con sus cortes,
+        y en cada sobrante su medida y destino."""
+        b = baldosas[idx - 1]
+        _rect(msp, cx, cy - lT, aT, lT, CAPA_X)
+        for (px, py, pw, pl, pid, rot), (origen, orden) in zip(b.piezas, b.meta):
+            _rect(msp, cx + px, cy - lT + py, pw, pl, CAPA_X)
+            marca = "*" if pid in marcados else ""
+            _txt(msp, f"{marca}{pid}", cx + px + pw / 2, cy - lT + py + pl / 2,
+                 min(0.05, max(0.028, min(pw, pl) * 0.28)), CAPA_X,
+                 rot=0 if pw >= pl else 90)
+        for (fx, fy, fw, fl, *_z) in b.libres:
             if fw > 0.03 and fl > 0.03:
-                _rect(msp, cx + fx, cy - lT + fy, fw, fl, "PLAN-CORTE-SOBRANTES")
-                _etq_sobrante(msp, cx, cy - lT, fx, fy, fw, fl)
-        _txt(msp, etq, cx + aT / 2, cy + 0.07, 0.06, "PLAN-CORTE-TEXTOS")
+                _rect(msp, cx + fx, cy - lT + fy, fw, fl, CAPA_X)
+                _txt(msp, f"SOBRA {_fmt(fw)}x{_fmt(fl)} -> GUARDAR",
+                     cx + fx + fw / 2, cy - lT + fy + fl / 2, 0.03, CAPA_X,
+                     rot=0 if fw >= fl else 90)
+        _txt(msp, f"{pc}-{idx:02d}", cx + aT / 2, cy + 0.08, 0.055, CAPA_X)
 
-    # ---- ESCALERA ----
-    # Los CORTES de la escalera (H#/P#/D#) van DENTRO del plan de corte general
-    # (reusan sobrantes del piso y ahí dicen a dónde brinca cada sobrante).
-    # Aquí sólo quedan las piezas ENTERAS de los descansos, para contarlas.
+    y = y0
+
+    # ================= 1) ESQUEMA DE LA ESCALERA =================
     res = DE.escalera_resumen(modelo)
-    enteras = [p for p in res["piezas"] if p["completa"]]
-    _txt(msp, f"ESCALERA (ancho 1.15, peralte 0.175, huella 0.27) - {res['n_escalones']} escalones; "
-              f"sus cortes estan en el PLAN DE CORTE general; aqui solo las enteras de descansos",
-         x0, y0 + 0.5, 0.16, "PLAN-CORTE-TEXTOS")
-    n = 0
-    for p in enteras:
-        cx = x0 + (n % cols) * gx; cy = y0 - (n // cols) * gy
-        _rect(msp, cx, cy - lT, aT, lT, "PLAN-CORTE-PIEZAS-A-ABRIR")
-        _txt(msp, p["id"], cx + aT / 2, cy - lT / 2, 0.06, "PLAN-CORTE-TEXTOS")
-        _txt(msp, f"B{n+1}", cx + aT / 2, cy + 0.07, 0.06, "PLAN-CORTE-TEXTOS"); n += 1
-    filas_esc = (n + cols - 1) // cols
+    cfg = DE.ESCALERA[modelo]
+    y = _titulo(y, f"1) ESCALERA - ESQUEMA ({res['n_escalones']} escalones: ancho 1.15,"
+                   f" peralte 0.175, huella 0.27; tramos {'+'.join(str(t) for t in cfg['tramos'])})")
+    px_, py_ = x0, y - 3.2          # arranque del perfil (sube hacia la derecha)
+    ex, ey = px_, py_
+    n_esc = 0
+    DESC_LARGO = 1.0
+    for t_i, tramo in enumerate(cfg["tramos"]):
+        for _ in range(tramo):
+            n_esc += 1
+            msp.add_line((ex, ey), (ex, ey + 0.175), dxfattribs={"layer": CAPA_X})
+            _txt(msp, f"P{n_esc}", ex - 0.10, ey + 0.0875, 0.045, CAPA_X)
+            ey += 0.175
+            msp.add_line((ex, ey), (ex + 0.27, ey), dxfattribs={"layer": CAPA_X})
+            _txt(msp, f"H{n_esc}", ex + 0.135, ey + 0.055, 0.045, CAPA_X)
+            ex += 0.27
+        if t_i < len(cfg["descansos"]):
+            ent, rec = cfg["descansos"][t_i]
+            msp.add_line((ex, ey), (ex + DESC_LARGO, ey), dxfattribs={"layer": CAPA_X})
+            _txt(msp, f"DESCANSO {t_i+1} ({ent} ent + {rec} rec)",
+                 ex + DESC_LARGO / 2, ey + 0.09, 0.045, CAPA_X)
+            ex += DESC_LARGO
+    if res.get("zoclo_orilla"):
+        _txt(msp, "+ zoclo de 0.149 en la orilla (pegado al muro) desde el 1er descanso",
+             x0, py_ - 0.35, 0.11, CAPA_X)
+    y = py_ - 0.9
 
-    # ---- ZOCLO Moret (catálogo: 4 tiras de 0.148 por baldosa, cortadora diamante) ----
-    import generadores as _G
-    H = _G.ZOCLO_ALTO          # 0.148
-    KERF = _G.ZOCLO_KERF       # 0.0 (cortadora de diamante: rayar y tronchar)
-    yz = y0 - filas_esc * gy - 0.8
-    _txt(msp, "DESPIECE ZOCLO MORET (4 tiras de 0.148 x 1.194 por pieza; cortadora de diamante: rayar y tronchar, corte sin merma; holgura para calibre 0.594-0.596)",
-         x0, yz + 0.5, 0.16, "PLAN-CORTE-TEXTOS")
-    _rect(msp, x0, yz - lT, aT, lT, "PLAN-CORTE-PIEZAS-A-ABRIR")
+    # ================= 2) PLAN DE CORTE - ESCALERA =================
+    esc_rec = [p for p in res["piezas"] if not p["completa"]]
+    esc_ent = [p for p in res["piezas"] if p["completa"]]
+    y = _titulo(y, "2) PLAN DE CORTE - ESCALERA (de donde sale cada corte;"
+                   " las tablas son las MISMAS del plan de corte general)")
+    filas = [f"{p['id']} ({_fmt(p['ancho'])}x{_fmt(p['largo'])}): {_origen_txt(p['id'])}"
+             for p in esc_rec]
+    filas += [f"{p['id']}: pieza ENTERA de descanso (se coloca completa, sin corte)"
+              for p in esc_ent]
+    y = _lineas(y, filas)
+    y -= 0.3
+    idxs = sorted({tabla_de[p["id"]] for p in esc_rec if p["id"] in tabla_de})
+    marcados = {p["id"] for p in esc_rec}
+    cols, gx, gy = 6, aT + 0.35, lT + 0.65
+    for k, idx in enumerate(idxs):
+        cx = x0 + (k % cols) * gx
+        cy = y - (k // cols) * gy
+        _tabla(cx, cy - 0.2, idx, marcados)
+    y -= ((len(idxs) + cols - 1) // cols) * gy + 0.9 if idxs else 0.4
+
+    # ================= 3) PLAN DE CORTE - MUROS DE BANO =================
+    paredes = DE.regadera_paredes(modelo)
+    rres = DE.regadera_resumen(modelo)
+    y = _titulo(y, f"3) MUROS DE BANO (REGADERA) - piso Moret ACOSTADO en 3 caras;"
+                   f" {rres['completas']} enteras + {rres['recortes']} recortes")
+    # alzados de cada cara, con el id de cada pieza
+    cx = x0
+    fila_h = 0.0
+    for (titulo, w, h, pzs) in paredes:
+        if cx + w > x0 + 14.0:          # nueva fila de alzados
+            cx = x0
+            y -= fila_h + 1.0
+            fila_h = 0.0
+        _rect(msp, cx, y - h, w, h, CAPA_X)
+        for p in pzs:
+            _rect(msp, cx + p["x"], y - h + p["y"], p["w"], p["h"], CAPA_X)
+            _txt(msp, p["id"], cx + p["x"] + p["w"] / 2, y - h + p["y"] + p["h"] / 2,
+                 0.05, CAPA_X, rot=0 if p["w"] >= p["h"] else 90)
+        etq_corta = (pzs[0]["pared"] if pzs else titulo.split("—")[0].strip())
+        _txt(msp, f"{etq_corta} ({w:.2f}x{h:.2f})", cx + w / 2, y + 0.12, 0.06, CAPA_X)
+        cx += w + 0.6
+        fila_h = max(fila_h, h)
+    y -= fila_h + 1.0
+    reg_rec = [p for _t, _w, _h, ps in paredes for p in ps if not p["completa"]]
+    filas = [f"{p['id']} ({_fmt(p['ancho'])}x{_fmt(p['largo'])}): {_origen_txt(p['id'])}"
+             for p in reg_rec]
+    filas.append("(las piezas enteras de los muros se colocan completas, sin corte)")
+    y = _lineas(y, filas)
+    y -= 0.3
+    idxs = sorted({tabla_de[p["id"]] for p in reg_rec if p["id"] in tabla_de})
+    marcados = {p["id"] for p in reg_rec}
+    for k, idx in enumerate(idxs):
+        cx = x0 + (k % cols) * gx
+        cy = y - (k // cols) * gy
+        _tabla(cx, cy - 0.2, idx, marcados)
+    y -= ((len(idxs) + cols - 1) // cols) * gy + 0.9 if idxs else 0.4
+
+    # ================= 4) DESPIECE DEL ZOCLO =================
+    H = _G.ZOCLO_ALTO          # 0.149: 4 x 0.149 = 0.596, tiras exactas
+    import math as _math
+    ml = _G.GEN[modelo]["zoclo_m"]
+    tiras = _math.ceil(ml / 1.194)
+    tablas_z = _math.ceil(tiras / 4)
+    y = _titulo(y, f"4) ZOCLO MORET - tiras de {H:.3f} x 1.194 (4 x {H:.3f} = 0.596:"
+                   " 4 tiras EXACTAS por pieza; cortadora de diamante, corte sin merma)")
+    y = _lineas(y, [f"{ml:.2f} ml de zoclo -> {tiras} tiras -> {tablas_z} piezas destinadas a zoclo"])
+    y -= 0.2
+    _rect(msp, x0, y - lT, aT, lT, CAPA_X)
     for i in range(4):
-        _rect(msp, x0 + i * (H + KERF), yz - lT, H, lT, "PLAN-CORTE-RECORTES")
-        _txt(msp, f"Z{i+1}", x0 + i * (H + KERF) + H / 2, yz - lT / 2, 0.05, "PLAN-CORTE-TEXTOS")
+        _rect(msp, x0 + i * H, y - lT, H, lT, CAPA_X)
+        _txt(msp, f"Z{i+1} ({H:.3f})", x0 + i * H + H / 2, y - lT / 2, 0.045, CAPA_X, rot=90)
 
 
 def exportar(modelo, fusionado=False):
@@ -783,8 +1130,8 @@ def exportar(modelo, fusionado=False):
     dibujar_resumen(msp, piezas, modelo, minx,
                     (y_fin if y_fin is not None else miny - 4.0) - 0.6, fusionado)
 
-    # --- Despiece de ESCALERA y ZOCLO (a la derecha del plano) ---
-    dibujar_despiece_extra(msp, modelo, maxx + 3.0, maxy)
+    # --- Escalera, muros de baño y zoclo (a la derecha del plano) ---
+    dibujar_despiece_extra(msp, modelo, maxx + 3.0, maxy, piezas)
 
     # Nombre ASCII (sin ñ) para los CAD: evita que AutoCAD falle al resolver la
     # ruta por el carácter especial. Los PDF/Excel sí conservan "Viñas".

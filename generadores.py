@@ -8,14 +8,12 @@ Cubre: Piso Moret, Piso Royal, Zoclo Moret, Zoclo Royal, Urbania White
 regadera (Moret vertical).
 
 Zoclo: metros lineales tomados del Excel del cliente. El zoclo Moret se corta a
-lo ALTO del mismo tablón (0.596 m) con CORTADORA DE DIAMANTE (rayar y tronchar,
-"score-and-snap"): la pieza se parte exactamente por la línea rayada, kerf ≈ 0.
-Council (REVERTIR_A_0149 -> ejecuta 0.148): sin kerf, 0.149*4 = 0.596 daría 4
-tiras pero con margen CERO; como el calibre de fábrica varía 0.594-0.596, se corta
-a 0.148 (4*0.148 = 0.592 <= 0.596, ~4 mm de holgura) para GARANTIZAR 4 tiras/tablón
-en todo el rango. A 0.15 sólo salen 3 (0.60 > 0.596). El conteo es por
-RENDIMIENTO-POR-TABLÓN (no por área): contar por área asume uso 100% del tablón y
-SUBESTIMA cajas — fue una de las causas del faltante en Cabernet.
+lo ALTO de la misma pieza (0.596 m) con CORTADORA DE DIAMANTE (rayar y tronchar):
+la pieza se parte exactamente por la línea rayada, corte sin merma. Las tiras son
+de 0.149 m (dato de obra): 4 x 0.149 = 0.596, salen 4 tiras EXACTAS por pieza sin
+sobrante. El conteo es por RENDIMIENTO-POR-TABLÓN (no por área): contar por área
+asume uso 100% del tablón y SUBESTIMA cajas — fue una de las causas del faltante
+en Cabernet.
 Urbania 0.30x0.45 (horizontal).  Malla ~1.5 m2 por charola.  Muro de
 regadera: alto = NPT - losa (P.B. 2.75 m, P.A. 2.90 m), 3 caras, Moret.
 """
@@ -34,8 +32,8 @@ URB=(0.45,0.30); URB_M2=URB[0]*URB[1]  # 0.135 m2/pieza (Urbania White)
 URB_PZCAJA=10; URB_CAJA=round(URB_M2*URB_PZCAJA,4)   # 1.35 m2/caja (derivado, como Moret/Royal)
 MALLA=(0.60,0.30); MALLA_M2=MALLA[0]*MALLA[1]   # 0.18 m2/pieza (Malla Lyndhurst)
 TABLON_W=0.596          # alto del tablón Moret (de donde se corta el zoclo a lo alto)
-ZOCLO_KERF=0.0          # cortadora de diamante (rayar y tronchar): kerf ≈ 0
-ZOCLO_ALTO=0.148        # Council: 4 tiras/tablón garantizadas con holgura para calibre 0.594-0.596
+ZOCLO_KERF=0.0          # cortadora de diamante (rayar y tronchar): corte sin merma
+ZOCLO_ALTO=0.149        # tira real de obra: 4 x 0.149 = 0.596, 4 tiras exactas por pieza
 ZOCLO_LARGO=1.194       # largo real de la tira (= largo del tablón)
 ZOCLO_ESC_ML=5.0        # ml de zoclo de orilla de escalera (Chardonnay, desde el 1er descanso)
 MALLA_M2_CHAROLA=1.5
@@ -75,7 +73,7 @@ def tiras_por_tablon(alto_tablon, H=ZOCLO_ALTO, kerf=ZOCLO_KERF):
 
 def zoclo(ml, caja_m2):
     """Cajas de zoclo por RENDIMIENTO-POR-TABLÓN (no por área). El zoclo se corta a
-    lo alto del tablón; Moret rinde 4 tiras/tablón a 0.148 (diamante, kerf~0),
+    lo alto del tablón; Moret rinde 4 tiras/tablón a 0.149 (diamante, sin merma),
     Royal 1 tira/tablón (tablón de 0.20). Devuelve (pzas, m2, cajas)."""
     if abs(caja_m2 - MORET_CAJA) < 1e-6:
         alto_tablon, pzcaja, largo_tira = MORET[1], MORET_PZCAJA, ZOCLO_LARGO   # 0.596
@@ -94,9 +92,9 @@ def reporte(modelo):
     R.append(('PISO Moret Arena (0.596x1.194)', f'{am:.2f} m2', f'{math.ceil(am*1.1/MORET_CAJA)} cajas (+10%)'))
     R.append(('PISO Royal Walnut (0.20x1.20)', f'{ar:.2f} m2', f'{math.ceil(ar*1.07/ROYAL_CAJA)} cajas (+7%)'))
     zp,zm2,zc=zoclo(g['zoclo_m'],MORET_CAJA)
-    R.append(('ZOCLO Moret (1.194x0.148, 4 tiras/tablón, cortadora diamante)', f'{g["zoclo_m"]:.1f} ml -> {zp} pzas / {math.ceil(zp/4)} tablones', f'{math.ceil(zc*1.1)} cajas (+10%)'))
+    R.append(('ZOCLO Moret (1.194x0.149, 4 tiras/tablón, cortadora diamante)', f'{g["zoclo_m"]:.1f} ml -> {zp} pzas / {math.ceil(zp/4)} tablones', f'{math.ceil(zc*1.1)} cajas (+10%)'))
     zp,zm2,zc=zoclo(g['zoclo_r'],ROYAL_CAJA)
-    R.append(('ZOCLO Royal (1.20x0.148, 1 tira/tabla)', f'{g["zoclo_r"]:.1f} ml -> {zp} pzas', f'{math.ceil(zc*1.07)} cajas (+7%)'))
+    R.append(('ZOCLO Royal (1.20x0.149, 1 tira/tabla)', f'{g["zoclo_r"]:.1f} ml -> {zp} pzas', f'{math.ceil(zc*1.07)} cajas (+7%)'))
     up=math.ceil(g['urbania_m2']/URB_M2)
     R.append(('URBANIA WHITE lavandería (0.30x0.45)', f'{g["urbania_m2"]:.2f} m2 -> {up} pzas', f'{math.ceil(g["urbania_m2"]*1.1/URB_CAJA)} cajas (+10%, 10 pz/caja)'))
     nch=len(g['regaderas']); mm2=nch*MALLA_M2_CHAROLA; mp=math.ceil(mm2/MALLA_M2)
@@ -114,7 +112,7 @@ def reporte(modelo):
                   f'{esc["cajas"]} cajas (+15%)'))
         if esc.get('zoclo_orilla'):
             zp,zm2,zc=zoclo(ZOCLO_ESC_ML,MORET_CAJA)
-            R.append(('ZOCLO ESCALERA Chardonnay (0.148, orilla al muro)',
+            R.append(('ZOCLO ESCALERA Chardonnay (0.149, orilla al muro)',
                       f'~{ZOCLO_ESC_ML:.1f} ml -> {zp} pzas', f'{math.ceil(zc*1.1)} cajas (+10%)'))
     except Exception as e:
         # Fallback por ÁREA (subestima): sólo si el despiece real de regadera/

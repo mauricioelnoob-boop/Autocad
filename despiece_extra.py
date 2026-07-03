@@ -42,6 +42,7 @@ def _tile_pared(w, h, etiqueta):
     RES = 0.02
     pzs = []
     y = 0.0
+    k = 0
     while y < h - RES:
         hh = min(TH, h - y)
         x = 0.0
@@ -49,10 +50,14 @@ def _tile_pared(w, h, etiqueta):
             ww = min(TW, w - x)
             corto, largo = min(ww, hh), max(ww, hh)
             completa = abs(ww - TW) < 0.012 and abs(hh - TH) < 0.012
+            k += 1
             pzs.append({"x": round(x, 4), "y": round(y, 4),
                         "w": round(ww, 4), "h": round(hh, 4),
                         "ancho": round(corto, 4), "largo": round(largo, 4),
-                        "completa": completa, "pared": etiqueta})
+                        "completa": completa, "pared": etiqueta,
+                        # id UNICO por pieza del muro: con el se rastrea en el
+                        # plan de corte de que tabla o de que sobrante sale
+                        "id": f"{etiqueta}-{k}"})
             x += TW
         y += TH
     return pzs
