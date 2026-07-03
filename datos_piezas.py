@@ -41,9 +41,16 @@ def en_bbox(p, bb):
 
 
 def _retipo(p):
-    """Recalcula completa/tipo_corte de una pieza según su material y medida."""
+    """Recalcula completa/tipo_corte de una pieza según su material y medida.
+    OJO: algunos planos dibujan la CELDA pieza+junta (0.600 / 1.200); la pieza
+    física es 0.596 x 1.194. Aquí se absorbe ese redondeo para que `ancho` y
+    `largo` sean SIEMPRE la medida real de corte (igual que hace ajustar())."""
     aw, al = PISOS[p["material"]]
     corto, largo = min(p["wx"], p["hy"]), max(p["wx"], p["hy"])
+    if 0 < corto - aw <= 0.012:
+        corto = aw
+    if 0 < largo - al <= 0.012:
+        largo = al
     p["ancho"], p["largo"] = round(corto, 4), round(largo, 4)
     ancho_ok = abs(corto - aw) <= 0.012
     largo_ok = abs(largo - al) <= 0.012

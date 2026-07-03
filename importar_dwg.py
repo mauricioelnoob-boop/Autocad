@@ -8,9 +8,11 @@ Lee el DWG que editaste en AutoCAD (exportado con exportar_dwg.py) y regenera
 los PDF de despiece con tus cambios: piezas agregadas, ajustadas o borradas.
 
 El material lo toma de la CAPA de cada pieza:
-    PISO-MORET          -> Moret
-    PISO-ROYAL-WALNUT   -> Royal Walnut
-El tamaño/posición lo toma del rectángulo (no importa si lo moviste o estiraste).
+    MORET-COMPLETAS / MORET-RECORTES   -> Moret
+    ROYAL-COMPLETAS / ROYAL-RECORTES   -> Royal Walnut
+    (también acepta las capas viejas PISO-MORET / PISO-ROYAL-WALNUT)
+El tamaño/posición lo toma del rectángulo (no importa si lo moviste o estiraste);
+completa/recorte se recalcula por la medida, no por la capa.
 Si dibujas una pieza nueva en la capa correcta, se incluye. Si la borras, se va.
 
 Uso:  python3 importar_dwg.py  Cabernet_editable.dwg  [--modelo Cabernet]
@@ -30,7 +32,10 @@ from datos_piezas import asignar_ids_corte, _retipo, MODELOS
 import pdf_material
 
 DWG2DXF = os.environ.get("DWG2DXF", "/tmp/libredwg-0.13.3/programs/dwg2dxf")
-CAPA_MAT = {"PISO-MORET": "Moret", "PISO-ROYAL-WALNUT": "Royal Walnut"}
+CAPA_MAT = {"MORET-COMPLETAS": "Moret", "MORET-RECORTES": "Moret",
+            "ROYAL-COMPLETAS": "Royal Walnut", "ROYAL-RECORTES": "Royal Walnut",
+            # nombres viejos, por si se importa un DXF de una versión anterior:
+            "PISO-MORET": "Moret", "PISO-ROYAL-WALNUT": "Royal Walnut"}
 
 
 def leer_piezas(archivo, modelo):

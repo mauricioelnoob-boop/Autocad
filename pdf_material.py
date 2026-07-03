@@ -12,7 +12,7 @@ Cada PDF:
                identificadas por ID; el otro material se dibuja tenue, sólo
                como contexto. (Royal Walnut ya NO aparece en planta baja.)
   Página 2  -> resumen de compra y desperdicio del material.
-  Págs. 3+  -> los DESPERDICIOS / recortes: cada baldosa que se corta, con las
+  Págs. 3+  -> los DESPERDICIOS / recortes: cada pieza que se corta, con las
                piezas y a dónde van, y el sobrante coloreado
                (amarillo = reutilizable, rojo = desperdicio).
 
@@ -47,7 +47,7 @@ PAL = ["#7fb3d5", "#82e0aa", "#f7dc6f", "#f0b27a", "#bb8fce", "#85c1e9",
 
 
 def pagina_zoclo(pdf, guardar, modelo, material):
-    """Catálogo de corte del ZOCLO: cómo sale el zoclo de cada baldosa/tabla.
+    """Catálogo de corte del ZOCLO: cómo sale el zoclo de cada pieza.
     Corte con CORTADORA DE DIAMANTE (rayar y tronchar): kerf ≈ 0, la pieza se parte
     exacto por la línea. Moret 0.596 m de alto -> 4 tiras de 0.148 m
     (4×0.148 = 0.592 ≤ 0.596, ~4 mm de holgura para el calibre de fábrica 0.594-0.596;
@@ -61,14 +61,14 @@ def pagina_zoclo(pdf, guardar, modelo, material):
     if material == "Moret":
         ml = g["zoclo_m"]; alto_t, largo_t = 0.596, 1.194
         alto_z, por_tabla = G.ZOCLO_ALTO, 4; pzcaja = G.MORET_PZCAJA
-        comprob = "0.148 m × 4 = 0.592 m ≤ 0.596 m  (4 tiras/tablón con ~4 mm de holgura de calibre)"
+        comprob = "0.148 m × 4 = 0.592 m ≤ 0.596 m  (4 tiras/pieza con ~4 mm de holgura de calibre)"
         antes = ("Cortadora de diamante (rayar y tronchar), kerf ≈ 0. A 0.15 sólo salen "
-                 "3 tiras; a 0.149 el margen es cero y un tablón a 0.594 cae a 3. Por eso 0.148.")
+                 "3 tiras; a 0.149 el margen es cero y una pieza a 0.594 cae a 3. Por eso 0.148.")
     else:
         ml = g["zoclo_r"]; alto_t, largo_t = 0.20, 1.20
         alto_z, por_tabla = G.ZOCLO_ALTO, 1; pzcaja = G.ROYAL_PZCAJA
-        comprob = "1 zoclo de 0.148 m por tabla (la tabla Royal mide 0.20 m de alto)"
-        antes = "De cada tabla Royal (0.20 m) sale 1 zoclo de 0.148 m; sobran ~0.05 m."
+        comprob = "1 zoclo de 0.148 m por pieza (la pieza Royal mide 0.20 m de alto)"
+        antes = "De cada pieza Royal (0.20 m) sale 1 zoclo de 0.148 m; sobran ~0.05 m."
     tiras = math.ceil(ml / largo_t)
     tablas = math.ceil(tiras / por_tabla)
     cajas = math.ceil(tablas / pzcaja)
@@ -95,7 +95,7 @@ def pagina_zoclo(pdf, guardar, modelo, material):
         ax.text(largo_t / 2, por_tabla * alto_z + sobra / 2, f"sobra {sobra:.3f} m",
                 ha="center", va="center", fontsize=7, color="#922b21")
     ax.set_xlim(-0.05, largo_t + 0.05); ax.set_ylim(-0.05, alto_t + 0.05)
-    ax.set_title(f"De 1 baldosa {material} ({alto_t:.3f} × {largo_t:.3f} m)\n"
+    ax.set_title(f"De 1 pieza {material} ({alto_t:.3f} × {largo_t:.3f} m)\n"
                  f"salen {por_tabla} zoclo(s) de {alto_z:.3f} m de alto", fontsize=10)
 
     # --- panel de cantidades ---
@@ -104,8 +104,8 @@ def pagina_zoclo(pdf, guardar, modelo, material):
         ("Metros lineales de zoclo (generador)", f"{ml:.2f} ml"),
         (f"Largo útil por tira", f"{largo_t:.3f} m"),
         ("Tiras de zoclo necesarias", f"{tiras} tiras"),
-        (f"Zoclos por baldosa (corte a {alto_z:.3f} m)", f"{por_tabla}"),
-        ("Baldosas a destinar a zoclo", f"{tablas} pzas"),
+        (f"Zoclos por pieza (corte a {alto_z:.3f} m)", f"{por_tabla}"),
+        ("Piezas a destinar a zoclo", f"{tablas} pzas"),
         (f"Cajas ({pzcaja} pz/caja)", f"{cajas} cajas"),
     ]
     y = 0.92
@@ -117,7 +117,7 @@ def pagina_zoclo(pdf, guardar, modelo, material):
         y -= 0.12
 
     nota = (f"PROPUESTA DE CORTE:  {comprob}.\n{antes}\n"
-            "El zoclo se obtiene de la misma baldosa del piso (mismo tono y lote).")
+            "El zoclo se obtiene de la misma pieza del piso (mismo tono y lote).")
     fig.text(0.5, 0.13, nota, ha="center", va="top", fontsize=9.5, color="#444",
              bbox=dict(boxstyle="round", facecolor="#eafaf1", edgecolor="#27ae60"))
     guardar(fig)
@@ -164,10 +164,10 @@ def pagina_despiece_regadera(pdf, guardar, modelo):
 
 
 def pagina_despiece_escalera(pdf, guardar, modelo):
-    """DESPIECE de la escalera tipo CATÁLOGO DE CORTE: cada baldosa completa con
+    """DESPIECE de la escalera tipo CATÁLOGO DE CORTE: cada pieza completa con
     los recortes que se le sacan, marcados P1, P2… (peraltes), H1, H2… (huellas) y
     D#-R# (recortes de descanso). Datos del cliente: ancho 1.15 m, peralte 0.175 m,
-    huella 0.27 m. Cada peralte/huella es un recorte de una baldosa."""
+    huella 0.27 m. Cada peralte/huella es un recorte de una pieza."""
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle, Patch
     import despiece_extra as DE
@@ -201,7 +201,7 @@ def pagina_despiece_escalera(pdf, guardar, modelo):
                 ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#efefef",
                              edgecolor="#cfcfcf", lw=0.3))
         ax.set_xlim(-0.03, aT + 0.03); ax.set_ylim(-0.03, lT + 0.03)
-        ax.set_aspect("equal"); ax.set_title(f"Baldosa {idx}", fontsize=7)
+        ax.set_aspect("equal"); ax.set_title(f"Pieza {idx}", fontsize=7)
         ax.set_xticks([]); ax.set_yticks([])
     for p in enteras:
         ax = axes[ai]; ai += 1
@@ -221,7 +221,7 @@ def pagina_despiece_escalera(pdf, guardar, modelo):
                  f"ancho 1.15 m · peralte 0.175 m · huella 0.27 m · {tramos} · "
                  f"{len(cfg['descansos'])} descanso(s){zoclo}\n"
                  f"{res['n_escalones']} peraltes (P) + {res['n_escalones']} huellas (H) + descansos · "
-                 f"{nb} baldosas ≈ {res['cajas']} cajas (sumadas a la tabla)",
+                 f"{nb} piezas ≈ {res['cajas']} cajas (sumadas a la tabla)",
                  fontsize=10.5, fontweight="bold")
     fig.legend(handles=[Patch(facecolor="#aed6f1", label="Peralte (P#)"),
                         Patch(facecolor="#f5b66b", label="Huella (H#) / entera"),
@@ -292,6 +292,12 @@ def pagina_muro_regadera(pdf, guardar, modelo):
 
 
 
+def _fmt(v):
+    """Medida con precisión real, sin ceros de sobra: 0.596 -> '0.596',
+    0.41 -> '0.41', 1.194 -> '1.194' (nunca muestra 0.596 como 0.60)."""
+    return f"{v:.3f}".rstrip("0").rstrip(".")
+
+
 def es_reutilizable(w, l):
     return min(w, l) >= MIN_REUSABLE
 
@@ -305,7 +311,7 @@ def empacar(piezas, material):
 
 
 def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
-    """PLAN DE CORTE — ORDEN Y REUSO: marca el ORDEN en que se corta cada baldosa
+    """PLAN DE CORTE — ORDEN Y REUSO: marca el ORDEN en que se corta cada pieza
     y de qué SOBRANTE sale cada pieza (la cadena de reuso). Dibuja las tablas que
     aprovechan sobrante (2+ piezas) con el orden 1°, 2°, 3° y su origen."""
     import matplotlib.pyplot as plt
@@ -333,13 +339,13 @@ def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
                 o = ordmap.get(orden, 1)
                 ax.add_patch(Rectangle((x, y), w, l, facecolor=PALo[(o - 1) % len(PALo)],
                              edgecolor="#333", lw=0.5))
-                src = "tabla" if origen == "TABLA" else "sobra"
+                src = "nueva" if origen == "TABLA" else "sobra"
                 # La etiqueta se adapta al tamaño de la pieza para NO encimarse:
                 # piezas muy angostas llevan solo el orden; las medianas, orden+clave;
                 # las amplias, las 3 líneas. La fuente escala con el lado corto.
                 smin = min(w, l)
                 fs = max(2.6, min(5.0, smin * 26))
-                dim = f"{round(w*100):.0f}×{round(l*100):.0f}"   # ancho×largo en cm
+                dim = f"{round(w*100, 1):g}×{round(l*100, 1):g}"   # ancho×largo en cm (59.6, no 60)
                 if smin < 0.09:
                     txt = f"{o}°"
                 elif smin < 0.20:
@@ -354,11 +360,11 @@ def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
                                  edgecolor="#cfcfcf", hatch="//", lw=0.3))
                     if fw > 0.13 and fl > 0.13:      # sobrante con su medida
                         ax.text(fx + fw / 2, fy + fl / 2,
-                                f"sobra\n{round(fw*100):.0f}×{round(fl*100):.0f}",
+                                f"sobra\n{round(fw*100, 1):g}×{round(fl*100, 1):g}",
                                 ha="center", va="center", fontsize=3.0, color="#999",
                                 rotation=0 if fw >= fl else 90)
             ax.set_xlim(-0.02, aB + 0.02); ax.set_ylim(-0.02, lB + 0.02)
-            ax.set_aspect("equal"); ax.set_title(f"Tabla #{c['id']}", fontsize=6.5)
+            ax.set_aspect("equal"); ax.set_title(f"Pieza #{c['id']}", fontsize=6.5)
             ax.set_xticks([]); ax.set_yticks([])
         for ax in axes[len(grupo):]:
             ax.axis("off")
@@ -368,11 +374,11 @@ def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
         fig.suptitle(ttl, fontsize=12, fontweight="bold", y=0.985)
         if primero:
             fig.text(0.5, 0.945,
-                     f"{len(ch)} tablas se abren para recortes; {len(multi)} aprovechan el sobrante "
-                     f"para 2+ piezas (ahorro de {len(multi)} tablas).",
+                     f"{len(ch)} piezas se abren para recortes; {len(multi)} aprovechan el sobrante "
+                     f"para 2+ recortes (ahorro de {len(multi)} piezas).",
                      ha="center", fontsize=8.5, color="#444")
             fig.text(0.5, 0.928,
-                     "El número = orden de corte · '(tabla)' = corte de tabla nueva · "
+                     "El número = orden de corte · '(nueva)' = corte de pieza nueva · "
                      "'(sobra)' = sale del sobrante de la pieza anterior.",
                      ha="center", fontsize=8.5, color="#444")
             fig.text(0.5, 0.911,
@@ -538,10 +544,104 @@ def hacer_pdf(todas, material, path, modelo=""):
         fig.tight_layout()
         guardar(fig)
 
-        # (Se eliminó la página "RECORTES Y SU PIEZA COMPLETA": dibujaba tablones
-        #  completos imaginarios encimados sobre las piezas del plano y recortes en
-        #  morado. Obs. de supervisión: sin capa morada y sin encimar; el de dónde
-        #  sale cada recorte queda en el PLAN DE CORTE y el plan de corte del DXF.)
+        # ---------- Página 1b: RECORTES CON SU PIEZA COMPLETA ----------
+        # (Sólo en PDF: morado = FALTANTE que sale de un sobrante; dentro de cada
+        #  sobrante amarillo se anota hacia qué faltante morado "brinca" — o
+        #  GUARDAR si nadie lo usa. En el DXF no existe capa morada.)
+        pc = PREF_CORTE[material]
+        recortes_plan = [p for p in focal if not p["completa"]]
+        cxh = sum(p["x"] for p in focal) / len(focal) if focal else 0
+        cyh = sum(p["y"] for p in focal) / len(focal) if focal else 0
+        # Según el empaque: de dónde sale cada recorte. "TABLA" = se corta de una
+        # baldosa nueva; cualquier otra etiqueta = sale del SOBRANTE de esa pieza.
+        origen_de = {}
+        for b in baldosas:
+            for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+                origen_de[etq] = origen
+        # ...y a la inversa: hacia qué faltante(s) morado(s) brinca el sobrante de
+        # cada pieza que se corta de tabla nueva.
+        destino_de = defaultdict(list)
+        for pid_, org_ in origen_de.items():
+            if org_ != "TABLA":
+                destino_de[org_].append(pid_)
+        n_sobra = sum(1 for p in recortes_plan
+                      if origen_de.get(p["id"], "TABLA") != "TABLA")
+
+        def _etq_salto(ax, x, y, w, l, pid):
+            """Escribe dentro del sobrante amarillo hacia qué faltante morado va."""
+            if w * l < 0.018:
+                return
+            dest = destino_de.get(pid)
+            if dest:
+                txt = "→ " + "\n→ ".join(dest[:3]) + ("\n…" if len(dest) > 3 else "")
+                col = "#6c3483"
+            else:
+                txt = "→ GUARDAR"
+                col = "#7d6608"
+            ax.text(x + w / 2, y + l / 2, txt, ha="center", va="center",
+                    fontsize=min(3.4, max(2.4, min(w, l) * 22)), color=col,
+                    rotation=0 if w >= l else 90, weight="bold")
+
+        if recortes_plan:
+            fig, ax = plt.subplots(figsize=(min(24, W * 1.4), min(16, H * 1.4) + 1))
+            for p in focal:
+                ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                       facecolor="#eef3f8" if p["completa"] else "#ffffff",
+                                       edgecolor="#d5d8dc", lw=0.3))
+            for p in recortes_plan:
+                org = origen_de.get(p["id"], "TABLA")
+                if org != "TABLA":
+                    # FALTANTE morado: sale del sobrante de otra pieza, NO se corta
+                    # tabla nueva. El sobrante de esa pieza "brinca" hacia aquí.
+                    ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                           facecolor="#d2b4de", edgecolor="#6c3483", lw=0.7))
+                    _tapar_notch(ax, p, edge="#6c3483")
+                    ax.text(p["x"], p["y"], f"{p['id']}\n(de {org.split()[0]})",
+                            ha="center", va="center", fontsize=3.2,
+                            rotation=0 if p["wx"] >= p["hy"] else 90, color="#4a235a")
+                    continue
+                aw, al = PISOS[material]
+                Wt = max(aw, p["wx"]); Lt = max(al, p["hy"])
+                tx = p["x0"] if p["x"] >= cxh else p["x0"] + p["wx"] - Wt
+                ty = p["y0"] if p["y"] >= cyh else p["y0"] + p["hy"] - Lt
+                # baldosa completa de la que sale (contorno punteado, pegada al recorte)
+                ax.add_patch(Rectangle((tx, ty), Wt, Lt, fill=False,
+                                       edgecolor="#7f8c8d", lw=0.5, ls="--"))
+                # el sobrante (lo que NO es el recorte), con su destino adentro
+                if Wt - p["wx"] > 0.02:
+                    ox = (p["x0"] + p["wx"]) if p["x"] >= cxh else tx
+                    ax.add_patch(Rectangle((ox, p["y0"]), Wt - p["wx"], p["hy"],
+                                           facecolor="#fcf3cf", edgecolor="#b7950b",
+                                           lw=0.3, alpha=0.7, hatch=".."))
+                    _etq_salto(ax, ox, p["y0"], Wt - p["wx"], p["hy"], p["id"])
+                if Lt - p["hy"] > 0.02:
+                    oy = (p["y0"] + p["hy"]) if p["y"] >= cyh else ty
+                    ax.add_patch(Rectangle((p["x0"], oy), p["wx"], Lt - p["hy"],
+                                           facecolor="#fcf3cf", edgecolor="#b7950b",
+                                           lw=0.3, alpha=0.7, hatch=".."))
+                    _etq_salto(ax, p["x0"], oy, p["wx"], Lt - p["hy"], p["id"])
+                # el recorte en su lugar real (un solo color neutro)
+                ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
+                                       facecolor="#aed6f1", edgecolor="#1b4f72", lw=0.6))
+                _tapar_notch(ax, p, edge="#1b4f72")
+                ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
+                        fontsize=3.6, rotation=0 if p["wx"] >= p["hy"] else 90)
+            ax.set_xlim(minx - 0.6, maxx + 0.6); ax.set_ylim(miny - 0.6, maxy + 0.6)
+            ax.set_aspect("equal"); ax.axis("off")
+            ax.legend(handles=[
+                Patch(facecolor="#aed6f1", edgecolor="#1b4f72",
+                      label="recorte cortado de pieza nueva"),
+                Patch(facecolor="#fcf3cf", edgecolor="#b7950b",
+                      label="sobrante de ese corte (adentro dice a dónde brinca)"),
+                Patch(facecolor="#d2b4de", edgecolor="#6c3483",
+                      label="FALTANTE morado: sale de un sobrante, sin corte nuevo"),
+            ], loc="upper center", ncol=3, fontsize=9, bbox_to_anchor=(0.5, -0.02))
+            ax.set_title(f"RECORTES Y SU PIEZA COMPLETA — {modelo.upper()} · {material.upper()}\n"
+                         "azul = recorte de pieza nueva (línea punteada = pieza entera; amarillo = su sobrante,\n"
+                         f"y ADENTRO del amarillo dice hacia qué faltante morado brinca o si se GUARDA) · "
+                         f"morado = faltante que sale de un sobrante ({n_sobra} piezas)",
+                         fontsize=11)
+            guardar(fig)
 
         # ---------- Página 1c: MAPA DE SOBRANTES (dónde encaja cada uno) ----------
         pc = PREF_CORTE[material]
@@ -565,7 +665,7 @@ def hacer_pdf(todas, material, path, modelo=""):
             ax.set_aspect("equal"); ax.axis("off")
             ax.set_title(f"MAPA DE SOBRANTES — {modelo.upper()} · {material.upper()}\n"
                          f"los recortes que ENCAJAN aprovechando un sobrante (amarillo); "
-                         f"entre paréntesis, la baldosa de la que sobra ({len(reusados)} aprovechados)",
+                         f"entre paréntesis, la pieza de la que sobra ({len(reusados)} aprovechados)",
                          fontsize=11)
             guardar(fig)
 
@@ -582,7 +682,7 @@ def hacer_pdf(todas, material, path, modelo=""):
         # tarjetas KPI (3 arriba: piezas / cajas / m² instalados)
         kpis = [
             ("PIEZAS TOTALES", f"{total_pzas}",
-             f"{completas + extra_completas} completas · {len(baldosas_all)} tablas p/recorte", "#eaf2f8", "#2471a3"),
+             f"{completas + extra_completas} completas · {len(baldosas_all)} piezas p/recorte", "#eaf2f8", "#2471a3"),
             ("CAJAS", f"{cajas}", f"{cfg['pzas_caja']} pzas/caja = {cajas*cfg['pzas_caja']} pzas", "#eafaf1", "#1e8449"),
             ("SUPERFICIE", f"{cajas*cfg['m2_caja']:.1f} m²", f"caja = {cfg['m2_caja']:g} m²", "#fef9e7", "#b7950b"),
         ]
@@ -614,7 +714,7 @@ def hacer_pdf(todas, material, path, modelo=""):
         # nota guía
         axr.text(0.06, 0.30,
                  "En las páginas siguientes se detalla cada pieza que se corta y a dónde va. El PLAN DE CORTE\n"
-                 "usa un color por orden (1°/2°/3°…) y gris rayado para el sobrante de cada tabla; las TABLAS\n"
+                 "usa un color por orden (1°/2°/3°…) y gris rayado para el sobrante de cada pieza; las LISTAS\n"
                  "DE SOBRANTE finales separan amarillo = reutilizable (≥10 cm) de rojo = desperdicio (<10 cm).\n"
                  "Royal Walnut sólo en recámaras (planta alta).",
                  fontsize=10.5, va="top", color="#2c3e50")
@@ -634,7 +734,7 @@ def hacer_pdf(todas, material, path, modelo=""):
                                            edgecolor="black", lw=0.8))
                     dest = mapa.get(pid)
                     loc = f"\n→ ({dest['x']:.1f}, {dest['y']:.1f})" if dest else ""
-                    ax.text(x + w / 2, y + l / 2, f"{pid}\n{w:.2f}x{l:.2f}{loc}",
+                    ax.text(x + w / 2, y + l / 2, f"{pid}\n{_fmt(w)}x{_fmt(l)}{loc}",
                             ha="center", va="center",
                             fontsize=6 if w >= 0.25 else 4.6, rotation=0 if w >= l else 90)
                 for (fx, fy, fw, fl, *_z) in b.libres:
@@ -644,13 +744,13 @@ def hacer_pdf(todas, material, path, modelo=""):
                         ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#f9e79f",
                                                edgecolor="#b7950b", lw=0.8, hatch=".."))
                         ax.text(fx + fw / 2, fy + fl / 2,
-                                f"SOBRA\n{fw:.2f}x{fl:.2f}\n→ GUARDAR",
+                                f"SOBRA\n{_fmt(fw)}x{_fmt(fl)}\n→ GUARDAR",
                                 ha="center", va="center", fontsize=4.6, color="#7d6608",
                                 rotation=0 if fw >= fl else 90)
                     else:
                         ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#f1948a",
                                                edgecolor="#922b21", lw=0.8, hatch="xx"))
-                        ax.text(fx + fw / 2, fy + fl / 2, f"desperd.\n{fw:.2f}x{fl:.2f}",
+                        ax.text(fx + fw / 2, fy + fl / 2, f"desperd.\n{_fmt(fw)}x{_fmt(fl)}",
                                 ha="center", va="center", fontsize=4.8, color="#641e16")
                 ax.set_xlim(-0.03, ancho + 0.03); ax.set_ylim(-0.03, largo + 0.03)
                 ax.set_aspect("equal"); ax.axis("off")
@@ -784,7 +884,7 @@ def hacer_pdf(todas, material, path, modelo=""):
                 axg.text(0.82, yy, _ss, fontsize=7.5, color="#1b4f72", transform=axg.transAxes)
                 axg.axhline(yy - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
                 yy -= 0.085
-            axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.148 m (4 por baldosa, cortadora de diamante, holgura para calibre); Royal 1 tira/tabla. "
+            axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.148 m (4 por pieza, cortadora de diamante, holgura para calibre); Royal 1 tira/pieza. "
                      "Urbania White 0.30×0.45 (lavandería). Malla Lyndhurst 0.30×0.60 (charola). "
                      "Muro de regadera = Moret acostado, fondo 1.50 m, ventana al plafón descontada, alto P.B. 2.75 / P.A. 2.90 m.",
                      fontsize=8, color="#444", transform=axg.transAxes, va="top")
