@@ -55,9 +55,6 @@ MODELOS = {
             _recorte("Moret", 504.526, -86.254, 0.540, 1.194),   # izq. de PA-M-006 (≈ idéntico)
             _recorte("Moret", 502.744, -85.498, 0.600, 0.520),   # arriba de PA-M-010
             _recorte("Moret", 506.008, -88.624, 0.210, 1.194),   # der. de PA-M-035 (corte de muro)
-            # UMBRAL de la puerta bajo PB-M-015: hay vano con piso (A-PISO +
-            # cerramiento proyectado) y el despiece dejó la franja sin pieza
-            _recorte("Moret", 493.1507, -83.2604, 0.5960, 0.1800),
 
             _recorte("Moret", 494.955, -91.520, 0.250, 1.194),   # der. de PB-M-147 hacia el baño
             _recorte("Moret", 495.389, -91.460, 0.170, 1.120),   # izq. de PB-M-135
@@ -97,15 +94,8 @@ MODELOS = {
         "eliminar": [
             (504.20, -85.28),    # PA-M-003: se absorbe en la pieza unida (009)
         ],
-        # Vano de puerta bajo PB-M-015: hay PISO real (A-PISO + cerramiento
-        # proyectado) pero la máscara de muros lo tapaba y borraba el umbral
-        # agregado en piezas_extra. Se abre SOLO la franja del vano en la
-        # máscara final (cancel_ignorar es quirúrgico: resta la caja; NO usar
-        # muros_ignorar aquí porque desactiva el polígono de muro COMPLETO
-        # cuyo centro caiga en la caja).
-        "cancel_ignorar": [
-            (493.145, 493.755, -83.270, -83.070),
-        ],
+        # (la franja bajo PB-M-015 es MURO: confirmado por el usuario, ahí no
+        # va pieza de umbral)
         # Recámaras: alinear el tope de cada columna de Royal con el muro de arriba.
         "tope_royal_regiones": [
             (499.70, 502.75, -87.0, -82.0),   # recámara 1 (izquierda)
@@ -251,6 +241,10 @@ MODELOS = {
         ],
         "redimensionar": [
             {"x": 288.32, "y": -60.97, "x0": 287.88, "y0": -61.215, "wx": 0.692, "hy": 0.483},  # PA-M-001 se extiende hasta la mitad
+            # PB-M-069 + PB-M-073 son UN solo recorte en L (obs. usuario): se
+            # extiende 069 al contorno completo; el murete de abajo-izquierda
+            # queda como entrante vía la máscara de muros, y 073 se elimina.
+            {"x": 277.4765, "y": -64.3453, "x0": 277.2695, "y0": -64.6223, "wx": 0.600, "hy": 0.374},
         ],
         # MUESCAS a la cara REAL del muro falso de tablaroca (el DWG las traía
         # cortas: arrancaban en x=290.25 y la tablaroca empieza en x=290.192,
@@ -311,6 +305,7 @@ MODELOS = {
         # Fantasmas / donde va muro: se eliminan.
         "eliminar": [
             (286.75, -64.68),   # PA-M-026: ahí va muro (casi no debe existir)
+            (277.7765, -64.4353),   # PB-M-073: absorbida en el recorte en L (069+073 = una pieza)
         ],
         # Baño de planta baja (claves 5/5/2/4 = Urbania/Malla/concreto): el
         # despiece dejó el Moret continuo cruzando el muro; ese piso es otro

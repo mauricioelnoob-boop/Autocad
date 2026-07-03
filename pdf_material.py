@@ -669,7 +669,10 @@ def hacer_pdf(todas, material, path, modelo=""):
             gt = geom.geom_type
             if gt == "LineString":
                 xs, ys = geom.xy
-                ax.plot(xs, ys, color=zcol, lw=2.0, zorder=5,
+                # zorder BAJO el texto (los ax.text van en ~3): la línea de
+                # zoclo ya no tapa las etiquetas de las piezas (obs. usuario,
+                # pasaba en el Royal); un poco translúcida por si coincide.
+                ax.plot(xs, ys, color=zcol, lw=1.4, zorder=2.5, alpha=0.75,
                         solid_capstyle="round")
             elif gt in ("MultiLineString", "GeometryCollection"):
                 for g in geom.geoms:
