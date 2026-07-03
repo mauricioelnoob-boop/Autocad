@@ -584,20 +584,55 @@ def _relayar_juntas(piezas, modelo=None):
     return ps
 
 
-def dibujar_acabados(msp, modelo):
+def dibujar_acabados(msp, modelo, limites=None):
     """Dibuja zoclo (perímetro) y marca las zonas de Urbania (lavandería) y las
-    regaderas (Malla en charola + muro Moret), cada una en su propio layer."""
+    regaderas (Malla en charola + muro Moret), cada una en su propio layer.
+    Con `limites` (minx, miny, maxx, maxy del plano de piezas) se descartan los
+    segmentos sueltos de OTRAS partes de la hoja del DWG de origen, que caían
+    encima del plan de corte."""
     try:
         import pdf_generadores as PG
         zoclo, muros, escal, claves = PG._datos_dwg(modelo)
     except Exception:
         return
+
+    def _recorta(a, b):
+        """Devuelve el tramo del segmento DENTRO del recuadro del plano (+1.5 m),
+        o None si queda todo afuera: las bardas largas del DWG de origen se
+        recortan en vez de invadir el plan de corte de abajo."""
+        if limites is None:
+            return a, b
+        x0, y0, x1, y1 = limites
+        m = 1.5
+        X0, Y0, X1, Y1 = x0 - m, y0 - m, x1 + m, y1 + m
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        t0, t1 = 0.0, 1.0
+        for p, q in ((-dx, a[0] - X0), (dx, X1 - a[0]),
+                     (-dy, a[1] - Y0), (dy, Y1 - a[1])):
+            if abs(p) < 1e-12:
+                if q < 0:
+                    return None
+            else:
+                t = q / p
+                if p < 0:
+                    t0 = max(t0, t)
+                else:
+                    t1 = min(t1, t)
+        if t0 > t1:
+            return None
+        return ((a[0] + t0 * dx, a[1] + t0 * dy),
+                (a[0] + t1 * dx, a[1] + t1 * dy))
+
     for a, b in zoclo:
-        msp.add_line(a, b, dxfattribs={"layer": "ZOCLO"})
-    # MUROS reales, sacados del plano de origen (capa A-MUROS del DWG): así se
-    # revisan las piezas contra el grosor del muro directamente en AutoCAD.
+        seg = _recorta(a, b)
+        if seg:
+            msp.add_line(seg[0], seg[1], dxfattribs={"layer": "ZOCLO"})
+    # MUROS reales del plano de origen (A-MUROS + tablaroca): así se revisan
+    # las piezas contra el grosor del muro directamente en AutoCAD.
     for a, b in muros:
-        msp.add_line(a, b, dxfattribs={"layer": "MUROS"})
+        seg = _recorta(a, b)
+        if seg:
+            msp.add_line(seg[0], seg[1], dxfattribs={"layer": "MUROS"})
     for c in claves:
         if c[0] == "5":
             _txt(msp, "URBANIA", c[1], c[2], 0.12, "URBANIA-LAVANDERIA")
@@ -935,8 +970,9 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
             destino_de[org].append(pid)
 
     def _titulo(y, texto, alto=0.18):
+        y -= 0.6                      # aire ANTES de cada sección
         _txt(msp, texto, x0, y, alto, CAPA_X)
-        return y - 0.5
+        return y - 0.6
 
     def _lineas(y, filas, alto=0.13):
         for ln in filas:
@@ -961,14 +997,17 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
             _rect(msp, cx + px, cy - lT + py, pw, pl, CAPA_X)
             marca = "*" if pid in marcados else ""
             _txt(msp, f"{marca}{pid}", cx + px + pw / 2, cy - lT + py + pl / 2,
-                 min(0.05, max(0.028, min(pw, pl) * 0.28)), CAPA_X,
+                 min(0.038, max(0.02, min(pw, pl) * 0.2)), CAPA_X,
                  rot=0 if pw >= pl else 90)
         for (fx, fy, fw, fl, *_z) in b.libres:
             if fw > 0.03 and fl > 0.03:
                 _rect(msp, cx + fx, cy - lT + fy, fw, fl, CAPA_X)
-                _txt(msp, f"SOBRA {_fmt(fw)}x{_fmt(fl)} -> GUARDAR",
-                     cx + fx + fw / 2, cy - lT + fy + fl / 2, 0.03, CAPA_X,
-                     rot=0 if fw >= fl else 90)
+                # etiqueta SOLO si el sobrante da para contenerla (las tiras
+                # diminutas quedan sin texto: no ensucian el dibujo)
+                if min(fw, fl) >= 0.05 and fw * fl >= 0.02:
+                    _txt(msp, f"SOBRA {_fmt(fw)}x{_fmt(fl)} -> GUARDAR",
+                         cx + fx + fw / 2, cy - lT + fy + fl / 2, 0.028, CAPA_X,
+                         rot=0 if fw >= fl else 90)
         _txt(msp, f"{pc}-{idx:02d}", cx + aT / 2, cy + 0.08, 0.055, CAPA_X)
 
     y = y0
@@ -1012,15 +1051,15 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
     filas += [f"{p['id']}: pieza ENTERA de descanso (se coloca completa, sin corte)"
               for p in esc_ent]
     y = _lineas(y, filas)
-    y -= 0.3
+    y -= 0.8
     idxs = sorted({tabla_de[p["id"]] for p in esc_rec if p["id"] in tabla_de})
     marcados = {p["id"] for p in esc_rec}
-    cols, gx, gy = 6, aT + 0.35, lT + 0.65
+    cols, gx, gy = 6, aT + 0.55, lT + 0.85
     for k, idx in enumerate(idxs):
         cx = x0 + (k % cols) * gx
         cy = y - (k // cols) * gy
         _tabla(cx, cy - 0.2, idx, marcados)
-    y -= ((len(idxs) + cols - 1) // cols) * gy + 0.9 if idxs else 0.4
+    y -= ((len(idxs) + cols - 1) // cols) * gy + 1.4 if idxs else 0.6
 
     # ================= 3) PLAN DE CORTE - MUROS DE BANO =================
     paredes = DE.regadera_paredes(modelo)
@@ -1050,14 +1089,14 @@ def dibujar_despiece_extra(msp, modelo, x0, y0, piezas):
              for p in reg_rec]
     filas.append("(las piezas enteras de los muros se colocan completas, sin corte)")
     y = _lineas(y, filas)
-    y -= 0.3
+    y -= 0.8
     idxs = sorted({tabla_de[p["id"]] for p in reg_rec if p["id"] in tabla_de})
     marcados = {p["id"] for p in reg_rec}
     for k, idx in enumerate(idxs):
         cx = x0 + (k % cols) * gx
         cy = y - (k // cols) * gy
         _tabla(cx, cy - 0.2, idx, marcados)
-    y -= ((len(idxs) + cols - 1) // cols) * gy + 0.9 if idxs else 0.4
+    y -= ((len(idxs) + cols - 1) // cols) * gy + 1.4 if idxs else 0.6
 
     # ================= 4) DESPIECE DEL ZOCLO =================
     H = _G.ZOCLO_ALTO          # 0.149: 4 x 0.149 = 0.596, tiras exactas
@@ -1110,11 +1149,18 @@ def exportar(modelo, fusionado=False):
         else:
             w, h = p["wx"], p["hy"]           # ya vienen a medida real (re-tendido)
             _rect(msp, p["x0"], p["y0"], w, h, capa)
-        th = min(max(0.022, min(w, h) * 0.22), 0.055)
-        _txt(msp, p["id"], p["x"], p["y"], th, "ETIQUETAS")
+        # etiqueta chica, centrada y a lo LARGO de la pieza (rotada si la pieza
+        # es vertical): siempre queda contenida dentro de su pieza
+        th = min(max(0.018, min(w, h) * 0.16), 0.042)
+        _txt(msp, p["id"], p["x"], p["y"], th, "ETIQUETAS",
+             rot=0 if w >= h else 90)
 
     # --- Acabados: zoclo + muros + zonas de Urbania / regaderas ---
-    dibujar_acabados(msp, modelo)
+    dibujar_acabados(msp, modelo,
+                     (min(p["x0"] for p in piezas_dxf),
+                      min(p["y0"] for p in piezas_dxf),
+                      max(p["x0"] + p["wx"] for p in piezas_dxf),
+                      max(p["y0"] + p["hy"] for p in piezas_dxf)))
 
     # --- Sobrante amarillo PEGADO a cada recorte (completa la pieza entera) ---
     dibujar_sobrantes_en_plano(msp, piezas_dxf, modelo)
@@ -1126,12 +1172,27 @@ def exportar(modelo, fusionado=False):
     maxy = max(p["y0"] + p["hy"] for p in piezas_dxf)
     y_fin = dibujar_plan_corte(msp, piezas, minx, miny, modelo)
 
-    # --- Cuadro RESUMEN (conteo de completas / piezas a abrir / cajas / sobra) ---
+    # --- Cuadro RESUMEN (conteo de completas / piezas a abrir / cajas / sobra),
+    # bien SEPARADO del plan de corte para que no se encimen los textos ---
     dibujar_resumen(msp, piezas, modelo, minx,
-                    (y_fin if y_fin is not None else miny - 4.0) - 0.6, fusionado)
+                    (y_fin if y_fin is not None else miny - 4.0) - 1.8, fusionado)
 
-    # --- Escalera, muros de baño y zoclo (a la derecha del plano) ---
-    dibujar_despiece_extra(msp, modelo, maxx + 3.0, maxy, piezas)
+    # --- Escalera, muros de baño y zoclo: A LA DERECHA DE TODO lo dibujado
+    # (plano + plan de corte + resumen), para que NO se encime con nada ---
+    max_x_global = maxx
+    for e in msp:
+        try:
+            if e.dxftype() == "LWPOLYLINE":
+                max_x_global = max(max_x_global, max(p[0] for p in e.get_points()))
+            elif e.dxftype() == "LINE":
+                max_x_global = max(max_x_global, e.dxf.start[0], e.dxf.end[0])
+            elif e.dxftype() == "TEXT":
+                ancho_txt = (0 if (e.dxf.rotation or 0) > 45
+                             else len(e.dxf.text) * e.dxf.height * 0.85)
+                max_x_global = max(max_x_global, e.dxf.insert[0] + ancho_txt)
+        except Exception:
+            pass
+    dibujar_despiece_extra(msp, modelo, max_x_global + 3.0, maxy, piezas)
 
     # Nombre ASCII (sin ñ) para los CAD: evita que AutoCAD falle al resolver la
     # ruta por el carácter especial. Los PDF/Excel sí conservan "Viñas".
