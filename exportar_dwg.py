@@ -120,58 +120,273 @@ def _dim_real(v, material):
 BOQUILLA = {"Moret": 0.002, "Royal Walnut": 0.001}
 
 
-def _relayar_juntas(piezas):
+def _relayar_juntas(piezas, modelo=None):
     """Devuelve una COPIA de las piezas re-tendida con la BOQUILLA REAL para el
-    DXF: 2 mm entre piezas de Moret y 1 mm en Royal Walnut (los planos de
-    origen de Cabernet/Chardonnay traen retícula nominal 0.602/1.202 que deja
-    6-8 mm; Merlot ya viene a paso real y no se mueve).
+    DXF: piezas completas EXACTAS de 0.596 x 1.194 con boquilla de 2 mm en
+    Moret (Royal Walnut ya viene a paso real con 1 mm y no se toca).
 
-    Cada corrida contigua (fila o columna) se re-tiende desde su PRIMERA pieza
-    (el lado del muro): pieza a medida real + boquilla. Si la corrida termina
-    en RECORTE, ese recorte conserva su borde lejano (en obra el corte real
-    absorbe la diferencia); si termina en pieza completa, la holgura queda en
-    el perímetro (la tapa el zoclo). Las piezas con entrante de muro no se
-    mueven (anclan contra su muro)."""
+    Cómo: por cada CUARTO (piezas Moret conectadas) se detectan las COLUMNAS y
+    FILAS de la retícula y se re-calcula su paso: todo paso nominal (0.600 a
+    0.602 de columna, 1.194 a 1.202 de fila) pasa al paso real 0.598 / 1.196
+    (pieza + boquilla); los pasos parciales (recortes) se conservan. Una sola
+    malla por cuarto = las esquinas de todas las filas y columnas COINCIDEN.
+    Las boquillas chuecas del dibujo original (hasta 4 cm, como la de
+    PB-M-080/081 en Cabernet) se normalizan a 2 mm porque en ese espacio no
+    cabe un muro: son vicios del dibujo. El recorte que remata contra un muro
+    conserva su borde original (en obra el corte absorbe la diferencia). Las
+    piezas con entrante se mueven con la retícula pero su muesca queda
+    pegada al muro real (el muro no se mueve)."""
+    def _snap_real(v):
+        # medida dibujada ~pieza completa (calibre +-6 mm) -> medida real exacta
+        if 0.590 <= v <= 0.6085:
+            return 0.596
+        if 1.188 <= v <= 1.2065:
+            return 1.194
+        return v
+
+    try:
+        from shapely.geometry import box as _box
+        from shapely.ops import unary_union as _uni
+    except Exception:
+        return [dict(p) for p in piezas]
+
     ps = [dict(p) for p in piezas]
-    for eje in ("x", "y"):
-        a0, w = ("x0", "wx") if eje == "x" else ("y0", "hy")
-        o0 = "y0" if eje == "x" else "x0"
-        for mat in ("Moret", "Royal Walnut"):
-            J = BOQUILLA[mat]
-            grupo = sorted([p for p in ps if p["material"] == mat],
-                           key=lambda p: p[o0])
-            if not grupo:
-                continue
-            filas = [[grupo[0]]]
-            for p in grupo[1:]:
+    orig_dim = {p["id"]: (p["wx"], p["hy"]) for p in piezas if "id" in p}
+    # máscara de muros: las piezas que CRUZAN muro (umbrales de puerta, muescas)
+    # no generan aristas ni se mueven: cada cuarto ancla contra SU muro y el
+    # corrimiento no se propaga de un cuarto a otro (ni empuja piezas al muro)
+    mask = None
+    if modelo is not None:
+        try:
+            from datos_piezas import _mascara_muros, MODELOS
+            mask = _mascara_muros(MODELOS[modelo])
+        except Exception:
+            mask = None
+
+    def _cap(p, eje, propuesto):
+        # tope FISICO: el corte tiene que caber en la pieza madre 0.596x1.194
+        # (nunca se fuerza por debajo de lo que ya traia el dibujo)
+        k = 0 if eje == "wx" else 1
+        otro = p["hy"] if eje == "wx" else p["wx"]
+        madre = 1.194 if otro <= 0.608 else 0.596
+        tope = max(madre, orig_dim.get(p.get("id"), (0.02, 0.02))[k])
+        return max(0.02, min(propuesto, tope))
+
+    moret = [p for p in ps if p["material"] == "Moret"]
+    if not moret:
+        return ps
+    cajas = [_box(p["x0"] - 0.021, p["y0"] - 0.021,
+                  p["x0"] + p["wx"] + 0.021, p["y0"] + p["hy"] + 0.021) for p in moret]
+    union = _uni(cajas)
+    zonas = list(union.geoms) if union.geom_type == "MultiPolygon" else [union]
+    for zona in zonas:
+        grupo = [p for p, c in zip(moret, cajas) if c.intersects(zona)
+                 and c.intersection(zona).area > 0.5 * c.area]
+        moviles = list(grupo)      # las piezas con muesca también se mueven:
+        if len(moviles) < 2:       # su anillo de muesca queda absoluto (pegado
+            continue               # al muro real, que no se mueve)
+        for eje in ("x", "y"):
+            a0, w = ("x0", "wx") if eje == "x" else ("y0", "hy")
+            o0, ow = ("y0", "hy") if eje == "x" else ("x0", "wx")
+            # columnas (o filas) de la retícula del cuarto
+            vals = sorted(p[a0] for p in moviles)
+            cols = [[vals[0]]]
+            for v in vals[1:]:
+                if v - cols[-1][-1] <= 0.0015:
+                    cols[-1].append(v)
+                else:
+                    cols.append([v])
+            orig = [sum(c) / len(c) for c in cols]
+
+            def _idx(v):
+                k = min(range(len(orig)), key=lambda i: abs(orig[i] - v))
+                return k if abs(orig[k] - v) <= 0.0015 else None
+
+            # aristas: SOLO entre columnas de piezas vecinas en la misma fila
+            # (así las retículas corridas de cuartos distintos no se mezclan)
+            filas_o = sorted(moviles, key=lambda p: p[o0])
+            filas = [[filas_o[0]]]
+            for p in filas_o[1:]:
                 if p[o0] - filas[-1][-1][o0] <= 0.03:
                     filas[-1].append(p)
                 else:
                     filas.append([p])
+            from collections import defaultdict as _dd
+            ady = _dd(list)
             for fila in filas:
                 fila.sort(key=lambda p: p[a0])
-                runs = [[fila[0]]]
-                for p in fila[1:]:
-                    prev = runs[-1][-1]
-                    contigua = p[a0] - (prev[a0] + prev[w]) <= 0.02
-                    if contigua and not p.get("notch") and not prev.get("notch"):
-                        runs[-1].append(p)
+                for p, q in zip(fila, fila[1:]):
+                    if q[a0] - (p[a0] + p[w]) <= 0.045:
+                        i, j = _idx(p[a0]), _idx(q[a0])
+                        if i is None or j is None or i == j:
+                            continue
+                        # objetivo: pieza a su medida real + boquilla de 2 mm.
+                        # Normaliza TODAS las juntas, incluidas las chuecas de
+                        # hasta 4.5 cm (ahí no cabe un muro: vicio del dibujo,
+                        # p.ej. la de PB-M-080/081) y las de piezas tocándose.
+                        t = _snap_real(p[w]) + 0.002
+                        ady[i].append((j, t))
+                        ady[j].append((i, -t))
+            # columnas ANCLADAS A MURO: si una pieza tiene muro pegado a su
+            # borde inicial (el maestro traza línea nueva después del muro),
+            # su columna se fija en su posición original y no la arrastra el
+            # corrimiento del resto del cuarto
+            fijas = set()
+            if mask is not None:
+                for p in moviles:
+                    i = _idx(p[a0])
+                    if i is None or i in fijas:
+                        continue
+                    if eje == "x":
+                        franja = _box(p["x0"] - 0.012, p["y0"] + 0.02,
+                                      p["x0"] - 0.001, p["y0"] + p["hy"] - 0.02)
                     else:
-                        runs.append([p])
-                for run in runs:
-                    if run[0].get("notch"):
-                        continue                      # ancla: no se mueve
-                    cursor = run[0][a0]
-                    for k, p in enumerate(run):
-                        borde_lejano = p[a0] + p[w]
-                        p[a0] = round(cursor, 4)
-                        if k == len(run) - 1 and not p["completa"] and k > 0:
-                            # el recorte del final absorbe la diferencia
-                            p[w] = round(max(borde_lejano - p[a0], 0.02), 4)
-                        else:
-                            p[w] = round(_dim_real(p[w], mat), 4)
-                        cursor = p[a0] + p[w] + J
+                        franja = _box(p["x0"] + 0.02, p["y0"] - 0.012,
+                                      p["x0"] + p["wx"] - 0.02, p["y0"] - 0.001)
+                    if not franja.is_empty and franja.intersection(mask).area > 0.55 * franja.area:
+                        fijas.add(i)
+
+            # posiciones: BFS inicial + relajación por mínimos cuadrados, para
+            # que los vicios del dibujo (ciclos inconsistentes) se repartan en
+            # fracciones de mm entre todas las juntas y no se concentren
+            pos = {}
+            for start in range(len(orig)):
+                if start in pos or start not in ady:
+                    continue
+                comp = [start]
+                pos[start] = None
+                pila = [start]
+                while pila:
+                    u = pila.pop()
+                    for v, t in ady[u]:
+                        if v not in pos:
+                            pos[v] = None
+                            comp.append(v)
+                            pila.append(v)
+                ancla = min(comp, key=lambda i: orig[i])
+                for i in comp:
+                    if i in fijas:
+                        pos[i] = orig[i]          # ancla extra: columna a muro
+                pos[ancla] = orig[ancla]
+                pila = [ancla]
+                vistos = {ancla}
+                while pila:
+                    u = pila.pop()
+                    for v, t in ady[u]:
+                        if v not in vistos:
+                            vistos.add(v)
+                            if pos.get(v) is None:
+                                pos[v] = pos[u] + t
+                            pila.append(v)
+                # relajación (mínimos cuadrados): los vicios del dibujo se
+                # reparten en fracciones de mm; lo que quede concentrado lo
+                # absorbe la cascada D en los cortes
+                for _ in range(400):
+                    peor = 0.0
+                    for u in comp:
+                        if u == ancla or u in fijas:
+                            continue
+                        est = [pos[v] - t for (v, t) in ady[u]]
+                        nuevo = sum(est) / len(est)
+                        peor = max(peor, abs(nuevo - pos[u]))
+                        pos[u] = nuevo
+                    if peor < 1e-7:
+                        break
+
+
+            # precomputar (con coordenadas ORIGINALES): borde lejano y si la
+            # pieza remata contra un muro (nadie enfrente en su franja)
+            datos = []
+            for p in moviles:
+                lejos = p[a0] + p[w]
+                remata = (not p["completa"]) and not any(
+                    q is not p
+                    and -0.001 <= q[a0] - lejos <= 0.045
+                    and min(p[o0] + p[ow], q[o0] + q[ow]) - max(p[o0], q[o0]) > 0.02
+                    for q in grupo)
+                datos.append((p, lejos, remata))
+            for p, lejos, remata in datos:
+                i = _idx(p[a0])
+                if i is None or i not in pos:     # fuera de retícula: no se mueve
+                    continue
+                p[a0] = pos[i]
+                if remata:
+                    p[w] = _cap(p, w, max(lejos - p[a0], 0.02))   # el corte absorbe (con tope)
+                else:
+                    # medida real exacta: completas 0.596 x 1.194; y cualquier
+                    # lado dibujado a "casi pieza" (calibre +-6 mm) tambien
+                    p[w] = _snap_real(p[w])
+    for _pasada in range(8):
+        # pase D: cerrar boquillas chuecas residuales (3 mm a 4.5 cm) extendiendo
+        # el lado de CORTE hacia la junta (en obra el corte se llena a la boquilla);
+        # nunca se toca una pieza completa.
+        for _ronda in range(2):
+            for a in moret:
+                for b in moret:
+                    if a is b:
+                        continue
+                    fy = min(a["y0"] + a["hy"], b["y0"] + b["hy"]) - max(a["y0"], b["y0"])
+                    fx = min(a["x0"] + a["wx"], b["x0"] + b["wx"]) - max(a["x0"], b["x0"])
+                    if fy > 0.05:
+                        g = b["x0"] - (a["x0"] + a["wx"])
+                        if 0.00005 < g <= 0.045 and abs(g - 0.002) > 0.0005:
+                            if not a["completa"]:
+                                a["wx"] = _cap(a, "wx", a["wx"] + g - 0.002)
+                            elif not b["completa"]:
+                                nb = _cap(b, "wx", b["wx"] + g - 0.002)
+                                b["x0"] -= nb - b["wx"]
+                                b["wx"] = nb
+                            else:
+                                a["x0"] += g - 0.002     # completa: se recorre; la
+                                                          # holgura pasa a su junta de
+                                                          # atrás y la siguiente ronda
+                                                          # la absorbe (cascada)
+                    if fx > 0.05:
+                        g = b["y0"] - (a["y0"] + a["hy"])
+                        if 0.00005 < g <= 0.045 and abs(g - 0.002) > 0.0005:
+                            if not a["completa"]:
+                                a["hy"] = _cap(a, "hy", a["hy"] + g - 0.002)
+                            elif not b["completa"]:
+                                nb = _cap(b, "hy", b["hy"] + g - 0.002)
+                                b["y0"] -= nb - b["hy"]
+                                b["hy"] = nb
+                            else:
+                                a["y0"] += g - 0.002     # completa: se recorre (cascada)
+
+        # pase final: si al llevar una completa a su medida real (celda dibujada
+        # corta) quedó encimada con la vecina, retrocede el borde invasor (nunca
+        # por debajo de lo dibujado); los slivers residuales se los come el corte.
+        # incluye pares Moret x Royal: si el re-tendido de Moret roza una pieza
+        # Royal (que no se mueve), retrocede SIEMPRE el lado Moret
+        royal = [p for p in ps if p["material"] == "Royal Walnut"]
+        for i, a in enumerate(moret):
+            for b in moret[i + 1:] + royal:
+                ox = min(a["x0"] + a["wx"], b["x0"] + b["wx"]) - max(a["x0"], b["x0"])
+                oy = min(a["y0"] + a["hy"], b["y0"] + b["hy"]) - max(a["y0"], b["y0"])
+                if ox <= 1e-6 or oy <= 1e-6:
+                    continue
+                eje = "wx" if ox <= oy else "hy"
+                a0 = "x0" if eje == "wx" else "y0"
+                pen = min(ox, oy)
+                # invade quien mete su borde lejano dentro del otro
+                par = sorted(((p, q) for p, q in ((a, b), (b, a))
+                              if q[a0] - 1e-9 <= p[a0] + p[eje] <= q[a0] + q[eje] + 1e-9),
+                             key=lambda pq: (pq[0]["material"] != "Moret", pq[0]["completa"]))
+                if not par:
+                    par = [(a, b)]
+                p = par[0][0]                      # de preferencia retrocede el corte Moret
+                if p["material"] != "Moret":
+                    p = par[0][1] if par[0][1]["material"] == "Moret" else a
+                k = 0 if eje == "wx" else 1
+                # una completa solo retrocede lo que había CRECIDO sobre el dibujo;
+                # un corte puede retroceder hasta 2 cm
+                piso_min = (orig_dim.get(p.get("id"), (0.02, 0.02))[k]
+                            if p["completa"] else 0.02)
+                p[eje] = max(p[eje] - pen, min(piso_min, p[eje]))
+
     for p in ps:
+        for k in ("x0", "y0", "wx", "hy"):
+            p[k] = round(p[k], 4)
         p["x"] = round(p["x0"] + p["wx"] / 2, 4)
         p["y"] = round(p["y0"] + p["hy"] / 2, 4)
     return ps
@@ -519,7 +734,7 @@ def exportar(modelo, fusionado=False):
     que se compran, y los FALTANTES (salen de un sobrante) aparte."""
     piezas = cargar_anotado(modelo)
     # geometría del plano con BOQUILLA REAL (2 mm Moret / 1 mm Royal)
-    piezas_dxf = _relayar_juntas(piezas)
+    piezas_dxf = _relayar_juntas(piezas, modelo)
     origen_de = {}
     if fusionado:
         for material in ("Moret", "Royal Walnut"):
