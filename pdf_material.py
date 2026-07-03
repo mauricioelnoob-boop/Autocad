@@ -28,7 +28,7 @@ from optimizador_recortes import PISOS, CAJAS, ajustar, empaquetar
 from datos_piezas import cargar_anotado, PREF_CORTE
 from plano_casa import ESTILO
 
-VERSION = "v5.0"          # versión del despiece (cámbiala al hacer correcciones)
+VERSION = "v6.0"          # versión del despiece (cámbiala al hacer correcciones)
 MIN_REUSABLE = 0.10
 POR_PAGINA = 9
 
@@ -538,81 +538,13 @@ def hacer_pdf(todas, material, path, modelo=""):
         fig.tight_layout()
         guardar(fig)
 
-        # ---------- Página 1b: RECORTES CON SU PIEZA COMPLETA ----------
-        pc = PREF_CORTE[material]
-        recortes_plan = [p for p in focal if not p["completa"]]
-        cxh = sum(p["x"] for p in focal) / len(focal) if focal else 0
-        cyh = sum(p["y"] for p in focal) / len(focal) if focal else 0
-        # Según el empaque: de dónde sale cada recorte. "TABLA" = se corta de una
-        # baldosa nueva; cualquier otra etiqueta = sale del SOBRANTE de esa pieza
-        # (no se abre tabla nueva).
-        origen_de = {}
-        for b in baldosas:
-            for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
-                origen_de[etq] = origen
-        n_sobra = sum(1 for p in recortes_plan
-                      if origen_de.get(p["id"], "TABLA") != "TABLA")
-        if recortes_plan:
-            fig, ax = plt.subplots(figsize=(min(24, W * 1.4), min(16, H * 1.4) + 1))
-            for p in focal:
-                ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
-                                       facecolor="#eef3f8" if p["completa"] else "#ffffff",
-                                       edgecolor="#d5d8dc", lw=0.3))
-            for p in recortes_plan:
-                org = origen_de.get(p["id"], "TABLA")
-                if org != "TABLA":
-                    # Sale del sobrante de otra pieza: NO se corta tabla nueva.
-                    # Se marca en morado para indicar que ya está "de sobra".
-                    ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
-                                           facecolor="#d2b4de", edgecolor="#6c3483", lw=0.7))
-                    _tapar_notch(ax, p, edge="#6c3483")
-                    ax.text(p["x"], p["y"], f"{p['id']}\n(de {org.split()[0]})",
-                            ha="center", va="center", fontsize=3.2,
-                            rotation=0 if p["wx"] >= p["hy"] else 90, color="#4a235a")
-                    continue
-                aw, al = PISOS[material]
-                Wt = max(aw, p["wx"]); Lt = max(al, p["hy"])
-                tx = p["x0"] if p["x"] >= cxh else p["x0"] + p["wx"] - Wt
-                ty = p["y0"] if p["y"] >= cyh else p["y0"] + p["hy"] - Lt
-                # baldosa completa de la que sale (contorno punteado, pegada al recorte)
-                ax.add_patch(Rectangle((tx, ty), Wt, Lt, fill=False,
-                                       edgecolor="#7f8c8d", lw=0.5, ls="--"))
-                # el sobrante (lo que NO es el recorte)
-                if Wt - p["wx"] > 0.02:
-                    ox = (p["x0"] + p["wx"]) if p["x"] >= cxh else tx
-                    ax.add_patch(Rectangle((ox, p["y0"]), Wt - p["wx"], p["hy"],
-                                           facecolor="#fcf3cf", edgecolor="#b7950b",
-                                           lw=0.3, alpha=0.7, hatch=".."))
-                if Lt - p["hy"] > 0.02:
-                    oy = (p["y0"] + p["hy"]) if p["y"] >= cyh else ty
-                    ax.add_patch(Rectangle((p["x0"], oy), p["wx"], Lt - p["hy"],
-                                           facecolor="#fcf3cf", edgecolor="#b7950b",
-                                           lw=0.3, alpha=0.7, hatch=".."))
-                # el recorte en su lugar real (un solo color neutro)
-                ax.add_patch(Rectangle((p["x0"], p["y0"]), p["wx"], p["hy"],
-                                       facecolor="#aed6f1", edgecolor="#1b4f72", lw=0.6))
-                _tapar_notch(ax, p, edge="#1b4f72")
-                ax.text(p["x"], p["y"], p["id"], ha="center", va="center",
-                        fontsize=3.6, rotation=0 if p["wx"] >= p["hy"] else 90)
-            ax.set_xlim(minx - 0.6, maxx + 0.6); ax.set_ylim(miny - 0.6, maxy + 0.6)
-            ax.set_aspect("equal"); ax.axis("off")
-            ax.legend(handles=[
-                Patch(facecolor="#aed6f1", edgecolor="#1b4f72",
-                      label="recorte cortado de tabla nueva"),
-                Patch(facecolor="#fcf3cf", edgecolor="#b7950b",
-                      label="sobrante de ese corte"),
-                Patch(facecolor="#d2b4de", edgecolor="#6c3483",
-                      label="sale de un sobrante previo (sin corte nuevo)"),
-            ], loc="upper center", ncol=3, fontsize=9, bbox_to_anchor=(0.5, -0.02))
-            ax.set_title(f"RECORTES Y SU PIEZA COMPLETA — {modelo.upper()} · {material.upper()}\n"
-                         "azul = recorte que se corta de tabla nueva (línea punteada = baldosa entera, "
-                         "amarillo = su sobrante)\n"
-                         f"morado = recorte que SALE de un sobrante previo, no se corta tabla nueva "
-                         f"({n_sobra} piezas)",
-                         fontsize=11)
-            guardar(fig)
+        # (Se eliminó la página "RECORTES Y SU PIEZA COMPLETA": dibujaba tablones
+        #  completos imaginarios encimados sobre las piezas del plano y recortes en
+        #  morado. Obs. de supervisión: sin capa morada y sin encimar; el de dónde
+        #  sale cada recorte queda en el PLAN DE CORTE y el plan de corte del DXF.)
 
         # ---------- Página 1c: MAPA DE SOBRANTES (dónde encaja cada uno) ----------
+        pc = PREF_CORTE[material]
         reusados = [(idx, b.piezas[k], mapa.get(b.piezas[k][4]))
                     for idx, b in enumerate(baldosas, 1)
                     for k in range(1, len(b.piezas))]
@@ -649,7 +581,8 @@ def hacer_pdf(todas, material, path, modelo=""):
                  fontsize=11, color="#d6eaf8")
         # tarjetas KPI (3 arriba: piezas / cajas / m² instalados)
         kpis = [
-            ("PIEZAS TOTALES", f"{total_pzas}", f"{completas} enteras · {len(baldosas)} con recorte", "#eaf2f8", "#2471a3"),
+            ("PIEZAS TOTALES", f"{total_pzas}",
+             f"{completas + extra_completas} completas · {len(baldosas_all)} tablas p/recorte", "#eaf2f8", "#2471a3"),
             ("CAJAS", f"{cajas}", f"{cfg['pzas_caja']} pzas/caja = {cajas*cfg['pzas_caja']} pzas", "#eafaf1", "#1e8449"),
             ("SUPERFICIE", f"{cajas*cfg['m2_caja']:.1f} m²", f"caja = {cfg['m2_caja']:g} m²", "#fef9e7", "#b7950b"),
         ]
@@ -710,8 +643,10 @@ def hacer_pdf(todas, material, path, modelo=""):
                     if es_reutilizable(fw, fl):
                         ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#f9e79f",
                                                edgecolor="#b7950b", lw=0.8, hatch=".."))
-                        ax.text(fx + fw / 2, fy + fl / 2, f"SOBRA\n{fw:.2f}x{fl:.2f}",
-                                ha="center", va="center", fontsize=5.2, color="#7d6608")
+                        ax.text(fx + fw / 2, fy + fl / 2,
+                                f"SOBRA\n{fw:.2f}x{fl:.2f}\n→ GUARDAR",
+                                ha="center", va="center", fontsize=4.6, color="#7d6608",
+                                rotation=0 if fw >= fl else 90)
                     else:
                         ax.add_patch(Rectangle((fx, fy), fw, fl, facecolor="#f1948a",
                                                edgecolor="#922b21", lw=0.8, hatch="xx"))

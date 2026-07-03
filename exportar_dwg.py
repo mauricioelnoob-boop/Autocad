@@ -13,13 +13,21 @@ Capas (todas prendibles/apagables por separado):
 
   CORTE-TILE            -> contorno de cada baldosa entera que se abre para cortar
   CORTE-RECORTE         -> el recorte ya ACOMODADO dentro de su baldosa
-  CORTE-SOBRANTE        -> sobrante reutilizable de esa baldosa
+  CORTE-SOBRANTE        -> sobrante reutilizable (amarillo) con su medida y destino
   CORTE-DESPERDICIO     -> desperdicio (muy corto)
   CORTE-TEXTO           -> etiquetas del plan de corte (texto)
+  RESUMEN               -> conteo de piezas completas / tablas / cajas y m2 de
+                           sobrante-desperdicio, para revisión de compra
 
 El "plan de corte" se dibuja DEBAJO del plano: cada baldosa que hay que abrir,
 con el/los recorte(s) que salen de ella ya puestos en su lugar. Así ves, pieza
 por pieza, qué se corta y de dónde sale — todo en su propio layer.
+
+Nota (obs. de supervisión): ya NO se dibujan tablones completos "imaginarios"
+sobre el plano (antes capa morada SOBRANTES-MAPA): se encimaban con las piezas
+completas. Los sobrantes viven únicamente en el plan de corte, cada uno con su
+medida y a dónde va (GUARDAR EN RESERVA); los recortes que salen del sobrante
+de otra pieza lo dicen en su etiqueta.
 
 Edita en AutoCAD (agrega/mueve/borra en la capa correcta), guarda como DXF y:
     python3 importar_dwg.py  Cabernet_editable.dxf
@@ -42,8 +50,7 @@ CAPA = {"Moret": "PISO-MORET", "Royal Walnut": "PISO-ROYAL-WALNUT"}
 LAYERS = {
     "PISO-MORET": 30, "PISO-ROYAL-WALNUT": 4, "ETIQUETAS": 7,
     "CORTE-TILE": 7, "CORTE-RECORTE": 3, "CORTE-SOBRANTE": 2,
-    "CORTE-DESPERDICIO": 1, "CORTE-TEXTO": 5,
-    "SOBRANTES-MAPA": 6, "SOBRANTES-RECORTE": 2, "SOBRANTES-TEXTO": 6,
+    "CORTE-DESPERDICIO": 1, "CORTE-TEXTO": 5, "RESUMEN": 5,
     "ZOCLO": 3, "URBANIA-LAVANDERIA": 5, "REGADERA-MALLA-MURO": 1,
 }
 
@@ -91,36 +98,26 @@ def _contorno_notch(msp, p, layer):
             msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": layer})
 
 
-def _txt(msp, s, x, y, h, layer):
-    t = msp.add_text(s, dxfattribs={"layer": layer, "height": h})
+def _txt(msp, s, x, y, h, layer, rot=0):
+    t = msp.add_text(s, dxfattribs={"layer": layer, "height": h, "rotation": rot})
     t.set_placement((x, y), align=ezdxf.enums.TextEntityAlignment.MIDDLE_CENTER)
 
 
-def dibujar_mapa_sobrantes(msp, piezas):
-    """En CADA recorte del plano, dibuja el tablón COMPLETO del que sale, extendido
-    hacia AFUERA de la casa: así, apagando lo demás, queda un mapa de todos los
-    sobrantes y de dónde salen. (Si es orilla, sale por fuera; si no, se encima.)"""
-    cx = sum(p["x"] for p in piezas) / len(piezas)
-    cy = sum(p["y"] for p in piezas) / len(piezas)
-    for p in piezas:
-        if p["completa"]:
-            continue
-        W, L = PISOS[p["material"]]          # W = ancho (x), L = largo (y) del tablón
-        W = max(W, p["wx"]); L = max(L, p["hy"])
-        dx = 1 if p["x"] >= cx else -1
-        dy = 1 if p["y"] >= cy else -1
-        tx = p["x0"] if dx > 0 else p["x0"] + p["wx"] - W
-        ty = p["y0"] if dy > 0 else p["y0"] + p["hy"] - L
-        # tablón completo (contorno) y el sobrante (lo que NO es el recorte)
-        _rect(msp, tx, ty, W, L, "SOBRANTES-MAPA")
-        sob_w = round(W - p["wx"], 3); sob_l = round(L - p["hy"], 3)
-        if sob_w > 0.02:                      # sobrante de ancho
-            ox = (p["x0"] + p["wx"]) if dx > 0 else tx
-            _rect(msp, ox, p["y0"], W - p["wx"], p["hy"], "SOBRANTES-RECORTE")
-        if sob_l > 0.02:                      # sobrante de largo
-            oy = (p["y0"] + p["hy"]) if dy > 0 else ty
-            _rect(msp, p["x0"], oy, p["wx"], L - p["hy"], "SOBRANTES-RECORTE")
-        _txt(msp, p["id"], tx + W / 2, ty + L / 2, min(0.05, W / 4), "SOBRANTES-TEXTO")
+def _etq_sobrante(msp, ox, oy, fx, fy, fw, fl):
+    """Etiqueta un sobrante reutilizable con su MEDIDA y su DESTINO (a reserva).
+    El texto se adapta al tamaño del hueco para no encimarse con nada."""
+    lado_c, lado_l = min(fw, fl), max(fw, fl)
+    rot = 0 if fw >= fl else 90
+    if lado_l > 0.55 and lado_c > 0.055:
+        s = f"SOBRA {fw:.2f}x{fl:.2f} -> GUARDAR"
+    elif lado_l > 0.28 and lado_c > 0.045:
+        s = f"SOBRA {fw:.2f}x{fl:.2f}"
+    elif lado_l > 0.14 and lado_c > 0.04:
+        s = "SOBRA"
+    else:
+        return
+    _txt(msp, s, ox + fx + fw / 2, oy + fy + fl / 2,
+         min(0.045, lado_c * 0.45, lado_l / (len(s) * 0.75)), "CORTE-TEXTO", rot)
 
 
 def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
@@ -134,8 +131,9 @@ def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
         cols = 22
         cellw = anchoB + 0.45          # más separación horizontal
         cellh = largoB + 0.70          # más separación vertical (texto no se encima)
-        _txt(msp, f"PLAN DE CORTE - {material.upper()}  ({len(baldosas)} baldosas a abrir)",
-             x0_plan + 3, y_top + 0.5, 0.25, "CORTE-TEXTO")
+        _txt(msp, f"PLAN DE CORTE - {material.upper()}  ({len(baldosas)} baldosas a abrir; "
+                  f"amarillo = SOBRANTE con su medida -> GUARDAR EN RESERVA; rojo = desperdicio)",
+             x0_plan + 6, y_top + 0.5, 0.25, "CORTE-TEXTO")
         for i, b in enumerate(baldosas):
             col = i % cols
             row = i // cols
@@ -143,16 +141,89 @@ def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
             oy = y_top - (row + 1) * cellh
             _rect(msp, ox, oy, anchoB, largoB, "CORTE-TILE")
             _txt(msp, f"{pc}-{i+1:02d}", ox + anchoB / 2, oy + largoB + 0.14, 0.06, "CORTE-TEXTO")
-            for (x, y, w, l, pid, rot) in b.piezas:
+            for (x, y, w, l, pid, rot), (origen, orden) in zip(b.piezas, b.meta):
                 _rect(msp, ox + x, oy + y, w, l, "CORTE-RECORTE")
-                _txt(msp, pid, ox + x + w / 2, oy + y + l / 2, min(0.035, w / 4.5), "CORTE-TEXTO")
+                etq = pid if origen == "TABLA" else f"{pid} (DE SOBRA DE {origen.split()[0]})"
+                _txt(msp, etq, ox + x + w / 2, oy + y + l / 2,
+                     min(0.035, w / 4.5, max(w, l) / (len(etq) * 0.72)), "CORTE-TEXTO",
+                     rot=0 if w >= l else 90)
             for (fx, fy, fw, fl, *_z) in b.libres:
                 if fw <= 0.005 or fl <= 0.005:
                     continue
-                capa = "CORTE-SOBRANTE" if es_reutilizable(fw, fl) else "CORTE-DESPERDICIO"
-                _rect(msp, ox + fx, oy + fy, fw, fl, capa)
+                if es_reutilizable(fw, fl):
+                    _rect(msp, ox + fx, oy + fy, fw, fl, "CORTE-SOBRANTE")
+                    _etq_sobrante(msp, ox, oy, fx, fy, fw, fl)
+                else:
+                    _rect(msp, ox + fx, oy + fy, fw, fl, "CORTE-DESPERDICIO")
         filas = (len(baldosas) + cols - 1) // cols
         y_top = y_top - filas * cellh - 2.0
+    return y_top
+
+
+def dibujar_resumen(msp, piezas, modelo, x0, y0):
+    """Cuadro RESUMEN (capa RESUMEN): piezas COMPLETAS, tablas abiertas para
+    recorte, TOTAL de piezas y cajas por material, y el desglose de sobrante
+    reutilizable vs desperdicio. Mismos números que el PDF y los generadores,
+    para revisar la compra y justificar el porcentaje de desperdicio."""
+    import math
+    import datetime
+    from optimizador_recortes import CAJAS
+    lineas = [f"RESUMEN DE PIEZAS - {modelo.upper()}", ""]
+    for material in ("Moret", "Royal Walnut"):
+        focal = [p for p in piezas if p["material"] == material]
+        if not focal:
+            continue
+        completas = sum(1 for p in focal if p["completa"])
+        baldosas, _, (aB, lB) = empacar(piezas, material)
+        extra_comp = 0
+        extra_bald = []
+        if material == "Moret":
+            try:
+                import despiece_extra as DE
+                from optimizador_recortes import ajustar as _aj, empaquetar as _emp
+                for res in (DE.regadera_resumen(modelo), DE.escalera_resumen(modelo)):
+                    extra_comp += res["completas"]
+                    ent = [(*_aj(p["ancho"], p["largo"], aB, lB),
+                            p.get("id") or p.get("pared") or "extra")
+                           for p in res["piezas"] if not p["completa"]]
+                    extra_bald += _emp(ent, material, 0.0, True)
+            except Exception:
+                extra_comp = 0
+                extra_bald = []
+        bald_all = baldosas + extra_bald
+        area_reut = area_desp = 0.0
+        n_sob = n_desp = 0
+        for b in bald_all:
+            for (fx, fy, fw, fl, *_z) in b.libres:
+                if fw <= 0.005 or fl <= 0.005:
+                    continue
+                if es_reutilizable(fw, fl):
+                    area_reut += fw * fl
+                    n_sob += 1
+                else:
+                    area_desp += fw * fl
+                    n_desp += 1
+        total = completas + extra_comp + len(bald_all)
+        cfg = CAJAS[material]
+        cajas = math.ceil(total / cfg["pzas_caja"])
+        m2_comprados = cajas * cfg["m2_caja"]
+        pct = 100.0 * (area_reut + area_desp) / m2_comprados if m2_comprados else 0.0
+        nota_extra = ("  (incluye muro de regadera y escalera)"
+                      if material == "Moret" and (extra_comp or extra_bald) else "")
+        lineas += [
+            f"{material.upper()}{nota_extra}:",
+            f"  PIEZAS COMPLETAS: {completas + extra_comp}   |   TABLAS ABIERTAS P/RECORTES: {len(bald_all)}"
+            f"   |   TOTAL DE PIEZAS: {total}   |   CAJAS: {cajas} ({m2_comprados:.2f} m2)",
+            f"  SOBRANTE REUTILIZABLE: {area_reut:.2f} m2 en {n_sob} pzas -> GUARDAR EN RESERVA"
+            f"   |   DESPERDICIO: {area_desp:.2f} m2 ({n_desp} pedazos <10 cm)"
+            f"   |   SOBRA TOTAL: {pct:.1f}% de lo comprado",
+            "",
+        ]
+    lineas += [f"Elaboro: Ing. Mauricio Gastelum Mora   -   {datetime.date.today().strftime('%d/%m/%Y')}"]
+    for k, ln in enumerate(lineas):
+        h = 0.24 if k == 0 else 0.15
+        t = msp.add_text(ln, dxfattribs={"layer": "RESUMEN", "height": h})
+        t.set_placement((x0, y0 - k * 0.42), align=ezdxf.enums.TextEntityAlignment.MIDDLE_LEFT)
 
 
 def dibujar_despiece_extra(msp, modelo, x0, y0):
@@ -175,6 +246,7 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
         for (fx, fy, fw, fl, *_z) in libres:
             if fw > 0.03 and fl > 0.03:
                 _rect(msp, cx + fx, cy - lT + fy, fw, fl, "CORTE-SOBRANTE")
+                _etq_sobrante(msp, cx, cy - lT, fx, fy, fw, fl)
         _txt(msp, etq, cx + aT / 2, cy + 0.07, 0.06, "CORTE-TEXTO")
 
     # ---- ESCALERA ----
@@ -230,15 +302,15 @@ def exportar(modelo):
     # --- Acabados: zoclo + zonas de Urbania / regaderas ---
     dibujar_acabados(msp, modelo)
 
-    # --- Mapa de sobrantes (sobre el plano, saliendo hacia afuera) ---
-    dibujar_mapa_sobrantes(msp, piezas)
-
     # --- Plan de corte (debajo del plano) ---
     minx = min(p["x0"] for p in piezas)
     miny = min(p["y0"] for p in piezas)
     maxx = max(p["x0"] + p["wx"] for p in piezas)
     maxy = max(p["y0"] + p["hy"] for p in piezas)
-    dibujar_plan_corte(msp, piezas, minx, miny)
+    y_fin = dibujar_plan_corte(msp, piezas, minx, miny)
+
+    # --- Cuadro RESUMEN (conteo de completas / tablas / cajas / sobra) ---
+    dibujar_resumen(msp, piezas, modelo, minx, (y_fin if y_fin is not None else miny - 4.0) - 0.6)
 
     # --- Despiece de ESCALERA y ZOCLO (a la derecha del plano) ---
     dibujar_despiece_extra(msp, modelo, maxx + 3.0, maxy)
@@ -255,9 +327,10 @@ def exportar(modelo):
         print(f"(no se encontró dxf2dwg; queda el DXF: {dxf})")
     nrec = sum(1 for p in piezas if not p["completa"])
     print(f"DXF editable: {dxf}")
-    print(f"Piezas en el plano: {len(piezas)}  (recortes: {nrec})")
+    print(f"Piezas en el plano: {len(piezas)}  (completas: {len(piezas)-nrec}, recortes: {nrec})")
     print("Capas: PISO-MORET, PISO-ROYAL-WALNUT, ETIQUETAS, "
-          "CORTE-TILE/RECORTE/SOBRANTE/DESPERDICIO/TEXTO")
+          "CORTE-TILE/RECORTE/SOBRANTE/DESPERDICIO/TEXTO, RESUMEN "
+          "(sin capa morada de tablones imaginarios)")
 
 
 if __name__ == "__main__":
