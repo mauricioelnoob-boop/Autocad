@@ -239,6 +239,20 @@ MODELOS = {
         "redimensionar": [
             {"x": 288.32, "y": -60.97, "x0": 287.88, "y0": -61.215, "wx": 0.692, "hy": 0.483},  # PA-M-001 se extiende hasta la mitad
         ],
+        # MUESCAS a la cara REAL del muro falso de tablaroca (el DWG las traía
+        # cortas: arrancaban en x=290.25 y la tablaroca empieza en x=290.192,
+        # dejando 6 cm de pieza dentro del muro). El recorte es UN solo bocado
+        # desde el borde derecho de la pieza: sin astilla.
+        "muescas": [
+            {"x": 290.078, "y": -63.019,     # PA-M-020
+             "notch": [[[290.3779, -63.0673], [290.192, -63.0673],
+                        [290.192, -62.9473], [290.3779, -62.9473],
+                        [290.3779, -63.0673]]]},
+            {"x": 290.078, "y": -61.817,     # PA-M-012
+             "notch": [[[290.3779, -61.8473], [290.192, -61.8473],
+                        [290.192, -61.7273], [290.3779, -61.7273],
+                        [290.3779, -61.8473]]]},
+        ],
         # Columna de CANCELERÍA de ~1 cm (capa A-CANCELERIA) a x≈290.19-290.24:
         # tiras verticales de 1 cm que muerden PA-M-012/020 como "astilla" no
         # serruchable. Se RESTAN de la máscara de muros (ver _mascara_muros) para

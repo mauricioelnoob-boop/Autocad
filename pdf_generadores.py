@@ -57,15 +57,57 @@ def _segmentos(objs, capas, frag):
     return S
 
 
+def _cerrar_cadenas(segs, dmax=3.0):
+    """Cierra las cadenas ABIERTAS de segmentos (los muros falsos de tablaroca
+    vienen dibujados sin el lado que pega al muro estructural): si una cadena
+    tiene exactamente 2 extremos sueltos y están a menos de `dmax`, se agrega
+    el segmento que los une, para que el muro quede completo/cerrado."""
+    from collections import defaultdict
+
+    def k(p):
+        return (round(p[0], 3), round(p[1], 3))
+
+    padre = {}
+
+    def find(a):
+        while padre[a] != a:
+            padre[a] = padre[padre[a]]
+            a = padre[a]
+        return a
+
+    grado = defaultdict(int)
+    for a, b in segs:
+        ka, kb = k(a), k(b)
+        grado[ka] += 1
+        grado[kb] += 1
+        for kk in (ka, kb):
+            padre.setdefault(kk, kk)
+        ra, rb = find(ka), find(kb)
+        if ra != rb:
+            padre[ra] = rb
+    cadenas = defaultdict(list)
+    for kk in padre:
+        if grado[kk] % 2 == 1:                 # extremo suelto
+            cadenas[find(kk)].append(kk)
+    extra = []
+    for sueltos in cadenas.values():
+        if len(sueltos) == 2:
+            (x1, y1), (x2, y2) = sueltos
+            if ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5 <= dmax:
+                extra.append(((x1, y1), (x2, y2)))
+    return segs + extra
+
+
 def _datos_dwg(modelo):
     cfg = MODELOS[modelo]
     doc = json.loads(open(cfg["json"], "rb").read().decode("utf-8", "replace"))
     objs = doc["OBJECTS"]; capas = _capas(objs)
     zoclo = _segmentos(objs, capas, "A-ZOCLO")
     # muros = los estructurales (A-MUROS, incluye A-MUROS BAJOS por fragmento)
-    # + los MUROS FALSOS de tablaroca (más delgados), que también delimitan piso
+    # + los MUROS FALSOS de tablaroca (más delgados), que también delimitan
+    # piso; sus cadenas abiertas se CIERRAN contra el muro estructural
     muros = (_segmentos(objs, capas, "A-MUROS")
-             + _segmentos(objs, capas, "A-TABLAROCA"))
+             + _cerrar_cadenas(_segmentos(objs, capas, "A-TABLAROCA")))
     escal = _segmentos(objs, capas, "A-ESCALON")
     claves = json.load(open(cfg["claves"]))
     return zoclo, muros, escal, claves

@@ -552,10 +552,19 @@ def _relayar_juntas(piezas, modelo=None):
                     a[eje] = nuevo
                     break
 
+    for p in ps:
+        for k in ("x0", "y0", "wx", "hy"):
+            p[k] = round(p[k], 4)
+        p["x"] = round(p["x0"] + p["wx"] / 2, 4)
+        p["y"] = round(p["y0"] + p["hy"] / 2, 4)
+
     # las MUESCAS (notch) son absolutas: abrazan el muro real, que no se mueve.
-    # Si la pieza se corrió, el lado de la muesca que iba al ras de un borde
-    # de la pieza se EXTIENDE hasta el borde nuevo, para que el contorno
-    # dibujado no muerda el muro (PB-M-103, PA-M-009)
+    # Si la pieza se corrió, el lado de la muesca que iba al ras de un borde de
+    # la pieza se EXTIENDE hasta el borde nuevo, para que el contorno dibujado
+    # no muerda el muro (PB-M-103, PA-M-009). Se hace DESPUES del redondeo y
+    # con el anillo redondeado a 4 decimales: si quedara 0.0001 de diferencia
+    # con el borde, la muesca se convertiria en agujero interior y el contorno
+    # saldria entero o con picos (PA-M-035 / PA-M-025 en Cabernet).
     for p in ps:
         if not p.get("notch") or p.get("id") not in orig_pos:
             continue
@@ -563,24 +572,18 @@ def _relayar_juntas(piezas, modelo=None):
         ow, oh = orig_dim[p["id"]]
         nuevo_notch = []
         for ring in p["notch"]:
-            ring = [list(pt) for pt in ring]
+            ring = [[round(pt[0], 4), round(pt[1], 4)] for pt in ring]
             for pt in ring:
-                if abs(pt[0] - ox0) < 1e-6:
+                if abs(pt[0] - ox0) < 2e-4:
                     pt[0] = p["x0"]
-                elif abs(pt[0] - (ox0 + ow)) < 1e-6:
+                elif abs(pt[0] - (ox0 + ow)) < 2e-4:
                     pt[0] = p["x0"] + p["wx"]
-                if abs(pt[1] - oy0) < 1e-6:
+                if abs(pt[1] - oy0) < 2e-4:
                     pt[1] = p["y0"]
-                elif abs(pt[1] - (oy0 + oh)) < 1e-6:
+                elif abs(pt[1] - (oy0 + oh)) < 2e-4:
                     pt[1] = p["y0"] + p["hy"]
             nuevo_notch.append(ring)
         p["notch"] = nuevo_notch
-
-    for p in ps:
-        for k in ("x0", "y0", "wx", "hy"):
-            p[k] = round(p[k], 4)
-        p["x"] = round(p["x0"] + p["wx"] / 2, 4)
-        p["y"] = round(p["y0"] + p["hy"] / 2, 4)
     return ps
 
 
@@ -653,17 +656,41 @@ def _contorno_notch(msp, p, layer):
         from shapely.geometry import box, Polygon
     except Exception:
         return _rect(msp, p["x0"], p["y0"], p["wx"], p["hy"], layer)
-    g = box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+    g = box(round(p["x0"], 4), round(p["y0"], 4),
+            round(p["x0"] + p["wx"], 4), round(p["y0"] + p["hy"], 4))
     for ring in p.get("notch", []):
         if len(ring) >= 3:
-            g = g.difference(Polygon(ring).buffer(0))
+            anillo = Polygon([(round(x, 4), round(y, 4)) for x, y in ring]).buffer(0)
+            g = g.difference(anillo)
+    g = g.buffer(0)
     polys = [g] if g.geom_type == "Polygon" else list(getattr(g, "geoms", []))
     for gg in polys:
-        if gg.is_empty:
+        if gg.is_empty or gg.area < 1e-5:
             continue
-        pts = [(round(x, 4), round(y, 4)) for x, y in gg.exterior.coords[:-1]]
-        if len(pts) >= 3:
-            msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": layer})
+        pts = []
+        for x, y in gg.exterior.coords[:-1]:
+            q = (round(x, 4), round(y, 4))
+            if not pts or q != pts[-1]:
+                pts.append(q)
+        # sin picos: un vértice que regresa por el mismo camino sobra
+        limpio = []
+        for q in pts:
+            while len(limpio) >= 2:
+                a, b = limpio[-2], limpio[-1]
+                if ((b[0] - a[0]) * (q[1] - b[1]) == (b[1] - a[1]) * (q[0] - b[0])
+                        and (q[0] - b[0]) * (b[0] - a[0]) + (q[1] - b[1]) * (b[1] - a[1]) < 0):
+                    limpio.pop()
+                else:
+                    break
+            limpio.append(q)
+        if len(limpio) >= 3:
+            msp.add_lwpolyline(limpio, close=True, dxfattribs={"layer": layer})
+        # si aun asi quedo una muesca INTERIOR (isla de tablaroca en medio de
+        # la pieza), se dibuja tambien su contorno para que el corte se vea
+        for interior in gg.interiors:
+            ptsi = [(round(x, 4), round(y, 4)) for x, y in interior.coords[:-1]]
+            if len(ptsi) >= 3:
+                msp.add_lwpolyline(ptsi, close=True, dxfattribs={"layer": layer})
 
 
 def _txt(msp, s, x, y, h, layer, rot=0):

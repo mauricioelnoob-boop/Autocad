@@ -825,6 +825,16 @@ def cargar_anotado(modelo="Cabernet"):
     # para que nada vuelva a partir la pieza con su entrante.
     anotadas = recortar_muros_interiores(anotadas, cfg, extra_obst=escalon_zonas)
 
+    # Corregir la MUESCA de una pieza: el DWG/máscara a veces la deja CORTA
+    # respecto a la cara real del muro falso de tablaroca (PA-M-020/PA-M-012 de
+    # Chardonnay quedaban 6 cm dentro del muro). Va AL FINAL porque el paso de
+    # muros interiores regenera las muescas y pisaría la corrección.
+    for r in cfg.get("muescas", []):
+        cerca = _match(r, "muesca")
+        if cerca is None:
+            continue
+        cerca["notch"] = [[list(pt) for pt in ring] for ring in r["notch"]]
+
     # IDs y pieza de corte, por (planta, material)
     asignar_ids_corte(anotadas)
 
