@@ -302,12 +302,43 @@ def es_reutilizable(w, l):
     return min(w, l) >= MIN_REUSABLE
 
 
-def empacar(piezas, material):
+def _punto_escalera(modelo):
+    """Centroide de la escalera del modelo (arranque del orden de corte)."""
+    try:
+        import json as _json
+        from shapely.geometry import Polygon as _Poly
+        from shapely.ops import unary_union as _uni
+        c = _uni([_Poly(q) for q in
+                  _json.load(open(f"escalon_{modelo.lower()}.json"))]).centroid
+        return (c.x, c.y)
+    except Exception:
+        return None
+
+
+def empacar(piezas, material, modelo=None):
+    """Empaca los recortes en piezas nuevas y, si se da el modelo, ORDENA las
+    piezas del plan de corte en el ORDEN DE CORTE PROPUESTO: se empieza en
+    PLANTA ALTA junto a la ESCALERA (por ahí sube el material) y se va uno
+    alejando; al terminar P.A. se sigue con P.B., también desde la escalera.
+    La numeración M-01, M-02, ... queda en ese orden."""
     mapa = {p["id"]: p for p in piezas if p["material"] == material}
     ancho, largo = PISOS[material]
     recortes = [p for p in piezas if p["material"] == material and not p["completa"]]
     entradas = [(*ajustar(p["ancho"], p["largo"], ancho, largo), p["id"]) for p in recortes]
-    return empaquetar(entradas, material, 0.0, True), mapa, (ancho, largo)
+    baldosas = empaquetar(entradas, material, 0.0, True)
+    pe = _punto_escalera(modelo) if modelo else None
+    if pe is not None and baldosas:
+        def _seq(b):
+            claves = [mapa[etq] for (x, y, w, l, etq, rot) in b.piezas if etq in mapa]
+            if not claves:
+                return (2, 1e18)
+            return min(((0 if q["planta"] == "alta" else 1),
+                        (q["x"] - pe[0]) ** 2 + (q["y"] - pe[1]) ** 2)
+                       for q in claves)
+        baldosas.sort(key=_seq)
+        for i, b in enumerate(baldosas, 1):
+            b.id = i
+    return baldosas, mapa, (ancho, largo)
 
 
 def pagina_plan_corte(pdf, guardar, modelo, material, baldosas):
@@ -401,7 +432,7 @@ def hacer_pdf(todas, material, path, modelo=""):
     focal = [p for p in todas if p["material"] == material]
     otro = [p for p in todas if p["material"] != material]
 
-    baldosas, mapa, (ancho, largo) = empacar(todas, material)
+    baldosas, mapa, (ancho, largo) = empacar(todas, material, modelo)
 
     # EXTRAS Moret (muro de regadera + escalera): se empacan también y entran al
     # conteo de cajas y a las tablas de sobrante/desperdicio (además de su propia
@@ -716,7 +747,10 @@ def hacer_pdf(todas, material, path, modelo=""):
                  "En las páginas siguientes se detalla cada pieza que se corta y a dónde va. El PLAN DE CORTE\n"
                  "usa un color por orden (1°/2°/3°…) y gris rayado para el sobrante de cada pieza; las LISTAS\n"
                  "DE SOBRANTE finales separan amarillo = reutilizable (≥10 cm) de rojo = desperdicio (<10 cm).\n"
-                 "Royal Walnut sólo en recámaras (planta alta).",
+                 "Royal Walnut sólo en recámaras (planta alta).\n\n"
+                 "ORDEN DE CORTE PROPUESTO: la numeración de las piezas a abrir ES el orden de corte:\n"
+                 "se empieza en PLANTA ALTA junto a la ESCALERA (por ahí sube el material) y se va uno\n"
+                 "alejando; al terminar P.A. se sigue con P.B., también desde la escalera.",
                  fontsize=10.5, va="top", color="#2c3e50")
         guardar(fig)
 
@@ -759,7 +793,9 @@ def hacer_pdf(todas, material, path, modelo=""):
                 ax.axis("off")
             fig.suptitle(f"{material} — recortes: qué cortar, a dónde va y qué sobra\n"
                          f"(cada color = un recorte a cortar de esta pieza · amarillo = sobrante "
-                         f"reutilizable · rojo = desperdicio)   pág. {ini//POR_PAGINA + 1} de {npag}",
+                         f"reutilizable · rojo = desperdicio)   pág. {ini//POR_PAGINA + 1} de {npag}\n"
+                         f"ORDEN DE CORTE PROPUESTO: {pc}-01 es el primer corte (P.A. junto a la "
+                         f"escalera) y se avanza en orden; al terminar P.A. se sigue en P.B.",
                          fontsize=11)
             fig.tight_layout(rect=[0, 0.04, 1, 0.95])
             guardar(fig)

@@ -6,36 +6,25 @@ exportar_dwg.py
 
 Exporta el despiece de un modelo a un DXF (+DWG) EDITABLE para AutoCAD.
 
-Capas (todas prendibles/apagables por separado, nombres limpios):
-  MORET-COMPLETAS       -> UNA polilínea por pieza COMPLETA de Moret
-                           (contarlas = contar entidades de esta capa, QSELECT)
-  MORET-RECORTES        -> piezas de Moret que llevan corte
-  ROYAL-COMPLETAS       -> UNA polilínea por pieza completa de Royal Walnut
-  ROYAL-RECORTES        -> piezas de Royal Walnut que llevan corte
-  ETIQUETAS             -> ID de cada pieza del plano (texto)
-
-  PLAN-CORTE-TABLAS     -> contorno de cada pieza entera que se abre para cortar
-  PLAN-CORTE-PIEZAS     -> el recorte ya ACOMODADO dentro de su pieza
-  PLAN-CORTE-SOBRANTES  -> sobrante reutilizable (amarillo) con su medida y destino
-  PLAN-CORTE-DESPERDICIO-> desperdicio (muy corto)
-  PLAN-CORTE-TEXTOS     -> etiquetas del plan de corte (texto)
-  RESUMEN               -> conteo de piezas completas / tablas / cajas y m2 de
-                           sobrante-desperdicio, para revisión de compra
+Capas: ver LEYENDA_CAPAS abajo (la misma leyenda se escribe DENTRO del DXF, en
+la capa RESUMEN, para que cualquiera sepa qué es cada layer sin abrir el código).
 
 El "plan de corte" se dibuja DEBAJO del plano: cada pieza que hay que abrir,
-con el/los recorte(s) que salen de ella ya puestos en su lugar. Así ves, pieza
-por pieza, qué se corta y de dónde sale — todo en su propio layer.
+con el/los recorte(s) que salen de ella ya puestos en su lugar, numerada en el
+ORDEN DE CORTE PROPUESTO: M-01 es el primer corte (PLANTA ALTA junto a la
+ESCALERA, por ahí sube el material) y se avanza alejándose; al terminar P.A.
+se sigue con P.B.
+
+SOBRANTE-JUNTO-AL-RECORTE: a cada recorte del plano se le dibuja pegado, en
+amarillo, el sobrante que completa la pieza entera (puede salir de los muros);
+se elige la posición que menos se encima con otros sobrantes amarillos.
 
 MEDIDA REAL: los planos de origen dibujan la celda pieza+junta (p.ej. 0.600 /
 1.200); aquí cada pieza del plano se dibuja a su MEDIDA REAL 0.596 x 1.194
 (la junta de ~4 mm queda visible entre piezas), para que al medir en AutoCAD
 salga la medida física del vitropiso.
 
-Nota (obs. de supervisión): ya NO se dibujan tablones completos "imaginarios"
-sobre el plano (antes capa morada SOBRANTES-MAPA): se encimaban con las piezas
-completas. Los sobrantes viven únicamente en el plan de corte, cada uno con su
-medida y a dónde va (GUARDAR EN RESERVA); los recortes que salen del sobrante
-de otra pieza lo dicen en su etiqueta.
+Nota (obs. de supervisión): no hay capa morada de tablones imaginarios.
 
 Edita en AutoCAD (agrega/mueve/borra en la capa correcta), guarda como DXF y:
     python3 importar_dwg.py  Cabernet_editable.dxf
@@ -59,10 +48,31 @@ CAPA = {("Moret", True): "MORET-COMPLETAS", ("Moret", False): "MORET-RECORTES",
 LAYERS = {
     "MORET-COMPLETAS": 30, "MORET-RECORTES": 41,
     "ROYAL-COMPLETAS": 4, "ROYAL-RECORTES": 151, "ETIQUETAS": 7,
-    "PLAN-CORTE-TABLAS": 7, "PLAN-CORTE-PIEZAS": 3, "PLAN-CORTE-SOBRANTES": 2,
+    "SOBRANTE-JUNTO-AL-RECORTE": 2,
+    "PLAN-CORTE-PIEZAS-A-ABRIR": 7, "PLAN-CORTE-RECORTES": 3, "PLAN-CORTE-SOBRANTES": 2,
     "PLAN-CORTE-DESPERDICIO": 1, "PLAN-CORTE-TEXTOS": 5, "RESUMEN": 5,
     "ZOCLO": 3, "URBANIA-LAVANDERIA": 5, "REGADERA-MALLA-MURO": 1,
 }
+
+# Qué es cada capa (esta leyenda también se escribe DENTRO del DXF, capa RESUMEN):
+LEYENDA_CAPAS = [
+    ("MORET-COMPLETAS", "piezas COMPLETAS de Moret en el plano; 1 polilinea = 1 pieza (contar con QSELECT)"),
+    ("MORET-RECORTES", "piezas de Moret que llevan corte, en su posicion real del plano"),
+    ("ROYAL-COMPLETAS", "piezas completas de Royal Walnut; 1 polilinea = 1 pieza"),
+    ("ROYAL-RECORTES", "piezas de Royal Walnut que llevan corte"),
+    ("ETIQUETAS", "ID de cada pieza del plano (PB/PA - M/R - numero)"),
+    ("SOBRANTE-JUNTO-AL-RECORTE", "amarillo PEGADO a cada recorte del plano: lo que le falta al recorte"
+                                  " para completar la pieza entera (puede salir de los muros)"),
+    ("PLAN-CORTE-PIEZAS-A-ABRIR", "plan de corte: contorno de cada pieza ENTERA que se abre (M-01, M-02...)"),
+    ("PLAN-CORTE-RECORTES", "plan de corte: los recortes ya acomodados dentro de su pieza"),
+    ("PLAN-CORTE-SOBRANTES", "plan de corte: sobrante reutilizable de cada pieza, con medida y destino"),
+    ("PLAN-CORTE-DESPERDICIO", "plan de corte: pedazos <10 cm que ya no sirven"),
+    ("PLAN-CORTE-TEXTOS", "textos del plan de corte (numeracion y etiquetas)"),
+    ("RESUMEN", "conteos (completas / piezas a abrir / cajas), % de sobra y esta leyenda"),
+    ("ZOCLO", "linea de zoclo sobre el perimetro de piso"),
+    ("URBANIA-LAVANDERIA", "marca de la zona con piso Urbania (lavanderia)"),
+    ("REGADERA-MALLA-MURO", "marca de regaderas (malla en charola + muro Moret)"),
+]
 
 
 def _dim_real(v, material):
@@ -147,29 +157,90 @@ def _etq_sobrante(msp, ox, oy, fx, fy, fw, fl):
          min(0.045, lado_c * 0.45, lado_l / (len(s) * 0.75)), "PLAN-CORTE-TEXTOS", rot)
 
 
-def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan):
-    """Dibuja, debajo del plano, cada pieza que se abre con sus recortes puestos."""
+def dibujar_sobrantes_en_plano(msp, piezas, modelo):
+    """Capa SOBRANTE-JUNTO-AL-RECORTE: a cada recorte del plano que se corta de
+    pieza NUEVA se le dibuja PEGADO, en amarillo, el sobrante que le falta para
+    completar la pieza entera (0.596 x 1.194). Se acomoda hacia AFUERA de la
+    casa (puede salir de los muros) y se elige, de las 4 posiciones posibles,
+    la que MENOS se encima con otros sobrantes amarillos ya puestos."""
+    try:
+        from shapely.geometry import box as _box
+        from shapely.ops import unary_union as _uni
+    except Exception:
+        return
+    # qué recortes abren pieza nueva (los que salen de un sobrante no la abren)
+    origen_de = {}
+    for material in ("Moret", "Royal Walnut"):
+        baldosas, _, _dims = empacar(piezas, material, modelo)
+        for b in baldosas:
+            for (x, y, w, l, etq, rot), (origen, orden) in zip(b.piezas, b.meta):
+                origen_de[etq] = origen
+    cx = sum(p["x"] for p in piezas) / len(piezas)
+    cy = sum(p["y"] for p in piezas) / len(piezas)
+    puestos = None                       # unión de amarillos ya colocados
+    pend = [p for p in piezas
+            if not p["completa"] and origen_de.get(p["id"], "TABLA") == "TABLA"]
+    # primero los recortes de la orilla (lejos del centro): toman su lado de
+    # afuera y dejan el interior más libre para los que no tienen opción
+    pend.sort(key=lambda p: -((p["x"] - cx) ** 2 + (p["y"] - cy) ** 2))
+    for p in pend:
+        aw, al = PISOS[p["material"]]
+        if p["wx"] <= aw + 0.012:
+            Wt, Lt = aw, al              # pieza parada (como se tiende el piso)
+        else:
+            Wt, Lt = al, aw              # pieza acostada
+        Wt, Lt = max(Wt, p["wx"]), max(Lt, p["hy"])
+        rec = _box(p["x0"], p["y0"], p["x0"] + p["wx"], p["y0"] + p["hy"])
+        cands = []
+        for tx in {p["x0"], p["x0"] + p["wx"] - Wt}:
+            for ty in {p["y0"], p["y0"] + p["hy"] - Lt}:
+                sob = _box(tx, ty, tx + Wt, ty + Lt).difference(rec)
+                if sob.is_empty:
+                    continue
+                enc = sob.intersection(puestos).area if puestos is not None else 0.0
+                sc = sob.centroid
+                afuera = (sc.x - cx) ** 2 + (sc.y - cy) ** 2
+                cands.append((round(enc, 5), -afuera, tx, ty, sob))
+        if not cands:
+            continue
+        enc, _na, tx, ty, sob = min(cands)
+        # dos tiras que completan la pieza: vertical (ancho faltante, alto total)
+        # y horizontal (ancho del recorte, largo faltante)
+        if Wt - p["wx"] > 0.02:
+            ox = (p["x0"] + p["wx"]) if tx == p["x0"] else tx
+            _rect(msp, ox, ty, Wt - p["wx"], Lt, "SOBRANTE-JUNTO-AL-RECORTE")
+        if Lt - p["hy"] > 0.02:
+            oy = (p["y0"] + p["hy"]) if ty == p["y0"] else ty
+            _rect(msp, p["x0"], oy, p["wx"], Lt - p["hy"], "SOBRANTE-JUNTO-AL-RECORTE")
+        puestos = sob if puestos is None else _uni([puestos, sob])
+
+
+def dibujar_plan_corte(msp, piezas, x0_plan, y0_plan, modelo):
+    """Dibuja, debajo del plano, cada pieza que se abre con sus recortes puestos,
+    en el ORDEN DE CORTE PROPUESTO (M-01 = P.A. junto a la escalera)."""
     y_top = y0_plan - 2.0
     for material in ("Moret", "Royal Walnut"):
-        baldosas, mapa, (anchoB, largoB) = empacar(piezas, material)
+        baldosas, mapa, (anchoB, largoB) = empacar(piezas, material, modelo)
         if not baldosas:
             continue
         pc = PREF_CORTE[material]
         cols = 22
         cellw = anchoB + 0.45          # más separación horizontal
         cellh = largoB + 0.70          # más separación vertical (texto no se encima)
-        _txt(msp, f"PLAN DE CORTE - {material.upper()}  ({len(baldosas)} piezas a abrir; "
+        _txt(msp, f"PLAN DE CORTE - {material.upper()}  ({len(baldosas)} piezas a abrir "
+                  f"EN ORDEN: {pc}-01 = primer corte, PLANTA ALTA junto a la ESCALERA, y se avanza "
+                  f"alejandose; al terminar P.A. sigue P.B.; "
                   f"amarillo = SOBRANTE con su medida -> GUARDAR EN RESERVA; rojo = desperdicio)",
-             x0_plan + 6, y_top + 0.5, 0.25, "PLAN-CORTE-TEXTOS")
+             x0_plan + 9, y_top + 0.5, 0.25, "PLAN-CORTE-TEXTOS")
         for i, b in enumerate(baldosas):
             col = i % cols
             row = i // cols
             ox = x0_plan + col * cellw
             oy = y_top - (row + 1) * cellh
-            _rect(msp, ox, oy, anchoB, largoB, "PLAN-CORTE-TABLAS")
+            _rect(msp, ox, oy, anchoB, largoB, "PLAN-CORTE-PIEZAS-A-ABRIR")
             _txt(msp, f"{pc}-{i+1:02d}", ox + anchoB / 2, oy + largoB + 0.14, 0.06, "PLAN-CORTE-TEXTOS")
             for (x, y, w, l, pid, rot), (origen, orden) in zip(b.piezas, b.meta):
-                _rect(msp, ox + x, oy + y, w, l, "PLAN-CORTE-PIEZAS")
+                _rect(msp, ox + x, oy + y, w, l, "PLAN-CORTE-RECORTES")
                 etq = pid if origen == "TABLA" else f"{pid} (DE SOBRA DE {origen.split()[0]})"
                 _txt(msp, etq, ox + x + w / 2, oy + y + l / 2,
                      min(0.035, w / 4.5, max(w, l) / (len(etq) * 0.72)), "PLAN-CORTE-TEXTOS",
@@ -201,7 +272,7 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0):
         if not focal:
             continue
         completas = sum(1 for p in focal if p["completa"])
-        baldosas, _, (aB, lB) = empacar(piezas, material)
+        baldosas, _, (aB, lB) = empacar(piezas, material, modelo)
         extra_comp = 0
         extra_bald = []
         if material == "Moret":
@@ -253,6 +324,16 @@ def dibujar_resumen(msp, piezas, modelo, x0, y0):
         "CONTEO RAPIDO EN AUTOCAD: QSELECT (polilinea) por capa MORET-COMPLETAS o ROYAL-COMPLETAS:",
         "1 polilinea = 1 pieza completa. Las piezas estan a MEDIDA REAL 0.596 x 1.194 (junta visible).",
         "",
+        "ORDEN DE CORTE PROPUESTO: la numeracion del plan de corte (M-01, M-02...) ES el orden:",
+        "se empieza en PLANTA ALTA junto a la ESCALERA (por ahi sube el material) y se va uno",
+        "alejando; al terminar P.A. se sigue con P.B., tambien desde la escalera.",
+        "",
+        "LEYENDA DE CAPAS (que es cada layer):",
+    ]
+    for nombre, desc in LEYENDA_CAPAS:
+        lineas.append(f"  {nombre}: {desc}")
+    lineas += [
+        "",
         f"Elaboro: Ing. Mauricio Gastelum Mora   -   {datetime.date.today().strftime('%d/%m/%Y')}",
     ]
     for k, ln in enumerate(lineas):
@@ -274,9 +355,9 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
     cols, gx, gy = 6, aT + 0.30, lT + 0.55
 
     def _baldosa(cx, cy, etq, piezas, libres):
-        _rect(msp, cx, cy - lT, aT, lT, "PLAN-CORTE-TABLAS")
+        _rect(msp, cx, cy - lT, aT, lT, "PLAN-CORTE-PIEZAS-A-ABRIR")
         for (px, py, pw, pl, pid, rot) in piezas:
-            _rect(msp, cx + px, cy - lT + py, pw, pl, "PLAN-CORTE-PIEZAS")
+            _rect(msp, cx + px, cy - lT + py, pw, pl, "PLAN-CORTE-RECORTES")
             _txt(msp, pid, cx + px + pw / 2, cy - lT + py + pl / 2, 0.045, "PLAN-CORTE-TEXTOS")
         for (fx, fy, fw, fl, *_z) in libres:
             if fw > 0.03 and fl > 0.03:
@@ -298,7 +379,7 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
         _baldosa(cx, cy, f"B{n+1}", b.piezas, b.libres); n += 1
     for p in enteras:
         cx = x0 + (n % cols) * gx; cy = y0 - (n // cols) * gy
-        _rect(msp, cx, cy - lT, aT, lT, "PLAN-CORTE-TABLAS")
+        _rect(msp, cx, cy - lT, aT, lT, "PLAN-CORTE-PIEZAS-A-ABRIR")
         _txt(msp, p["id"], cx + aT / 2, cy - lT / 2, 0.06, "PLAN-CORTE-TEXTOS")
         _txt(msp, f"B{n+1}", cx + aT / 2, cy + 0.07, 0.06, "PLAN-CORTE-TEXTOS"); n += 1
     filas_esc = (n + cols - 1) // cols
@@ -310,9 +391,9 @@ def dibujar_despiece_extra(msp, modelo, x0, y0):
     yz = y0 - filas_esc * gy - 0.8
     _txt(msp, "DESPIECE ZOCLO MORET (4 tiras de 0.148 x 1.194 por pieza; cortadora de diamante kerf~0, holgura para calibre 0.594-0.596)",
          x0, yz + 0.5, 0.16, "PLAN-CORTE-TEXTOS")
-    _rect(msp, x0, yz - lT, aT, lT, "PLAN-CORTE-TABLAS")
+    _rect(msp, x0, yz - lT, aT, lT, "PLAN-CORTE-PIEZAS-A-ABRIR")
     for i in range(4):
-        _rect(msp, x0 + i * (H + KERF), yz - lT, H, lT, "PLAN-CORTE-PIEZAS")
+        _rect(msp, x0 + i * (H + KERF), yz - lT, H, lT, "PLAN-CORTE-RECORTES")
         _txt(msp, f"Z{i+1}", x0 + i * (H + KERF) + H / 2, yz - lT / 2, 0.05, "PLAN-CORTE-TEXTOS")
 
 
@@ -341,12 +422,15 @@ def exportar(modelo):
     # --- Acabados: zoclo + zonas de Urbania / regaderas ---
     dibujar_acabados(msp, modelo)
 
+    # --- Sobrante amarillo PEGADO a cada recorte (completa la pieza entera) ---
+    dibujar_sobrantes_en_plano(msp, piezas, modelo)
+
     # --- Plan de corte (debajo del plano) ---
     minx = min(p["x0"] for p in piezas)
     miny = min(p["y0"] for p in piezas)
     maxx = max(p["x0"] + p["wx"] for p in piezas)
     maxy = max(p["y0"] + p["hy"] for p in piezas)
-    y_fin = dibujar_plan_corte(msp, piezas, minx, miny)
+    y_fin = dibujar_plan_corte(msp, piezas, minx, miny, modelo)
 
     # --- Cuadro RESUMEN (conteo de completas / tablas / cajas / sobra) ---
     dibujar_resumen(msp, piezas, modelo, minx, (y_fin if y_fin is not None else miny - 4.0) - 0.6)
@@ -367,9 +451,9 @@ def exportar(modelo):
     nrec = sum(1 for p in piezas if not p["completa"])
     print(f"DXF editable: {dxf}")
     print(f"Piezas en el plano: {len(piezas)}  (completas: {len(piezas)-nrec}, recortes: {nrec})")
-    print("Capas: MORET-COMPLETAS/RECORTES, ROYAL-COMPLETAS/RECORTES, ETIQUETAS, "
-          "PLAN-CORTE-TABLAS/PIEZAS/SOBRANTES/DESPERDICIO/TEXTOS, RESUMEN "
-          "(piezas a medida real 0.596x1.194; sin capa morada)")
+    print("Capas: MORET/ROYAL-COMPLETAS/-RECORTES, ETIQUETAS, SOBRANTE-JUNTO-AL-RECORTE, "
+          "PLAN-CORTE-PIEZAS-A-ABRIR/RECORTES/SOBRANTES/DESPERDICIO/TEXTOS, RESUMEN "
+          "(leyenda de capas y orden de corte escritos dentro del DXF)")
 
 
 if __name__ == "__main__":
