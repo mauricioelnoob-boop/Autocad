@@ -98,6 +98,8 @@ def generar():
         pdf_extra.main(m)
         paso(f"3) {m}: DXF editable")
         exportar_dwg.exportar(m)
+        paso(f"3) {m}: DXF de conteo (capas fusionadas)")
+        exportar_dwg.exportar(m, fusionado=True)
     paso("3) Comparativo PDF + Generadores Excel")
     pdf_extra.comparativo()
     pdf_extra.generadores_excel()
