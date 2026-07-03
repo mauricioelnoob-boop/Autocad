@@ -1054,32 +1054,8 @@ def hacer_pdf(todas, material, path, modelo=""):
                 cell.set_facecolor("#f1948a"); cell.set_text_props(weight="bold")
 
         guardar(fig)
-
-        # ---------- Página: GENERADORES DE ACABADOS (todos los materiales) ----------
-        try:
-            import generadores as _G
-            fig = plt.figure(figsize=(11.7, 8.3))
-            axg = fig.add_subplot(111); axg.axis("off")
-            axg.set_title(f"NÚMEROS GENERADORES — ACABADOS · {modelo.upper()}",
-                          fontsize=14, fontweight="bold")
-            axg.text(0.02, 0.90, "CONCEPTO", fontsize=8, fontweight="bold", transform=axg.transAxes)
-            axg.text(0.40, 0.90, "CANTIDAD", fontsize=8, fontweight="bold", transform=axg.transAxes)
-            axg.text(0.82, 0.90, "SUMINISTRO", fontsize=8, fontweight="bold", transform=axg.transAxes)
-            axg.axhline(0.885, xmin=0.02, xmax=0.98, color="#333", lw=1.0)
-            yy = 0.84
-            for _cc, _dd, _ss in _G.reporte(modelo):
-                axg.text(0.02, yy, _cc, fontsize=7.5, fontweight="bold", transform=axg.transAxes)
-                axg.text(0.40, yy, _dd, fontsize=7.5, transform=axg.transAxes)
-                axg.text(0.82, yy, _ss, fontsize=7.5, color="#1b4f72", transform=axg.transAxes)
-                axg.axhline(yy - 0.025, xmin=0.02, xmax=0.98, color="#e5e5e5", lw=0.5)
-                yy -= 0.085
-            axg.text(0.02, 0.10, "Zoclo: Moret se corta a 0.149 m (4 tiras exactas por pieza, cortadora de diamante, corte sin merma); Royal 1 tira/pieza. "
-                     "Urbania White 0.30×0.45 (lavandería). Malla Lyndhurst 0.30×0.60 (charola). "
-                     "Muro de regadera = Moret acostado, fondo 1.50 m, ventana al plafón descontada, alto P.B. 2.75 / P.A. 2.90 m.",
-                     fontsize=8, color="#444", transform=axg.transAxes, va="top")
-            guardar(fig)
-        except Exception:
-            pass
+        # (la hoja de NÚMEROS GENERADORES se quitó de los despieces a petición
+        # del usuario: esa información vive en "Viñas Norte - Generadores.pdf")
 
     return total_pzas, cajas, area_reut, area_desp
 
