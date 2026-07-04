@@ -43,14 +43,55 @@ GRIS = "#f2f3f4"        # aún sin colocar
 CTX = "#fafafa"         # el otro material (contexto)
 
 
-def _orden_colocacion(piezas_mat, pe):
+def _puntos_inicio(modelo, piezas):
+    """Puntos de ARRANQUE de la colocación por planta: las marcas del plano
+    (bloque FLCH: el cuadrito azul con dos flechitas), que caen en el recorte
+    de 1.15 m que coincide con la escalera. Si una planta trae más de una
+    marca, se usa la que cae DENTRO de una pieza."""
+    try:
+        import json as _json
+        import pdf_generadores as PG
+        from modelos import MODELOS
+        cfg = MODELOS[modelo]
+        doc = _json.loads(open(cfg["json"], "rb").read().decode("utf-8", "replace"))
+        objs = doc["OBJECTS"]
+        blocks = {}
+        for o in objs:
+            if o.get("object") == "BLOCK_HEADER":
+                h = o.get("handle")
+                if isinstance(h, list):
+                    blocks[h[-1]] = o.get("name")
+        marcas = []
+        for o in objs:
+            if o.get("entity") == "INSERT":
+                bh = o.get("block_header")
+                bname = blocks.get(bh[-1], "?") if isinstance(bh, list) else "?"
+                if "FLCH" in str(bname).upper():
+                    ins = o.get("ins_pt") or [0, 0]
+                    marcas.append((ins[0], ins[1]))
+        xc = cfg["x_corte"]
+        out = {}
+        for (mx, my) in marcas:
+            pl = "baja" if mx < xc else "alta"
+            dentro = any(p["x0"] - 0.05 <= mx <= p["x0"] + p["wx"] + 0.05
+                         and p["y0"] - 0.05 <= my <= p["y0"] + p["hy"] + 0.05
+                         for p in piezas)
+            if pl not in out or (dentro and not out[pl][1]):
+                out[pl] = ((mx, my), dentro)
+        return {pl: pt for pl, (pt, _d) in out.items()}
+    except Exception:
+        return {}
+
+
+def _orden_colocacion(piezas_mat, pe, inicios=None):
     """Orden de colocación con la REGLA DE OBRA: cada pieza que se pone queda
     JUNTO a una ya puesta (comparten boquilla). Caminata por adyacencia:
-    arranca en P.A. junto a la escalera; en cada paso se coloca una pieza
-    vecina de las ya puestas, prefiriendo seguir la MISMA FILA pegado a la
-    última (serpenteo natural). Solo se 'brinca' al agotar una región conexa
-    (cambio de planta o isla separada), reiniciando por la más cercana a la
-    escalera. `pe` = centroide de la escalera."""
+    arranca donde lo MARCA EL PLANO (bloque FLCH junto a la escalera: el
+    recorte de 1.15 m); en cada paso se coloca una pieza vecina de las ya
+    puestas, prefiriendo seguir la MISMA FILA pegado a la última (serpenteo
+    natural). Solo se 'brinca' al agotar una región conexa (cambio de planta
+    o isla separada), reiniciando por la más cercana al arranque."""
+    inicios = inicios or {}
     n = len(piezas_mat)
     ady = [[] for _ in range(n)]
     for i in range(n):
@@ -68,14 +109,18 @@ def _orden_colocacion(piezas_mat, pe):
                 ady[i].append(j)
                 ady[j].append(i)
 
+    def _ancla(i):
+        return inicios.get(piezas_mat[i]["planta"], pe)
+
     def d2(i, pt):
         return (piezas_mat[i]["x"] - pt[0]) ** 2 + (piezas_mat[i]["y"] - pt[1]) ** 2
 
     resto = set(range(n))
     orden = []
     while resto:
-        # arranque de región: P.A. primero, lo más cerca de la escalera
-        start = min(resto, key=lambda i: (piezas_mat[i]["planta"] != "alta", d2(i, pe)))
+        # arranque de región: P.A. primero, lo más cerca de la MARCA de inicio
+        start = min(resto, key=lambda i: (piezas_mat[i]["planta"] != "alta",
+                                          d2(i, _ancla(i))))
         resto.discard(start)
         orden.append(start)
         frontera = set(j for j in ady[start] if j in resto)
@@ -110,9 +155,11 @@ def _portada(pdf, modelo, pasos_m, pasos_r):
     txt = (f"Una página por CADA PIEZA COLOCADA (enteras y recortes): {pasos_m} de Moret"
            f" y {pasos_r} de Royal Walnut.\n\n"
            "REGLA DE OBRA: cada pieza que se pone queda JUNTO a una ya puesta"
-           " (comparten boquilla).\nSe empieza en PLANTA ALTA junto a la ESCALERA y se"
-           " avanza pegado, fila por fila por las boquillas;\nsolo se cambia de frente"
-           " al agotar una región (cambio de planta o isla separada).\n\n"
+           " (comparten boquilla).\nSe ARRANCA donde lo marca el plano (el cuadrito"
+           " azul con flechitas junto a la escalera, bloque FLCH):\nel recorte de"
+           " 1.15 m que coincide con la escalera, siempre con Moret; se avanza pegado,"
+           " fila por fila\npor las boquillas, y solo se cambia de frente al agotar"
+           " una región (cambio de planta o isla separada).\n\n"
            "La pieza madre se CORTA cuando se necesita su primer recorte (dice"
            f" '{pm}-xx SE CORTA AHORA');\nlos demás recortes de esa pieza quedan en"
            " RESERVA con el paso en que se colocan,\ny los que salen de una SOBRA"
@@ -170,6 +217,9 @@ def hacer(modelo):
     todas = cargar_anotado(modelo)
     pe = _punto_escalera(modelo) or (sum(p["x"] for p in todas) / len(todas),
                                      sum(p["y"] for p in todas) / len(todas))
+    # marcas de arranque del PLANO (cuadrito azul con flechitas, bloque FLCH):
+    # caen en el recorte de 1.15 m que coincide con la escalera
+    inicios = _puntos_inicio(modelo, todas)
     salida = f"Viñas Norte - {modelo} Colocación paso a paso.pdf"
 
     plan = {}
@@ -183,7 +233,7 @@ def hacer(modelo):
         # TODAS las piezas del material (enteras + recortes): la regla de obra
         # es que cada pieza colocada quede JUNTO a una ya puesta
         piezas_mat = [p for p in todas if p["material"] == material and p.get("id")]
-        orden = _orden_colocacion(piezas_mat, pe)
+        orden = _orden_colocacion(piezas_mat, pe, inicios)
         paso_de = {p["id"]: i + 1 for i, p in enumerate(orden)}
         plan[material] = (baldosas, mapa, tabla_de, origen_de, orden, paso_de)
 
@@ -226,6 +276,19 @@ def hacer(modelo):
                 ax.text(p["x"], p["y"], pid, ha="center", va="center", fontsize=7,
                         weight="bold", color="white", zorder=5,
                         rotation=0 if p["wx"] >= p["hy"] else 90)
+                # marca de ARRANQUE del plano (cuadrito azul con flechitas)
+                if p["planta"] in inicios:
+                    mx, my = inicios[p["planta"]]
+                    s = 0.16
+                    ax.add_patch(Rectangle((mx - s / 2, my - s / 2), s, s,
+                                           facecolor="#1a5276", edgecolor="#0b2e45",
+                                           lw=0.8, zorder=6))
+                    for (dx, dy) in ((0.42, 0.0), (0.0, 0.42)):
+                        ax.annotate("", (mx + dx, my + dy), (mx + dx * 0.25, my + dy * 0.25),
+                                    arrowprops=dict(arrowstyle="->", color="#0b2e45", lw=1.3),
+                                    zorder=6)
+                    ax.text(mx, my - s, "INICIO", ha="center", va="top", fontsize=6,
+                            weight="bold", color="#0b2e45", zorder=6)
                 xs0 = [q["x0"] for q in focos]; ys0 = [q["y0"] for q in focos]
                 xs1 = [q["x0"] + q["wx"] for q in focos]
                 ys1 = [q["y0"] + q["hy"] for q in focos]
