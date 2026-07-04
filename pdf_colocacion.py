@@ -145,6 +145,121 @@ def _orden_colocacion(piezas_mat, pe, inicios=None):
     return [piezas_mat[i] for i in orden]
 
 
+def _orden_escalera(modelo):
+    """Orden de SUBIDA de la escalera (P1,H1,P2,H2… descanso… tramo 2) y la
+    geometría del perfil para el mapita (cada pieza = un tramo del perfil)."""
+    import despiece_extra as DE
+    cfg = DE.ESCALERA[modelo]
+    orden, geo = [], {}
+    ex = ey = 0.0
+    k = 0
+    for t, tramo in enumerate(cfg["tramos"]):
+        for _ in range(tramo):
+            k += 1
+            orden += [f"P{k}", f"H{k}"]
+            geo[f"P{k}"] = ("v", ex, ey, 0.175)
+            ey += 0.175
+            geo[f"H{k}"] = ("h", ex, ey, 0.27)
+            ex += 0.27
+        if t < len(cfg["descansos"]):
+            ent, rec = cfg["descansos"][t]
+            ids = ([f"D{t+1}-E{j+1}" for j in range(ent)]
+                   + [f"D{t+1}-R{j+1}" for j in range(rec)])
+            orden += ids
+            L = 1.0
+            s = L / len(ids)
+            for j, pid in enumerate(ids):
+                geo[pid] = ("h", ex + j * s, ey, s)
+            ex += L
+    return orden, geo
+
+
+def _mapa_escalera(ax, geo, colocadas, actual):
+    for pid, (o, x, y, L) in geo.items():
+        if pid == actual:
+            col, lwd = AZUL, 6
+        elif pid in colocadas:
+            col, lwd = "#58d68d", 4
+        else:
+            col, lwd = "#b3b6b7", 2.5
+        if o == "v":
+            ax.plot([x, x], [y, y + L], color=col, lw=lwd, solid_capstyle="butt")
+            if pid == actual:
+                ax.text(x - 0.06, y + L / 2, pid, ha="right", va="center",
+                        fontsize=8, weight="bold", color="#1a5276")
+        else:
+            ax.plot([x, x + L], [y, y], color=col, lw=lwd, solid_capstyle="butt")
+            if pid == actual:
+                ax.text(x + L / 2, y + 0.06, pid, ha="center", fontsize=8,
+                        weight="bold", color="#1a5276")
+    ax.set_aspect("equal")
+    ax.axis("off")
+    ax.set_title("ESCALERA (perfil): verde = puesto · azul = este paso", fontsize=10)
+
+
+def _mapa_regadera_datos(modelo):
+    """Alzados de las 3 caras de cada regadera para el mapita: orden de
+    colocación (cara por cara, fila por fila de abajo hacia arriba), geometría
+    de cada pieza y de cada muro (con VENTANA y NICHO en el fondo)."""
+    import despiece_extra as DE
+    import generadores as G
+    paredes = DE.regadera_paredes(modelo)
+    regs = G.GEN[modelo]["regaderas"]
+    orden, piezas_geo, muros_geo = [], {}, []
+    off = 0.0
+    for k, (planta, h) in enumerate(regs, 1):
+        for cara in range(3):
+            titulo, w, hh, pzs = paredes[(k - 1) * 3 + cara]
+            es_fondo = cara == 0
+            etq = pzs[0]["pared"] if pzs else titulo
+            nicho = ((0.02, hh - 0.45 - G.NICHO_ALTO, G.NICHO_ANCHO, G.NICHO_ALTO)
+                     if es_fondo else None)
+            muros_geo.append((off, w, h, hh if es_fondo else None, nicho, etq))
+            for p in sorted(pzs, key=lambda q: (round(q["y"], 2), q["x"])):
+                orden.append(p["id"])
+                piezas_geo[p["id"]] = (off + p["x"], p["y"], p["w"], p["h"])
+            off += w + 0.35
+    return orden, piezas_geo, muros_geo
+
+
+def _mapa_regadera(ax, piezas_geo, muros_geo, colocadas, actual):
+    for (off, w, h, hf, nicho, etq) in muros_geo:
+        ax.add_patch(Rectangle((off, 0), w, h, fill=False, edgecolor="#333", lw=1.1))
+        if hf is not None:
+            ax.add_patch(Rectangle((off, hf), w, h - hf, facecolor="#d6eaf8",
+                                   edgecolor="#2e86c1", lw=0.8))
+            ax.text(off + w / 2, hf + (h - hf) / 2, "VENTANA\n(al plafón)",
+                    ha="center", va="center", fontsize=6, color="#1b4f72")
+        ax.text(off + w / 2, h + 0.10, etq, ha="center", fontsize=7, weight="bold")
+    for pid, (x, y, w, hh) in piezas_geo.items():
+        if pid == actual:
+            fc, ec, lw = AZUL, "#1a5276", 1.2
+        elif pid in colocadas:
+            fc, ec, lw = VERDE, "#82b366", 0.5
+        else:
+            fc, ec, lw = GRIS, "#b3b6b7", 0.4
+        ax.add_patch(Rectangle((x, y), w, hh, facecolor=fc, edgecolor=ec, lw=lw))
+        if pid == actual:
+            ax.text(x + w / 2, y + hh / 2, pid, ha="center", va="center",
+                    fontsize=6.5, weight="bold", color="white")
+    for (off, w, h, hf, nicho, etq) in muros_geo:
+        if nicho:
+            nx, ny, na, nh = nicho
+            ax.add_patch(Rectangle((off + nx, ny), na, nh, fill=False,
+                                   edgecolor="#c0392b", lw=1.6, zorder=6))
+            ax.text(off + nx + na / 2, ny + nh / 2, "NICHO", ha="center",
+                    va="center", fontsize=6, color="#c0392b", weight="bold",
+                    zorder=7)
+    x_fin = max(off + w for (off, w, h, hf, nicho, etq) in muros_geo)
+    y_fin = max(h for (off, w, h, hf, nicho, etq) in muros_geo)
+    ax.set_xlim(-0.2, x_fin + 0.2)
+    ax.set_ylim(-0.2, y_fin + 0.4)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    ax.set_title("MUROS DE BAÑO (alzados): verde = puesto · azul = este paso",
+                 fontsize=10)
+
+
 def _portada(pdf, modelo, pasos_m, pasos_r):
     pm, pr = PREF_CORTE["Moret"], PREF_CORTE["Royal Walnut"]
     fig = plt.figure(figsize=(13.5, 8.0))
@@ -214,6 +329,7 @@ def _dibujo_corte(axc, material, b, actual, paso_de, corta_ahora):
 
 
 def hacer(modelo):
+    import despiece_extra as DE
     todas = cargar_anotado(modelo)
     pe = _punto_escalera(modelo) or (sum(p["x"] for p in todas) / len(todas),
                                      sum(p["y"] for p in todas) / len(todas))
@@ -221,6 +337,13 @@ def hacer(modelo):
     # caen en el recorte de 1.15 m que coincide con la escalera
     inicios = _puntos_inicio(modelo, todas)
     salida = f"Viñas Norte - {modelo} Colocación paso a paso.pdf"
+
+    orden_esc, geo_esc = _orden_escalera(modelo)
+    orden_reg, piezas_geo_reg, muros_geo_reg = _mapa_regadera_datos(modelo)
+    dims_extra = {p["id"]: p for p in DE.escalera_piezas(modelo)}
+    for _t, _w, _h, ps in DE.regadera_paredes(modelo):
+        for q in ps:
+            dims_extra[q["id"]] = q
 
     plan = {}
     for material in ("Moret", "Royal Walnut"):
@@ -233,84 +356,111 @@ def hacer(modelo):
         # TODAS las piezas del material (enteras + recortes): la regla de obra
         # es que cada pieza colocada quede JUNTO a una ya puesta
         piezas_mat = [p for p in todas if p["material"] == material and p.get("id")]
-        orden = _orden_colocacion(piezas_mat, pe, inicios)
-        paso_de = {p["id"]: i + 1 for i, p in enumerate(orden)}
-        plan[material] = (baldosas, mapa, tabla_de, origen_de, orden, paso_de)
+        orden_piso = _orden_colocacion(piezas_mat, pe, inicios)
+        pasos = [("piso", p) for p in orden_piso]
+        if material == "Moret":
+            # después del piso: ESCALERA (orden de subida) y MUROS DE BAÑO
+            pasos += [("esc", pid) for pid in orden_esc]
+            pasos += [("reg", pid) for pid in orden_reg]
+        paso_de = {}
+        for i2, (kind, dato) in enumerate(pasos, 1):
+            paso_de[dato["id"] if kind == "piso" else dato] = i2
+        # INICIO propio del material por planta (Royal también tiene arranque)
+        ini_mat = dict(inicios) if material == "Moret" else {}
+        if material != "Moret":
+            for p in orden_piso:
+                ini_mat.setdefault(p["planta"], (p["x"], p["y"]))
+        plan[material] = (baldosas, mapa, tabla_de, origen_de, pasos, paso_de, ini_mat)
 
     with PdfPages(salida) as pdf:
-        _portada(pdf, modelo,
-                 len(plan["Moret"][4]), len(plan["Royal Walnut"][4]))
+        _portada(pdf, modelo, len(plan["Moret"][4]), len(plan["Royal Walnut"][4]))
         total_pags = 1
         for material in ("Moret", "Royal Walnut"):
-            baldosas, mapa, tabla_de, origen_de, orden, paso_de = plan[material]
+            baldosas, mapa, tabla_de, origen_de, pasos, paso_de, ini_mat = plan[material]
             pc = PREF_CORTE[material]
             colocadas = set()
-            cortadas = set()          # índices de tabla ya cortados
+            cortadas = set()          # índices de pieza madre ya cortados
             reserva = []              # (id, paso_destino) recortes cortados sin colocar
-            guardadas = []            # (w, l, tabla, paso) sobras a guardar
+            guardadas = []            # (w, l, pieza, paso) sobras a guardar
             merma_acum = 0.0
-            total = len(orden)
-            for i, p in enumerate(orden, 1):
-                pid = p["id"]
-                es_recorte = (not p["completa"]) and pid in tabla_de
+            total = len(pasos)
+            for i, (kind, dato) in enumerate(pasos, 1):
+                if kind == "piso":
+                    p = dato
+                    pid = p["id"]
+                    dim_txt = f"{_fmt(p['wx'])}x{_fmt(p['hy'])}"
+                    completa = p["completa"]
+                else:
+                    pid = dato
+                    pe_ = dims_extra[pid]
+                    dim_txt = f"{_fmt(pe_['ancho'])}x{_fmt(pe_['largo'])}"
+                    completa = pe_["completa"]
+                es_recorte = (not completa) and pid in tabla_de
                 idx = tabla_de.get(pid)
                 b = baldosas[idx - 1] if idx else None
                 corta_ahora = es_recorte and idx not in cortadas
 
                 fig = plt.figure(figsize=(13.5, 8.0))
                 ax = fig.add_axes([0.03, 0.06, 0.60, 0.84])
-                focos = [q for q in todas if q["planta"] == p["planta"]]
-                for q in focos:
-                    es_mat = q["material"] == material
-                    qid = q.get("id")
-                    if es_mat and qid == pid:
-                        fc, ec, lw, z = AZUL, "#1a5276", 1.2, 4
-                    elif es_mat and qid in colocadas:
-                        fc, ec, lw, z = VERDE, "#82b366", 0.4, 2
-                    elif es_mat:
-                        fc, ec, lw, z = GRIS, "#b3b6b7", 0.4, 2
-                    else:
-                        fc, ec, lw, z = CTX, "#dddddd", 0.3, 1
-                    ax.add_patch(Rectangle((q["x0"], q["y0"]), q["wx"], q["hy"],
-                                           facecolor=fc, edgecolor=ec, lw=lw, zorder=z))
-                ax.text(p["x"], p["y"], pid, ha="center", va="center", fontsize=7,
-                        weight="bold", color="white", zorder=5,
-                        rotation=0 if p["wx"] >= p["hy"] else 90)
-                # marca de ARRANQUE del plano (cuadrito azul con flechitas)
-                if p["planta"] in inicios:
-                    mx, my = inicios[p["planta"]]
-                    s = 0.16
-                    ax.add_patch(Rectangle((mx - s / 2, my - s / 2), s, s,
-                                           facecolor="#1a5276", edgecolor="#0b2e45",
-                                           lw=0.8, zorder=6))
-                    for (dx, dy) in ((0.42, 0.0), (0.0, 0.42)):
-                        ax.annotate("", (mx + dx, my + dy), (mx + dx * 0.25, my + dy * 0.25),
-                                    arrowprops=dict(arrowstyle="->", color="#0b2e45", lw=1.3),
-                                    zorder=6)
-                    ax.text(mx, my - s, "INICIO", ha="center", va="top", fontsize=6,
-                            weight="bold", color="#0b2e45", zorder=6)
-                xs0 = [q["x0"] for q in focos]; ys0 = [q["y0"] for q in focos]
-                xs1 = [q["x0"] + q["wx"] for q in focos]
-                ys1 = [q["y0"] + q["hy"] for q in focos]
-                ax.set_xlim(min(xs0) - 0.3, max(xs1) + 0.3)
-                ax.set_ylim(min(ys0) - 0.3, max(ys1) + 0.3)
-                ax.set_aspect("equal")
-                ax.axis("off")
-                ax.set_title(f"{'PLANTA ALTA' if p['planta'] == 'alta' else 'PLANTA BAJA'}"
-                             " — en AZUL la pieza de este paso", fontsize=10)
+                if kind == "piso":
+                    focos = [q for q in todas if q["planta"] == p["planta"]]
+                    for q in focos:
+                        es_mat = q["material"] == material
+                        qid = q.get("id")
+                        if es_mat and qid == pid:
+                            fc, ec, lw, z = AZUL, "#1a5276", 1.2, 4
+                        elif es_mat and qid in colocadas:
+                            fc, ec, lw, z = VERDE, "#82b366", 0.4, 2
+                        elif es_mat:
+                            fc, ec, lw, z = GRIS, "#b3b6b7", 0.4, 2
+                        else:
+                            fc, ec, lw, z = CTX, "#dddddd", 0.3, 1
+                        ax.add_patch(Rectangle((q["x0"], q["y0"]), q["wx"], q["hy"],
+                                               facecolor=fc, edgecolor=ec, lw=lw, zorder=z))
+                    ax.text(p["x"], p["y"], pid, ha="center", va="center", fontsize=7,
+                            weight="bold", color="white", zorder=5,
+                            rotation=0 if p["wx"] >= p["hy"] else 90)
+                    # marca de ARRANQUE (cuadrito azul con flechitas): la del
+                    # plano en Moret; en Royal, su propio inicio de despiece
+                    if p["planta"] in ini_mat:
+                        mx, my = ini_mat[p["planta"]]
+                        s = 0.16
+                        ax.add_patch(Rectangle((mx - s / 2, my - s / 2), s, s,
+                                               facecolor="#1a5276", edgecolor="#0b2e45",
+                                               lw=0.8, zorder=6))
+                        for (dx, dy) in ((0.42, 0.0), (0.0, 0.42)):
+                            ax.annotate("", (mx + dx, my + dy),
+                                        (mx + dx * 0.25, my + dy * 0.25),
+                                        arrowprops=dict(arrowstyle="->", color="#0b2e45",
+                                                        lw=1.3), zorder=6)
+                        ax.text(mx, my - s, "INICIO", ha="center", va="top", fontsize=6,
+                                weight="bold", color="#0b2e45", zorder=6)
+                    xs0 = [q["x0"] for q in focos]; ys0 = [q["y0"] for q in focos]
+                    xs1 = [q["x0"] + q["wx"] for q in focos]
+                    ys1 = [q["y0"] + q["hy"] for q in focos]
+                    ax.set_xlim(min(xs0) - 0.3, max(xs1) + 0.3)
+                    ax.set_ylim(min(ys0) - 0.3, max(ys1) + 0.3)
+                    ax.set_aspect("equal")
+                    ax.axis("off")
+                    ax.set_title(f"{'PLANTA ALTA' if p['planta'] == 'alta' else 'PLANTA BAJA'}"
+                                 " — en AZUL la pieza de este paso", fontsize=10)
+                elif kind == "esc":
+                    _mapa_escalera(ax, geo_esc, colocadas, pid)
+                else:
+                    _mapa_regadera(ax, piezas_geo_reg, muros_geo_reg, colocadas, pid)
 
                 axc = fig.add_axes([0.66, 0.42, 0.16, 0.50])
                 if es_recorte:
                     _dibujo_corte(axc, material, b, pid, paso_de, corta_ahora)
                     axc.set_title((f"pieza {pc}-{idx:02d}: SE CORTA AHORA" if corta_ahora
-                                   else f"pieza {pc}-{idx:02d} (cortada antes; estaba en reserva)"),
+                                   else f"pieza {pc}-{idx:02d} (cortada antes; en reserva)"),
                                   fontsize=9, weight="bold",
                                   color="#c0392b" if corta_ahora else "#1e8449")
                 else:
                     aB_, lB_ = PISOS[material]
                     axc.add_patch(Rectangle((0, 0), aB_, lB_, facecolor=AZUL,
                                             edgecolor="#1a5276", lw=1.5))
-                    axc.text(aB_ / 2, lB_ / 2, f"{pid}\n{_fmt(p['wx'])}x{_fmt(p['hy'])}\nENTERA",
+                    axc.text(aB_ / 2, lB_ / 2, f"{pid}\n{dim_txt}\nENTERA",
                              ha="center", va="center", fontsize=8, color="white",
                              weight="bold", rotation=90)
                     axc.set_xlim(-0.02, aB_ + 0.02)
@@ -325,7 +475,11 @@ def hacer(modelo):
                 org = origen_de.get(pid, "TABLA")
                 lineas = [f"PASO {i} de {total}", "",
                           f"COLOCAR {pid}",
-                          f"  {_fmt(p['wx'])}x{_fmt(p['hy'])}"]
+                          f"  {dim_txt}"]
+                if kind == "esc":
+                    lineas.insert(3, "  (ESCALERA)")
+                elif kind == "reg":
+                    lineas.insert(3, "  (MURO DE BAÑO)")
                 if es_recorte:
                     lineas.append(f"  {'corte de pieza nueva' if org == 'TABLA' else 'sale de la SOBRA de ' + org}")
                 else:
@@ -335,9 +489,7 @@ def hacer(modelo):
                     if otros:
                         lineas += ["", f"al cortar {pc}-{idx:02d} salen", "también (a RESERVA):"]
                         for etq in otros:
-                            dest = (f"paso {paso_de[etq]}" if etq in paso_de
-                                    else "escalera" if etq[:1] in ("P", "H", "D")
-                                    else "muro de baño")
+                            dest = f"paso {paso_de[etq]}" if etq in paso_de else "?"
                             lineas.append(f"  {etq} → {dest}")
                 lineas.append("")
                 if reserva:
@@ -359,8 +511,9 @@ def hacer(modelo):
                 axt.text(0.0, 0.30, "\n".join(reg), va="top", fontsize=6.4,
                          family="monospace", transform=axt.transAxes, color="#5d4037")
 
-                fig.suptitle(f"COLOCACIÓN · {modelo.upper()} · {material.upper()} — "
-                             f"PASO {i} de {total}: {pid}",
+                etiqueta_zona = {"piso": "", "esc": " · ESCALERA", "reg": " · MUROS DE BAÑO"}[kind]
+                fig.suptitle(f"COLOCACIÓN · {modelo.upper()} · {material.upper()}{etiqueta_zona}"
+                             f" — PASO {i} de {total}: {pid}",
                              fontsize=13, weight="bold", y=0.985)
                 fig.text(0.5, 0.015,
                          f"{PIE}        Guía de colocación — {modelo}        {FECHA}",
@@ -386,28 +539,9 @@ def hacer(modelo):
                 reserva = [(rid, rp) for (rid, rp) in reserva if rid != pid]
                 reserva.sort(key=lambda t: t[1])
 
-            # piezas que quedaron sin cortar: solo cortes de escalera/regadera
-            pendientes = [idx for idx in range(1, len(baldosas) + 1)
-                          if idx not in cortadas]
-            if pendientes and material == "Moret":
-                fig = plt.figure(figsize=(13.5, 8.0))
-                fig.suptitle(f"CORTES FINALES · {modelo.upper()} · MORET — piezas solo de"
-                             " ESCALERA / MUROS DE BAÑO", fontsize=13, weight="bold")
-                n = len(pendientes)
-                cols = min(6, n)
-                rows = (n + cols - 1) // cols
-                for k, idx in enumerate(pendientes):
-                    axc = fig.add_axes([0.04 + (k % cols) * 0.16,
-                                        0.72 - (k // cols) * 0.42, 0.12, 0.34])
-                    _dibujo_corte(axc, material, baldosas[idx - 1], None, paso_de, True)
-                    axc.set_title(f"{pc}-{idx:02d}", fontsize=8, weight="bold")
-                fig.text(0.5, 0.04, "Estas piezas se abren SOLO para la escalera y los"
-                         " muros de baño (ver su despiece); se pueden cortar al final"
-                         " o cuando toque ese frente.", ha="center", fontsize=9,
-                         color="#555")
-                pdf.savefig(fig)
-                plt.close(fig)
-                total_pags += 1
+            pendientes = [k2 for k2 in range(1, len(baldosas) + 1) if k2 not in cortadas]
+            if pendientes:
+                print(f"   (aviso: {material} dejó {len(pendientes)} piezas sin paso de corte)")
     print(f"-> {salida}  ({total_pags} páginas)")
     return salida
 
