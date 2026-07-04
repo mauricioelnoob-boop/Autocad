@@ -43,59 +43,61 @@ GRIS = "#f2f3f4"        # aún sin colocar
 CTX = "#fafafa"         # el otro material (contexto)
 
 
-def _orden_colocacion(recortes, pe):
-    """Orden de colocación PEGADO: zonas conexas (cuartos) de la más cercana
-    a la escalera a la más lejana (P.A. primero), y dentro de cada zona fila
-    por fila (boquillas), serpenteando. `pe` = centroide de la escalera."""
-    try:
-        from shapely.geometry import box as _box
-        from shapely.ops import unary_union as _uni
-    except Exception:
-        return sorted(recortes, key=lambda p: (p["planta"] != "alta",
-                                               (p["x"] - pe[0]) ** 2 + (p["y"] - pe[1]) ** 2))
-    orden_total = []
-    for planta in ("alta", "baja"):
-        grupo = [p for p in recortes if p["planta"] == planta]
-        if not grupo:
-            continue
-        cajas = [_box(p["x0"] - 0.05, p["y0"] - 0.05,
-                      p["x0"] + p["wx"] + 0.05, p["y0"] + p["hy"] + 0.05) for p in grupo]
-        union = _uni(cajas)
-        zonas = list(union.geoms) if union.geom_type == "MultiPolygon" else [union]
-        # cada pieza a su zona
-        por_zona = {i: [] for i in range(len(zonas))}
-        for p, c in zip(grupo, cajas):
-            zi = max(range(len(zonas)), key=lambda i: c.intersection(zonas[i]).area)
-            por_zona[zi].append(p)
-        # zonas de la más cercana a la escalera a la más lejana
-        orden_z = sorted(por_zona, key=lambda i: (zonas[i].centroid.x - pe[0]) ** 2
-                                                 + (zonas[i].centroid.y - pe[1]) ** 2)
-        for zi in orden_z:
-            zg = por_zona[zi]
-            if not zg:
-                continue
-            # filas por y0 (boquillas horizontales), tolerancia 12 cm
-            zg.sort(key=lambda p: -p["y0"])
-            filas = [[zg[0]]]
-            for p in zg[1:]:
-                if abs(p["y0"] - filas[-1][-1]["y0"]) <= 0.12:
-                    filas[-1].append(p)
-                else:
-                    filas.append([p])
-            # BARRIDO MONÓTONO fila por fila (sin brincar entre filas lejanas):
-            # se arranca por la fila del lado de la escalera y se avanza en un
-            # solo sentido; dentro de la fila, serpenteo (ida y vuelta)
-            def _dist_fila(f):
-                return min((q["x"] - pe[0]) ** 2 + (q["y"] - pe[1]) ** 2 for q in f)
-            if _dist_fila(filas[-1]) < _dist_fila(filas[0]):
-                filas.reverse()
-            # primer sentido en x: hacia el lado contrario de donde se entra
-            izq = pe[0] <= sum(q["x"] for q in filas[0]) / len(filas[0])
-            for f in filas:
-                f.sort(key=lambda p: p["x"], reverse=not izq)
-                orden_total.extend(f)
-                izq = not izq
-    return orden_total
+def _orden_colocacion(piezas_mat, pe):
+    """Orden de colocación con la REGLA DE OBRA: cada pieza que se pone queda
+    JUNTO a una ya puesta (comparten boquilla). Caminata por adyacencia:
+    arranca en P.A. junto a la escalera; en cada paso se coloca una pieza
+    vecina de las ya puestas, prefiriendo seguir la MISMA FILA pegado a la
+    última (serpenteo natural). Solo se 'brinca' al agotar una región conexa
+    (cambio de planta o isla separada), reiniciando por la más cercana a la
+    escalera. `pe` = centroide de la escalera."""
+    n = len(piezas_mat)
+    ady = [[] for _ in range(n)]
+    for i in range(n):
+        a = piezas_mat[i]
+        ax1, ay1 = a["x0"] + a["wx"], a["y0"] + a["hy"]
+        for j in range(i + 1, n):
+            b = piezas_mat[j]
+            bx1, by1 = b["x0"] + b["wx"], b["y0"] + b["hy"]
+            fx = min(ax1, bx1) - max(a["x0"], b["x0"])
+            fy = min(ay1, by1) - max(a["y0"], b["y0"])
+            gx = max(b["x0"] - ax1, a["x0"] - bx1)
+            gy = max(b["y0"] - ay1, a["y0"] - by1)
+            # comparten boquilla: pegadas (hueco <= 2.5 cm) con traslape > 5 cm
+            if (fy > 0.05 and -0.001 <= gx <= 0.025) or (fx > 0.05 and -0.001 <= gy <= 0.025):
+                ady[i].append(j)
+                ady[j].append(i)
+
+    def d2(i, pt):
+        return (piezas_mat[i]["x"] - pt[0]) ** 2 + (piezas_mat[i]["y"] - pt[1]) ** 2
+
+    resto = set(range(n))
+    orden = []
+    while resto:
+        # arranque de región: P.A. primero, lo más cerca de la escalera
+        start = min(resto, key=lambda i: (piezas_mat[i]["planta"] != "alta", d2(i, pe)))
+        resto.discard(start)
+        orden.append(start)
+        frontera = set(j for j in ady[start] if j in resto)
+        last = start
+        while frontera:
+            pl = piezas_mat[last]
+            ady_last = set(ady[last])
+
+            def _score(j):
+                q = piezas_mat[j]
+                misma_fila = abs(q["y0"] - pl["y0"]) <= 0.12
+                return (j not in ady_last,          # 1o: pegada a la ÚLTIMA
+                        not misma_fila,             # 2o: sigue la misma fila
+                        d2(j, (pl["x"], pl["y"])))  # 3o: la más cercana
+            sig = min(frontera, key=_score)
+            frontera.discard(sig)
+            resto.discard(sig)
+            orden.append(sig)
+            frontera |= {j for j in ady[sig] if j in resto}
+            frontera &= resto
+            last = sig
+    return [piezas_mat[i] for i in orden]
 
 
 def _portada(pdf, modelo, pasos_m, pasos_r):
@@ -105,18 +107,17 @@ def _portada(pdf, modelo, pasos_m, pasos_r):
              fontsize=26, weight="bold", color="#1b4f72")
     fig.text(0.5, 0.60, f"{modelo.upper()} · Viñas Norte", ha="center",
              fontsize=16, color="#2874a6")
-    txt = (f"Una página por cada RECORTE COLOCADO: {pasos_m} de Moret y {pasos_r} de"
-           " Royal Walnut, en ORDEN DE COLOCACIÓN REAL:\n"
-           "se empieza en PLANTA ALTA junto a la ESCALERA, cuarto por cuarto (del más"
-           " cercano al más lejano)\ny dentro del cuarto FILA POR FILA siguiendo las"
-           " boquillas, serpenteando; al terminar P.A. se sigue con P.B.\n\n"
+    txt = (f"Una página por CADA PIEZA COLOCADA (enteras y recortes): {pasos_m} de Moret"
+           f" y {pasos_r} de Royal Walnut.\n\n"
+           "REGLA DE OBRA: cada pieza que se pone queda JUNTO a una ya puesta"
+           " (comparten boquilla).\nSe empieza en PLANTA ALTA junto a la ESCALERA y se"
+           " avanza pegado, fila por fila por las boquillas;\nsolo se cambia de frente"
+           " al agotar una región (cambio de planta o isla separada).\n\n"
            "La pieza madre se CORTA cuando se necesita su primer recorte (dice"
            f" '{pm}-xx SE CORTA AHORA');\nlos demás recortes de esa pieza quedan en"
            " RESERVA con el paso en que se colocan,\ny los que salen de una SOBRA"
            " siempre tienen su sobra ya cortada.\n\n"
-           "GRIS = por colocar · VERDE = ya colocado · AZUL = el recorte de este paso.\n"
-           "Las piezas ENTERAS se tienden de corrido en su cuarto (no llevan página):"
-           " esta guía ordena los CORTES.")
+           "GRIS = por colocar · VERDE = ya colocado · AZUL = la pieza de este paso.")
     fig.text(0.5, 0.28, txt, ha="center", fontsize=10, color="#333", linespacing=1.7)
     fig.text(0.5, 0.05, f"{PIE}        {FECHA}", ha="center", fontsize=9, color="#777")
     pdf.savefig(fig)
@@ -179,9 +180,10 @@ def hacer(modelo):
             for (x, y, w, l, etq, rot), (org, _o) in zip(b.piezas, b.meta):
                 tabla_de[etq] = idx
                 origen_de[etq] = org
-        recortes = [p for p in todas if p["material"] == material
-                    and not p["completa"] and p.get("id") in tabla_de]
-        orden = _orden_colocacion(recortes, pe)
+        # TODAS las piezas del material (enteras + recortes): la regla de obra
+        # es que cada pieza colocada quede JUNTO a una ya puesta
+        piezas_mat = [p for p in todas if p["material"] == material and p.get("id")]
+        orden = _orden_colocacion(piezas_mat, pe)
         paso_de = {p["id"]: i + 1 for i, p in enumerate(orden)}
         plan[material] = (baldosas, mapa, tabla_de, origen_de, orden, paso_de)
 
@@ -200,9 +202,10 @@ def hacer(modelo):
             total = len(orden)
             for i, p in enumerate(orden, 1):
                 pid = p["id"]
-                idx = tabla_de[pid]
-                b = baldosas[idx - 1]
-                corta_ahora = idx not in cortadas
+                es_recorte = (not p["completa"]) and pid in tabla_de
+                idx = tabla_de.get(pid)
+                b = baldosas[idx - 1] if idx else None
+                corta_ahora = es_recorte and idx not in cortadas
 
                 fig = plt.figure(figsize=(13.5, 8.0))
                 ax = fig.add_axes([0.03, 0.06, 0.60, 0.84])
@@ -231,14 +234,28 @@ def hacer(modelo):
                 ax.set_aspect("equal")
                 ax.axis("off")
                 ax.set_title(f"{'PLANTA ALTA' if p['planta'] == 'alta' else 'PLANTA BAJA'}"
-                             " — en AZUL el recorte de este paso", fontsize=10)
+                             " — en AZUL la pieza de este paso", fontsize=10)
 
                 axc = fig.add_axes([0.66, 0.42, 0.16, 0.50])
-                _dibujo_corte(axc, material, b, pid, paso_de, corta_ahora)
-                axc.set_title((f"pieza {pc}-{idx:02d}: SE CORTA AHORA" if corta_ahora
-                               else f"pieza {pc}-{idx:02d} (cortada antes; estaba en reserva)"),
-                              fontsize=9, weight="bold",
-                              color="#c0392b" if corta_ahora else "#1e8449")
+                if es_recorte:
+                    _dibujo_corte(axc, material, b, pid, paso_de, corta_ahora)
+                    axc.set_title((f"pieza {pc}-{idx:02d}: SE CORTA AHORA" if corta_ahora
+                                   else f"pieza {pc}-{idx:02d} (cortada antes; estaba en reserva)"),
+                                  fontsize=9, weight="bold",
+                                  color="#c0392b" if corta_ahora else "#1e8449")
+                else:
+                    aB_, lB_ = PISOS[material]
+                    axc.add_patch(Rectangle((0, 0), aB_, lB_, facecolor=AZUL,
+                                            edgecolor="#1a5276", lw=1.5))
+                    axc.text(aB_ / 2, lB_ / 2, f"{pid}\n{_fmt(p['wx'])}x{_fmt(p['hy'])}\nENTERA",
+                             ha="center", va="center", fontsize=8, color="white",
+                             weight="bold", rotation=90)
+                    axc.set_xlim(-0.02, aB_ + 0.02)
+                    axc.set_ylim(-0.02, lB_ + 0.02)
+                    axc.set_aspect("equal")
+                    axc.axis("off")
+                    axc.set_title("PIEZA ENTERA (sin corte)", fontsize=9,
+                                  weight="bold", color="#1e8449")
 
                 axt = fig.add_axes([0.83, 0.06, 0.16, 0.86])
                 axt.axis("off")
@@ -246,7 +263,10 @@ def hacer(modelo):
                 lineas = [f"PASO {i} de {total}", "",
                           f"COLOCAR {pid}",
                           f"  {_fmt(p['wx'])}x{_fmt(p['hy'])}"]
-                lineas.append(f"  {'corte de pieza nueva' if org == 'TABLA' else 'sale de la SOBRA de ' + org}")
+                if es_recorte:
+                    lineas.append(f"  {'corte de pieza nueva' if org == 'TABLA' else 'sale de la SOBRA de ' + org}")
+                else:
+                    lineas.append("  pieza entera, directo de caja")
                 if corta_ahora:
                     otros = [etq for (x, y, w, l, etq, rot) in b.piezas if etq != pid]
                     if otros:
